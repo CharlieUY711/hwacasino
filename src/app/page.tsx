@@ -62,20 +62,21 @@ export default function Home() {
     } finally { setLoginLoading(false) }
   }
 
-  async function handleRegister() {
-    setRegError(null)
-    if (!regEmail || !regPassword || !regConfirm) { setRegError('Completa todos los campos.'); return }
-    if (regPassword !== regConfirm) { setRegError('Las contrasenas no coinciden.'); return }
-    if (regPassword.length < 6) { setRegError('Minimo 6 caracteres.'); return }
-    setRegLoading(true)
-    try {
-      await registerWithEmail(regEmail, regPassword)
-      if (inviteId) await markInviteUsed(inviteId)
-      router.push('/lobby')
-    } catch (err) {
-      setRegError(err instanceof Error ? err.message : 'Error inesperado.')
-    } finally { setRegLoading(false) }
-  }
+async function handleRegister() {
+  setRegError(null)
+  if (!regEmail || !regPassword || !regConfirm) { setRegError('Completa todos los campos.'); return }
+  if (regPassword !== regConfirm) { setRegError('Las contraseñas no coinciden.'); return }
+  if (regPassword.length < 6) { setRegError('Mínimo 6 caracteres.'); return }
+  setRegLoading(true)
+  try {
+    const data = await registerWithEmail(regEmail, regPassword)
+    const userId = data.user?.id
+    if (inviteId && userId) await markInviteUsed(inviteId, userId)
+    router.push('/lobby')
+  } catch (err) {
+    setRegError(err instanceof Error ? err.message : 'Error inesperado.')
+  } finally { setRegLoading(false) }
+}
 
   const handleValidate = useCallback(async () => {
     const allFilled = EDITABLE_INDICES.every(i => chars[i] !== '')
