@@ -3,20 +3,20 @@
 export const dynamic = 'force-dynamic'
 
 import { useEffect, useState, useRef } from 'react'
+import { useWallet } from '@/hooks/useWallet'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 
 const GOLD = '#D4AF37'
 const GOLD_LIGHT = '#F0D060'
 const DARK = '#0A0A0A'
-const CARD_BG = '#111108'
 
 const LIVE_WINNERS = [
-  'User_8291 ganó $12,400 en Slots',
-  'VIP_Marco ganó $45,000 en Ruleta',
-  'Player_X ganó $8,750 en Blackjack',
-  'Elite_77 ganó $31,200 en Dice',
-  'VIP_Rosa ganó $19,500 en Slots',
+  'User_8291 ganó 12.400 CHIPS en Slots',
+  'VIP_Marco ganó 45.000 CHIPS en Ruleta',
+  'Player_X ganó 8.750 CHIPS en Blackjack',
+  'Elite_77 ganó 31.200 CHIPS en Dice',
+  'VIP_Rosa ganó 19.500 CHIPS en Slots',
 ]
 
 const GAMES = [
@@ -73,7 +73,7 @@ const NAV_ITEMS = [
 export default function LobbyPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
-  const [balance, setBalance] = useState<number>(0)
+  const { balance, formatChips } = useWallet()
   const [username, setUsername] = useState<string>('MEMBER')
   const [activeNav, setActiveNav] = useState('lobby')
   const tickerRef = useRef<HTMLDivElement>(null)
@@ -82,14 +82,7 @@ export default function LobbyPage() {
     async function checkSession() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { router.replace('/'); return }
-
-      const [{ data: wallet }, { data: profile }] = await Promise.all([
-        supabase.from('wallets').select('balance').eq('user_id', session.user.id).single(),
-        supabase.from('profiles').select('username').eq('id', session.user.id).single(),
-      ])
-
-      setBalance(wallet?.balance ?? 0)
-      setUsername(profile?.username?.split('@')[0]?.toUpperCase() ?? 'MEMBER')
+      setUsername(session.user.user_metadata?.display_name?.toUpperCase() ?? 'MEMBER')
       setLoading(false)
     }
     checkSession()
@@ -170,9 +163,11 @@ export default function LobbyPage() {
         {/* ── HEADER ── */}
         <div className="fade-up fade-up-1" style={{ padding: '20px 20px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(212,175,55,0.1)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'linear-gradient(135deg, #2a1f00, #5a3d00)', border: `1.5px solid ${GOLD}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>
-              ♛
-            </div>
+            <img
+              src="/logo-dorado.jpg"
+              alt="HWA Casino"
+              style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', border: `1.5px solid ${GOLD}` }}
+            />
             <div>
               <p style={{ fontSize: '0.5rem', letterSpacing: '0.25em', color: 'rgba(255,255,255,0.3)', fontWeight: 300, textTransform: 'uppercase' }}>VIP MEMBER PROFILE</p>
               <p style={{ fontSize: '1rem', letterSpacing: '0.15em', color: '#fff', fontWeight: 600, fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic' }}>{username}</p>
@@ -180,8 +175,9 @@ export default function LobbyPage() {
           </div>
           <div style={{ textAlign: 'right' }}>
             <p style={{ fontSize: '0.45rem', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.3)', fontWeight: 300, textTransform: 'uppercase', marginBottom: '2px' }}>TOTAL BALANCE</p>
+            {/* FIX: usar formatChips en lugar de $balance.toLocaleString() */}
             <p style={{ fontSize: '1.1rem', letterSpacing: '0.05em', color: GOLD, fontWeight: 700 }}>
-              ${balance.toLocaleString()}
+              {formatChips(balance)}
             </p>
           </div>
         </div>
@@ -193,7 +189,7 @@ export default function LobbyPage() {
             EXCLUSIVE ACCESS
           </p>
           <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '3.2rem', lineHeight: 0.95, color: '#fff', fontWeight: 300, marginBottom: '24px' }}>
-            THE <span style={{ color: GOLD, fontStyle: 'italic', fontWeight: 700 }}>ROYAL</span><br />EXPERIENCE
+            HWA <span style={{ color: GOLD, fontStyle: 'italic', fontWeight: 700 }}>CASINO</span><br />EXPERIENCE
           </h1>
           <button
             onClick={() => setActiveNav('tables')}
@@ -201,24 +197,6 @@ export default function LobbyPage() {
             style={{ background: GOLD, border: 'none', borderRadius: '2px', padding: '14px 28px', fontFamily: "'Montserrat', sans-serif", fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.3em', color: '#000', textTransform: 'uppercase', cursor: 'pointer' }}>
             ENTER PRIVATE SUITE
           </button>
-        </div>
-
-        {/* ── TIER STATUS ── */}
-        <div className="fade-up fade-up-2" style={{ margin: '0 20px 24px', background: '#111', border: '1px solid rgba(212,175,55,0.15)', borderRadius: '4px', padding: '16px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-            <div>
-              <p style={{ fontSize: '0.45rem', letterSpacing: '0.25em', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', marginBottom: '4px' }}>TIER STATUS</p>
-              <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.1rem', color: GOLD, fontStyle: 'italic', fontWeight: 600 }}>Platinum Elite</p>
-            </div>
-            <div style={{ textAlign: 'right' }}>
-              <p style={{ fontSize: '0.45rem', letterSpacing: '0.25em', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', marginBottom: '4px' }}>NEXT GOAL</p>
-              <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.1rem', color: '#fff', fontWeight: 600 }}>Black Diamond</p>
-            </div>
-          </div>
-          <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '2px', height: '4px', overflow: 'hidden', marginBottom: '8px' }}>
-            <div className="tier-bar-fill" style={{ height: '100%', width: '72%', borderRadius: '2px' }} />
-          </div>
-          <p style={{ fontSize: '0.5rem', letterSpacing: '0.15em', color: 'rgba(255,255,255,0.2)', textAlign: 'center', fontStyle: 'italic' }}>7,200 / 10,000 Credits to next level</p>
         </div>
 
         {/* ── LIVE WINNERS TICKER ── */}
@@ -244,19 +222,25 @@ export default function LobbyPage() {
         <div className="fade-up fade-up-3" style={{ padding: '0 20px', marginBottom: '32px' }}>
 
           {/* Roulette — large */}
-          <div className="game-card" style={{ background: GAMES[0].gradient, border: '1px solid rgba(212,175,55,0.1)', borderRadius: '4px', padding: '28px 20px 20px', marginBottom: '12px', position: 'relative', overflow: 'hidden', minHeight: '160px' }}>
+          <div className="game-card" onClick={() => router.push('/roulette')} style={{ background: GAMES[0].gradient, border: '1px solid rgba(212,175,55,0.1)', borderRadius: '4px', padding: '28px 20px 20px', marginBottom: '12px', position: 'relative', overflow: 'hidden', minHeight: '160px' }}>
             <div style={{ position: 'absolute', right: '-20px', top: '-20px', fontSize: '7rem', opacity: 0.06, transform: 'rotate(-15deg)' }}>🎡</div>
             <p style={{ fontSize: '0.45rem', letterSpacing: '0.3em', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', marginBottom: '6px' }}>{GAMES[0].sub}</p>
             <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2rem', color: '#fff', fontWeight: 300, letterSpacing: '0.1em', marginBottom: '20px' }}>{GAMES[0].label}</h2>
-            <button className="play-btn" style={{ background: 'rgba(212,175,55,0.12)', border: `1px solid rgba(212,175,55,0.3)`, borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', position: 'absolute', bottom: '20px', right: '20px' }}>
+            <button className="play-btn" onClick={(e) => { e.stopPropagation(); router.push('/roulette') }} style={{ background: 'rgba(212,175,55,0.12)', border: `1px solid rgba(212,175,55,0.3)`, borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', position: 'absolute', bottom: '20px', right: '20px' }}>
               <span style={{ color: GOLD, fontSize: '0.9rem', marginLeft: '2px' }}>▶</span>
             </button>
           </div>
 
           {/* Blackjack + Slots — small grid */}
+          {/* FIX: onClick en cada card */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
             {GAMES.slice(1, 3).map(game => (
-              <div key={game.id} className="game-card" style={{ background: game.gradient, border: '1px solid rgba(212,175,55,0.1)', borderRadius: '4px', padding: '20px 14px 14px', position: 'relative', overflow: 'hidden', minHeight: '130px' }}>
+              <div
+                key={game.id}
+                className="game-card"
+                onClick={() => router.push(`/${game.id}`)}
+                style={{ background: game.gradient, border: '1px solid rgba(212,175,55,0.1)', borderRadius: '4px', padding: '20px 14px 14px', position: 'relative', overflow: 'hidden', minHeight: '130px' }}
+              >
                 <div style={{ position: 'absolute', right: '-10px', top: '-10px', fontSize: '4.5rem', opacity: 0.07, transform: 'rotate(-10deg)' }}>{game.emoji}</div>
                 <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.3rem', color: '#fff', fontWeight: 400, letterSpacing: '0.05em', marginBottom: '4px' }}>{game.label}</h2>
                 {game.tag && <p style={{ fontSize: '0.42rem', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase' }}>{game.tag}</p>}
