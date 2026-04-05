@@ -1,10 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+}
 
 const WHEEL_ORDER = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26]
 const RED_NUMBERS = new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36])
@@ -65,7 +67,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 1. Debitar balance atomicamente
-    const { data: betId, error: betError } = await supabase
+    const { data: betId, error: betError } = await getSupabase()
       .rpc('place_bet', { p_user_id: user_id, p_game: 'roulette', p_amount: amount })
     if (betError) {
       const msg = betError.message.includes('insufficient') ? 'insufficient_balance' : betError.message
@@ -80,10 +82,10 @@ export async function POST(req: NextRequest) {
     const payout = calcPayout(bet_type, bet_value, winningNumber, amount)
 
     // 4. Acreditar payout atomicamente
-    await supabase.rpc('resolve_bet', { p_bet_id: betId, p_payout: payout })
+    await getSupabase().rpc('resolve_bet', { p_bet_id: betId, p_payout: payout })
 
     // 5. Registrar resultado
-    await supabase.from('bets').update({
+    await getSupabase().from('bets').update({
       choice: `${bet_type}:${bet_value}`,
       result_number: winningNumber,
     }).eq('id', betId)
