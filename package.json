@@ -9,9 +9,11 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.101.1",
+    "dotenv": "^17.4.0",
     "next": "latest",
     "react": "latest",
-    "react-dom": "latest"
+    "react-dom": "latest",
+    "telegraf": "^4.16.3"
   },
   "devDependencies": {
     "@types/node": "25.5.2",

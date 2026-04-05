@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
@@ -46,6 +46,9 @@ export default function Home() {
   const [regConfirm, setRegConfirm] = useState('')
   const [regError, setRegError] = useState<string | null>(null)
   const [regLoading, setRegLoading] = useState(false)
+
+  // El usuario ha comenzado a completar el código
+  const codeStarted = chars.some(c => c !== '')
 
   async function handleLogin() {
     setLoginError(null)
@@ -144,23 +147,35 @@ export default function Home() {
 
   const allFilled = EDITABLE_INDICES.every(i => chars[i] !== '')
 
+  // Tipografía base unificada — usada en todos los campos y botones
+  const baseFont: React.CSSProperties = {
+    fontFamily: "'Montserrat', sans-serif",
+    fontWeight: 300,
+    fontSize: '0.75rem',
+    letterSpacing: '0.1em',
+  }
+
+  // 70% del maxWidth original de los campos (340px × 0.7 ≈ 238px)
+  const FORM_WIDTH = '238px'
+
   const fieldStyle: React.CSSProperties = {
-    width: '100%', height: '38px',
+    ...baseFont,
+    width: FORM_WIDTH,
+    height: '38px',
     background: 'rgba(255,255,255,0.09)',
     border: 'none', borderRadius: '2px',
     boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.8)',
     color: 'rgba(255,255,255,0.85)',
-    fontFamily: "'Montserrat', sans-serif",
-    fontWeight: 300, fontSize: '0.75rem', letterSpacing: '0.1em',
     padding: '0 12px', outline: 'none', boxSizing: 'border-box' as const,
   }
 
   const whiteBtnStyle: React.CSSProperties = {
-    width: '100%', height: '38px',
+    ...baseFont,
+    width: FORM_WIDTH,
+    height: '38px',
     background: 'rgba(255,255,255,0.90)',
     border: 'none', borderRadius: '2px', color: '#000',
-    fontFamily: "'Montserrat', sans-serif",
-    fontWeight: 700, fontSize: '0.75rem', letterSpacing: '0.35em',
+    fontWeight: 700, letterSpacing: '0.35em',
     textTransform: 'uppercase' as const,
     cursor: 'pointer', transition: 'background 0.25s ease',
     boxSizing: 'border-box' as const,
@@ -184,17 +199,14 @@ export default function Home() {
       <div className="corner-ornament br animate-fade-in delay-1200" />
       <div style={{ position: 'absolute', width: '520px', height: '520px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(212,175,55,0.04) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
-      {/* â”€â”€â”€ CONTENIDO PRINCIPAL â”€â”€â”€ */}
+      {/* CONTENEDOR ÚNICO — el logo siempre ocupa el mismo lugar */}
       <div style={{
         display: 'flex', flexDirection: 'column', alignItems: 'center',
         width: '100%', maxWidth: '480px', padding: '0 24px',
-        position: 'absolute', zIndex: 10,
-        opacity: showLogin ? 0 : 1,
-        pointerEvents: showLogin ? 'none' : 'auto',
-        transition: 'opacity 0.4s ease',
+        position: 'relative', zIndex: 10,
       }}>
 
-        {/* LOGO ROJO */}
+        {/* LOGO — tamaño y posición fijos en todos los estados */}
         <div className="animate-fade-in delay-200" style={{ marginBottom: '20px' }}>
           <Image src="/logo-dorado.jpg" alt="HWA Casino" width={140} height={140} style={{ objectFit: 'contain' }} priority />
         </div>
@@ -205,141 +217,164 @@ export default function Home() {
 
         <div className="line-expand" style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(212,175,55,0.4), transparent)', marginBottom: '40px', alignSelf: 'stretch' }} />
 
-        <p style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 200, fontSize: '0.58rem', letterSpacing: '0.45em', color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', marginBottom: '28px' }}>
-          VIP CODE
-        </p>
+        {/* ── VISTA LOGIN ── */}
+        <div style={{
+          display: 'flex', flexDirection: 'column', alignItems: 'center',
+          overflow: 'hidden',
+          maxHeight: showLogin ? '400px' : '0px',
+          opacity: showLogin ? 1 : 0,
+          transition: 'max-height 0.4s ease, opacity 0.35s ease',
+          width: '100%',
+        }}>
+          <p style={{ ...baseFont, fontWeight: 200, fontSize: '0.58rem', letterSpacing: '0.45em', color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', marginBottom: '24px' }}>
+            ACCESO MIEMBROS
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center', width: '100%', marginBottom: '24px' }}>
+            <input type="email" placeholder="EMAIL" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} style={fieldStyle} />
+            <input type="password" placeholder="PASSWORD" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleLogin() }} style={fieldStyle} />
+            <button onClick={handleLogin} disabled={loginLoading}
+              style={{ ...whiteBtnStyle, opacity: loginLoading ? 0.5 : 1, cursor: loginLoading ? 'not-allowed' : 'pointer' }}>
+              {loginLoading ? '...' : 'INGRESAR'}
+            </button>
+            {loginError && <p style={{ ...baseFont, fontSize: '0.6rem', letterSpacing: '0.15em', color: '#e05252', textAlign: 'center', margin: '4px 0 0' }}>{loginError}</p>}
+          </div>
+          <button onClick={() => setShowLogin(false)} style={{ ...goldLinkStyle, fontSize: '0.7rem', opacity: 0.5 }}>
+            VOLVER
+          </button>
+          <div style={{ height: '32px' }} />
+        </div>
 
-        {/* â”€â”€â”€ SLOTS â”€â”€â”€ */}
-        <div className={shake ? 'error-shake' : ''} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', userSelect: 'none', width: '88%', maxWidth: '340px' }}>
-          {TEMPLATE.split('').map((_, realIdx) => {
-            const type = SLOT_TYPES[realIdx]
-            const color = slotColor(realIdx)
+        {/* ── VISTA CÓDIGO + REGISTRO ── */}
+        <div style={{
+          display: 'flex', flexDirection: 'column', alignItems: 'center',
+          overflow: 'hidden',
+          maxHeight: showLogin ? '0px' : '700px',
+          opacity: showLogin ? 0 : 1,
+          transition: 'max-height 0.4s ease, opacity 0.35s ease',
+          width: '100%',
+        }}>
 
-            if (type === 'dash') {
+          <p style={{ ...baseFont, fontWeight: 200, fontSize: '0.58rem', letterSpacing: '0.45em', color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', marginBottom: '28px' }}>
+            VIP CODE
+          </p>
+
+          {/* SLOTS */}
+          <div className={shake ? 'error-shake' : ''} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', userSelect: 'none', width: '88%', maxWidth: '340px' }}>
+            {TEMPLATE.split('').map((_, realIdx) => {
+              const type = SLOT_TYPES[realIdx]
+              const color = slotColor(realIdx)
+
+              if (type === 'dash') {
+                return (
+                  <span key={realIdx} style={{ color: GOLD, fontSize: '5px', margin: '0 5px', lineHeight: 1, display: 'flex', alignItems: 'center', paddingBottom: '2px' }}>
+                    &#9679;
+                  </span>
+                )
+              }
+
+              const isEditable = type !== 'fixed'
+              const currentEditIdx = isEditable ? editCounter++ : -1
+              const displayChar = type === 'fixed' ? TEMPLATE[realIdx] : (chars[realIdx] || '')
+
               return (
-                <span key={realIdx} style={{ color: GOLD, fontSize: '5px', margin: '0 5px', lineHeight: 1, display: 'flex', alignItems: 'center', paddingBottom: '2px' }}>
-                  &#9679;
+                <span key={realIdx} style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', flex: '1 1 0', maxWidth: '22px', position: 'relative' }}>
+                  {isEditable ? (
+                    <input
+                      id={`slot-${currentEditIdx}`}
+                      maxLength={1}
+                      value={chars[realIdx]}
+                      onKeyDown={e => handleSlotKey(e, currentEditIdx)}
+                      onChange={() => {}}
+                      onFocus={() => setFocusedIdx(currentEditIdx)}
+                      onBlur={() => setFocusedIdx(-1)}
+                      style={{
+                        width: '100%', height: '1.43rem',
+                        background: 'transparent', border: 'none', outline: 'none',
+                        textAlign: 'center', caretColor: 'transparent',
+                        fontFamily: "'Montserrat', sans-serif",
+                        fontWeight: 300, fontSize: '1.1rem',
+                        color: displayChar ? color : 'transparent',
+                        padding: 0, margin: 0,
+                      }}
+                    />
+                  ) : (
+                    <span style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 400, fontSize: '1.1rem', color, lineHeight: 1.3, minHeight: '1.43rem', textAlign: 'center', display: 'block', width: '100%' }}>
+                      {displayChar}
+                    </span>
+                  )}
+                  <span style={{ display: 'block', width: '100%', height: '1px', marginTop: '3px', background: focusedIdx === currentEditIdx ? GOLD : color, transition: 'background 0.2s ease' }} />
                 </span>
               )
-            }
+            })}
+          </div>
 
-            const isEditable = type !== 'fixed'
-            const currentEditIdx = isEditable ? editCounter++ : -1
-            const displayChar = type === 'fixed' ? TEMPLATE[realIdx] : (chars[realIdx] || '')
+          {/* STATUS */}
+          <div style={{ ...baseFont, fontWeight: 300, fontSize: '0.58rem', letterSpacing: '0.3em', textTransform: 'uppercase', height: '20px', marginBottom: '20px', color: submitted === 'success' ? GOLD : submitted === 'error' ? '#e05252' : validating ? 'rgba(255,255,255,0.3)' : 'transparent', transition: 'color 0.3s ease' }}>
+            {statusMsg}
+          </div>
 
-            return (
-              <span key={realIdx} style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', flex: '1 1 0', maxWidth: '22px', position: 'relative' }}>
-                {isEditable ? (
-                  <input
-                    id={`slot-${currentEditIdx}`}
-                    maxLength={1}
-                    value={chars[realIdx]}
-                    onKeyDown={e => handleSlotKey(e, currentEditIdx)}
-                    onChange={() => {}}
-                    onFocus={() => setFocusedIdx(currentEditIdx)}
-                    onBlur={() => setFocusedIdx(-1)}
-                    style={{
-                      width: '100%', height: '1.43rem',
-                      background: 'transparent', border: 'none', outline: 'none',
-                      textAlign: 'center', caretColor: 'transparent',
-                      fontFamily: "'Montserrat', sans-serif",
-                      fontWeight: 300, fontSize: '1.1rem',
-                      color: displayChar ? color : 'transparent',
-                      padding: 0, margin: 0,
-                    }}
-                  />
-                ) : (
-                  <span style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 400, fontSize: '1.1rem', color, lineHeight: 1.3, minHeight: '1.43rem', textAlign: 'center', display: 'block', width: '100%' }}>
-                    {displayChar}
-                  </span>
-                )}
-                <span style={{ display: 'block', width: '100%', height: '1px', marginTop: '3px', background: focusedIdx === currentEditIdx ? GOLD : color, transition: 'background 0.2s ease' }} />
-              </span>
-            )
-          })}
-        </div>
-
-        {/* STATUS */}
-        <div style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 300, fontSize: '0.58rem', letterSpacing: '0.3em', textTransform: 'uppercase', height: '20px', marginBottom: '20px', color: submitted === 'success' ? GOLD : submitted === 'error' ? '#e05252' : validating ? 'rgba(255,255,255,0.3)' : 'transparent', transition: 'color 0.3s ease' }}>
-          {statusMsg}
-        </div>
-
-        {/* VALIDATE / RESET */}
-        <div style={{ marginBottom: '28px' }}>
-          {submitted === 'error' ? (
-            <button onClick={() => { setChars(Array(TEMPLATE.length).fill('')); setSubmitted('idle'); setStatusMsg(''); setShowRegister(false); setInviteId(null) }}
-              style={{ ...goldLinkStyle, color: '#e05252' }}>
-              RESET CODE
-            </button>
-          ) : (
-            <button onClick={handleValidate} disabled={!allFilled || submitted === 'success' || validating}
-              style={{ ...goldLinkStyle, opacity: allFilled && submitted !== 'success' && !validating ? 1 : 0.3 }}>
-              {validating ? '...' : 'VALIDAR'}
-            </button>
-          )}
-        </div>
-
-        {/* REGISTER */}
-        <div style={{ display: 'grid', gridTemplateRows: showRegister ? '1fr' : '0fr', transition: 'grid-template-rows 0.35s ease', width: '88%', maxWidth: '340px' }}>
-          <div style={{ overflow: 'hidden' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingBottom: '24px' }}>
-              <input type="email" placeholder="CORREO" value={regEmail} onChange={e => setRegEmail(e.target.value)} style={fieldStyle} />
-              <input type="password" placeholder="CONTRASENA" value={regPassword} onChange={e => setRegPassword(e.target.value)} style={fieldStyle} />
-              <input type="password" placeholder="CONFIRMAR CONTRASENA" value={regConfirm} onChange={e => setRegConfirm(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleRegister() }} style={fieldStyle} />
-              <button onClick={handleRegister} disabled={regLoading}
-                style={{ ...whiteBtnStyle, opacity: regLoading ? 0.5 : 1, cursor: regLoading ? 'not-allowed' : 'pointer' }}>
-                {regLoading ? '...' : 'REGISTRAR'}
+          {/* ── VALIDAR / LOGIN superpuestos, sin línea divisoria ── */}
+          <div style={{ marginBottom: '28px', position: 'relative', height: '24px', width: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {submitted === 'error' ? (
+              <button onClick={() => { setChars(Array(TEMPLATE.length).fill('')); setSubmitted('idle'); setStatusMsg(''); setShowRegister(false); setInviteId(null) }}
+                style={{ ...goldLinkStyle, color: '#e05252', position: 'absolute' }}>
+                RESET CODE
               </button>
-              {regError && <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.6rem', letterSpacing: '0.15em', color: '#e05252', textAlign: 'center', margin: '4px 0 0' }}>{regError}</p>}
+            ) : (
+              <>
+                {/* VALIDAR: negro al inicio → dorado al escribir */}
+                <button
+                  onClick={handleValidate}
+                  disabled={!allFilled || submitted === 'success' || validating}
+                  style={{
+                    ...goldLinkStyle,
+                    color: codeStarted ? GOLD : '#000',
+                    position: 'absolute',
+                    opacity: submitted === 'success' || validating ? 0.3 : 1,
+                    transition: 'color 0.3s ease, opacity 0.3s ease',
+                    pointerEvents: (!allFilled || submitted === 'success' || validating) ? 'none' : 'auto',
+                  }}
+                >
+                  {validating ? '...' : 'VALIDAR'}
+                </button>
+
+                {/* LOGIN: dorado al inicio → desaparece al escribir */}
+                <button
+                  onClick={() => { setShowLogin(true); setShowRegister(false) }}
+                  style={{
+                    ...goldLinkStyle,
+                    position: 'absolute',
+                    opacity: codeStarted ? 0 : 1,
+                    pointerEvents: codeStarted ? 'none' : 'auto',
+                    transition: 'opacity 0.3s ease',
+                  }}
+                >
+                  LOGIN
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* REGISTRO — aparece solo cuando el código es válido */}
+          <div style={{ display: 'grid', gridTemplateRows: showRegister ? '1fr' : '0fr', transition: 'grid-template-rows 0.35s ease', width: '100%' }}>
+            <div style={{ overflow: 'hidden' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingBottom: '24px', alignItems: 'center' }}>
+                <input type="email" placeholder="CORREO" value={regEmail} onChange={e => setRegEmail(e.target.value)} style={fieldStyle} />
+                <input type="password" placeholder="CONTRASENA" value={regPassword} onChange={e => setRegPassword(e.target.value)} style={fieldStyle} />
+                <input type="password" placeholder="CONFIRMAR CONTRASENA" value={regConfirm} onChange={e => setRegConfirm(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleRegister() }} style={fieldStyle} />
+                <button onClick={handleRegister} disabled={regLoading}
+                  style={{ ...whiteBtnStyle, opacity: regLoading ? 0.5 : 1, cursor: regLoading ? 'not-allowed' : 'pointer' }}>
+                  {regLoading ? '...' : 'REGISTRAR'}
+                </button>
+                {regError && <p style={{ ...baseFont, fontSize: '0.6rem', letterSpacing: '0.15em', color: '#e05252', textAlign: 'center', margin: '4px 0 0' }}>{regError}</p>}
+              </div>
             </div>
           </div>
+
         </div>
-
-        <div style={{ width: '1px', height: '32px', background: 'rgba(255,255,255,0.1)', marginBottom: '20px' }} />
-
-        <button style={goldLinkStyle} onClick={() => { setShowLogin(true); setShowRegister(false) }}>
-          LOGIN
-        </button>
-
-      </div>
-
-      {/* â”€â”€â”€ LOGIN PANEL â”€â”€â”€ */}
-      <div style={{
-        display: 'flex', flexDirection: 'column', alignItems: 'center',
-        width: '100%', maxWidth: '340px', padding: '0 24px',
-        position: 'absolute', zIndex: 20,
-        opacity: showLogin ? 1 : 0,
-        pointerEvents: showLogin ? 'auto' : 'none',
-        transition: 'opacity 0.4s ease',
-      }}>
-
-        <div style={{ marginBottom: '24px' }}>
-          <Image src="/logo-dorado.jpg" alt="HWA Casino" width={80} height={80} style={{ objectFit: 'contain' }} />
-        </div>
-
-        <p style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 200, fontSize: '0.58rem', letterSpacing: '0.45em', color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', marginBottom: '24px' }}>
-          ACCESO MIEMBROS
-        </p>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
-          <input type="email" placeholder="EMAIL" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} style={fieldStyle} />
-          <input type="password" placeholder="PASSWORD" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleLogin() }} style={fieldStyle} />
-          <button onClick={handleLogin} disabled={loginLoading}
-            style={{ ...whiteBtnStyle, opacity: loginLoading ? 0.5 : 1, cursor: loginLoading ? 'not-allowed' : 'pointer' }}>
-            {loginLoading ? '...' : 'INGRESAR'}
-          </button>
-          {loginError && <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.6rem', letterSpacing: '0.15em', color: '#e05252', textAlign: 'center', margin: '4px 0 0' }}>{loginError}</p>}
-        </div>
-
-        <div style={{ width: '1px', height: '32px', background: 'rgba(255,255,255,0.1)', margin: '24px 0' }} />
-
-        <button onClick={() => setShowLogin(false)} style={{ ...goldLinkStyle, fontSize: '0.7rem', opacity: 0.5 }}>
-          VOLVER
-        </button>
 
       </div>
 
     </main>
   )
 }
-
