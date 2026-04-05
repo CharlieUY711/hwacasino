@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -15,7 +15,7 @@ const TABLES = [
 const HOT_NUMBERS = [32, 17, 2, 21, 0]
 const RED_NUMBERS = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]
 
-function getColor(n) {
+function getColor(n: number) {
   if (n === 0) return '#1a6b1a'
   return RED_NUMBERS.includes(n) ? '#8B0000' : '#222'
 }
