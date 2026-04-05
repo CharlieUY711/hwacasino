@@ -61,7 +61,15 @@ function calcPayout(bet: string, value: string, result: number, amount: number):
 
 export async function POST(req: NextRequest) {
   try {
-    const { user_id, bet_type, bet_value, amount } = await req.json()
+    let body: Record<string, unknown>
+    try {
+      body = await req.json()
+    } catch {
+      return NextResponse.json({ error: 'invalid_json' }, { status: 400 })
+    }
+    const { user_id, bet_type, bet_value, amount } = body as {
+      user_id: string, bet_type: string, bet_value: string, amount: number
+    }
     if (!user_id || !bet_type || !bet_value || !amount || amount <= 0) {
       return NextResponse.json({ error: 'invalid_params' }, { status: 400 })
     }
