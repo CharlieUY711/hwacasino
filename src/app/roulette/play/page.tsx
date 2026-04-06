@@ -168,6 +168,30 @@ export default function RoulettePlayPage() {
     })
   }, [router])
 
+  // --- PRESENCIA REALTIME ---
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const r = params.get('room') ?? 'vip-1'
+
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return
+      const channel = supabase.channel(`presence:${r}`, {
+        config: { presence: { key: user.id } },
+      })
+      channel
+        .on('presence', { event: 'sync' }, () => {
+          const count = Object.keys(channel.presenceState()).length
+          setOnlineCount(count)
+        })
+        .subscribe(async (status) => {
+          if (status === 'SUBSCRIBED') {
+            await channel.track({ user_id: user.id, room: r, online_at: new Date().toISOString() })
+          }
+        })
+      return () => { supabase.removeChannel(channel) }
+    })
+  }, [])
+
   // --- POLLING DE RONDA ---
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -181,7 +205,6 @@ export default function RoulettePlayPage() {
 
         setSecondsRemaining(data.seconds_remaining ?? 0)
         setRoundStatus(data.status)
-        setOnlineCount(data.online_count ?? 1)
 
         // Nueva ronda detectada
         if (data.round_id !== prevRoundIdRef.current) {
@@ -299,27 +322,64 @@ export default function RoulettePlayPage() {
     setError(null)
 
     if (isSolo) {
-      // Modo solo: girar directo sin ronda
-      const WHEEL = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26]
-      const winIdx = Math.floor(Math.random() * 37)
-      const winNum = WHEEL[winIdx]
+      // Modo solo: llamar al API real para descontar y acreditar
+      setSpinning(true)
       const betsSnap = [...bets]
+      let netPayout = 0
+      let anyWin = false
+      let winNum: number | null = null
+      let winColor: string | null = null
+
+      try {
+        for (const bet of betsSnap) {
+          const res = await fetch('/api/play/roulette', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              user_id: userId,
+              bet_type: bet.type,
+              bet_value: bet.value,
+              amount: bet.amount,
+            }),
+          })
+          const data = await res.json()
+          if (data.error) {
+            setError(data.error === 'insufficient_balance' ? 'Saldo insuficiente' : 'Error al procesar')
+            setSpinning(false)
+            return
+          }
+          if (winNum === null) {
+            winNum = data.result
+            winColor = data.color
+          }
+          netPayout += data.payout
+          if (data.won) anyWin = true
+        }
+      } catch {
+        setError('Error de conexión')
+        setSpinning(false)
+        return
+      }
+
+      // Animar la rueda al número ganador
+      const winIdx = WHEEL_ORDER.indexOf(winNum!)
       setResultNumber(null)
       animateWheelTo(winIdx)
+
       setTimeout(() => {
         setResultNumber(winNum)
-        setResultColor(getColor(winNum))
-        setHistory(prev => [winNum, ...prev].slice(0, 30))
-        const { total, won } = calcLocalPayout(betsSnap, winNum)
-        setTotalPayout(total)
-        setTotalWon(won)
+        setResultColor(winColor)
+        setHistory(prev => [winNum!, ...prev].slice(0, 30))
+        setTotalPayout(netPayout)
+        setTotalWon(anyWin)
+        setLastBets(betsSnap)
+        setBets([])
         setSpinning(false)
         setTimeout(() => {
           setShowResult(true)
           setTimeout(() => {
             setShowResult(false)
             setResultNumber(null)
-            setBets([])
           }, 2000)
         }, 1000)
       }, 6200)
@@ -363,7 +423,9 @@ export default function RoulettePlayPage() {
     : waitingForResult ? 'ESPERANDO'
     : hasBetThisRound  ? 'APOSTASTE'
     : isSolo ? 'GIRAR'
-    : 'APOSTAR'
+    : roundStatus === 'betting' ? `APOSTAR ${secondsRemaining}s`
+    : roundStatus === 'spinning' ? 'GIRANDO'
+    : 'CERRADO'
 
   // Color del countdown
   const countdownColor = secondsRemaining <= 10 ? '#f87171' : GOLD
