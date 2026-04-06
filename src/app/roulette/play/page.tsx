@@ -606,16 +606,16 @@ export default function RoulettePlayPage() {
         </div>
 
         {/* --- BOTONERA: ACCIONES + GIRAR (encima del paño) --- */}
-        <div style={{ display: 'flex', gap: '6px', alignItems: 'stretch', padding: '0 16px 8px' }}>
+        <div style={{ display: 'flex', gap: '4px', alignItems: 'stretch', padding: '0 16px 8px' }}>
           {error && <p style={{ textAlign: 'center', color: '#f87171', fontSize: '0.55rem', letterSpacing: '0.1em' }}>{error}</p>}
           {[
-            { label: 'LIMPIAR', action: clearBets  },
-            { label: 'BORRAR',  action: removeLast },
-            { label: 'DOBLAR',  action: doubleBets },
-            { label: 'REPETIR', action: repeatBets },
+            { label: 'LMP', action: clearBets  },
+            { label: 'BRR', action: removeLast },
+            { label: 'DBL', action: doubleBets },
+            { label: 'RPT', action: repeatBets },
           ].map(btn => (
             <button key={btn.label} className="action-btn" onClick={btn.action}
-              style={{ flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '3px', padding: '8px 2px', color: 'rgba(255,255,255,0.5)', fontFamily: "'Montserrat', sans-serif", fontWeight: 700, fontSize: '0.42rem', letterSpacing: '0.15em', cursor: 'pointer', opacity: hasBetThisRound ? 0.4 : 1 }}>
+              style={{ flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '3px', padding: '6px 2px', color: 'rgba(255,255,255,0.5)', fontFamily: "'Montserrat', sans-serif", fontWeight: 700, fontSize: '0.38rem', letterSpacing: '0.1em', cursor: 'pointer', opacity: hasBetThisRound ? 0.4 : 1 }}>
               {btn.label}
             </button>
           ))}
@@ -623,8 +623,11 @@ export default function RoulettePlayPage() {
             className={`apostar-btn${(waitingForResult || hasBetThisRound) ? ' waiting' : ''}`}
             onClick={placeBets}
             disabled={!canBet}
-            style={{ flex: '0 0 72px', border: '1px solid rgba(212,175,55,0.3)', borderRadius: '4px', color: (waitingForResult || hasBetThisRound) ? 'rgba(212,175,55,0.6)' : '#1a0e00', fontFamily: "'Montserrat', sans-serif", fontWeight: 900, fontSize: '0.6rem', letterSpacing: '0.15em', boxShadow: canBet ? '0 0 30px rgba(212,175,55,0.35)' : 'none' }}>
-            {btnLabel}
+            style={{ flex: '0 0 90px', border: '1px solid rgba(212,175,55,0.3)', borderRadius: '4px', color: (waitingForResult || hasBetThisRound) ? 'rgba(212,175,55,0.6)' : '#1a0e00', fontFamily: "'Montserrat', sans-serif", fontWeight: 900, letterSpacing: '0.1em', boxShadow: canBet ? '0 0 30px rgba(212,175,55,0.35)' : 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1px', padding: '4px 0' }}>
+            <span style={{ fontSize: '0.55rem' }}>{btnLabel}</span>
+            {!isSolo && onlineCount >= 2 && (
+              <span style={{ fontSize: '0.38rem', opacity: 0.7 }}>👥 {onlineCount}</span>
+            )}
           </button>
         </div>
 
