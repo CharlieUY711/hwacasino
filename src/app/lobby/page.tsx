@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 export const dynamic = 'force-dynamic'
 
@@ -82,7 +82,8 @@ export default function LobbyPage() {
     async function checkSession() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { router.replace('/'); return }
-      setUsername(session.user.user_metadata?.display_name?.toUpperCase() ?? 'MEMBER')
+      const { data: profile } = await supabase.from('profiles').select('username').eq('id', session.user.id).single()
+        setUsername(profile?.username?.toUpperCase() ?? 'MEMBER')
       setLoading(false)
     }
     checkSession()

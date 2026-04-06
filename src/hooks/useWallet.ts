@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 export function useWallet() {
   const [balance, setBalance] = useState<number>(0)
+  const [username, setUsername] = useState<string>('')
   const [loading, setLoading] = useState(true)
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
   useEffect(() => {
@@ -11,11 +12,12 @@ export function useWallet() {
       if (!user || cancelled) { setLoading(false); return }
       const { data } = await supabase
         .from('wallets')
-        .select('balance')
+        .select('balance, user_id')
         .eq('user_id', user.id)
         .single()
       if (!cancelled) {
         setBalance(data?.balance ?? 0)
+        setUsername(user.user_metadata?.display_name ?? '')
         setLoading(false)
       }
       if (channelRef.current) {
@@ -40,5 +42,5 @@ export function useWallet() {
     }
   }, [])
   const formatChips = (n: number) => n.toLocaleString('es-UY') + ' CHIPS'
-  return { balance, loading, formatChips }
+  return { balance, loading, formatChips, username }
 }

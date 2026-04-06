@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 function getSupabase() {
@@ -16,8 +16,8 @@ function getColor(n: number): 'red' | 'black' | 'green' {
   return RED_NUMBERS.has(n) ? 'red' : 'black'
 }
 
+// Un solo RNG por ronda - distribucion uniforme perfecta
 function secureRandomIndex(): number {
-  // Rejection sampling para distribución uniforme perfecta
   const max = Math.floor(0xFFFFFFFF / 37) * 37
   let value: number
   do {
@@ -28,19 +28,19 @@ function secureRandomIndex(): number {
   return value % 37
 }
 
-function calcPayout(bet: string, value: string, result: number, amount: number): number {
+function calcPayout(betType: string, betValue: string, result: number, amount: number): number {
   const color = getColor(result)
-  switch (bet) {
+  switch (betType) {
     case 'number':
-      return parseInt(value) === result ? amount * 35 : 0
+      return parseInt(betValue) === result ? amount * 35 : 0
     case 'color':
-      return value === color ? amount : 0
+      return betValue === color ? amount : 0
     case 'parity':
       if (result === 0) return 0
-      return (value === 'even' ? result % 2 === 0 : result % 2 !== 0) ? amount : 0
+      return (betValue === 'even' ? result % 2 === 0 : result % 2 !== 0) ? amount : 0
     case 'dozen': {
       const dozens: Record<string, [number, number]> = { '1': [1,12], '2': [13,24], '3': [25,36] }
-      const [lo, hi] = dozens[value]
+      const [lo, hi] = dozens[betValue]
       return result >= lo && result <= hi ? amount * 2 : 0
     }
     case 'column': {
@@ -49,15 +49,25 @@ function calcPayout(bet: string, value: string, result: number, amount: number):
         '2': [2,5,8,11,14,17,20,23,26,29,32,35],
         '3': [3,6,9,12,15,18,21,24,27,30,33,36],
       }
-      return cols[value]?.includes(result) ? amount * 2 : 0
+      return cols[betValue]?.includes(result) ? amount * 2 : 0
     }
     case 'half':
       if (result === 0) return 0
-      return (value === 'low' ? result <= 18 : result > 18) ? amount : 0
+      return (betValue === 'low' ? result <= 18 : result > 18) ? amount : 0
+    case 'split2': {
+      const nums = betValue.split('-').map(Number)
+      return nums.includes(result) ? amount * 17 : 0
+    }
+    case 'split4': {
+      const nums = betValue.split('-').map(Number)
+      return nums.includes(result) ? amount * 8 : 0
+    }
     default:
       return 0
   }
 }
+
+type BetInput = { bet_type: string; bet_value: string; amount: number }
 
 export async function POST(req: NextRequest) {
   try {
@@ -67,43 +77,63 @@ export async function POST(req: NextRequest) {
     } catch {
       return NextResponse.json({ error: 'invalid_json' }, { status: 400 })
     }
-    const { user_id, bet_type, bet_value, amount } = body as {
-      user_id: string, bet_type: string, bet_value: string, amount: number
-    }
-    if (!user_id || !bet_type || !bet_value || !amount || amount <= 0) {
+
+    const { user_id, bets } = body as { user_id: string; bets: BetInput[] }
+
+    if (!user_id || !Array.isArray(bets) || bets.length === 0) {
       return NextResponse.json({ error: 'invalid_params' }, { status: 400 })
     }
 
-    // 1. Debitar balance atomicamente
-    const { data: betId, error: betError } = await getSupabase()
-      .rpc('place_bet', { p_user_id: user_id, p_game: 'roulette', p_amount: amount })
-    if (betError) {
-      const msg = betError.message.includes('insufficient') ? 'insufficient_balance' : betError.message
-      return NextResponse.json({ error: msg }, { status: 400 })
+    // Validar cada apuesta
+    for (const bet of bets) {
+      if (!bet.bet_type || !bet.bet_value || !bet.amount || bet.amount <= 0) {
+        return NextResponse.json({ error: 'invalid_params' }, { status: 400 })
+      }
     }
 
-    // 2. RNG seguro - sortea indice en la rueda (distribucion uniforme perfecta)
-    const winningIndex = secureRandomIndex()
+    const supabase = getSupabase()
+
+    // 1. UN SOLO RNG para toda la ronda
+    const winningIndex  = secureRandomIndex()
     const winningNumber = WHEEL_ORDER[winningIndex]
+    const winningColor  = getColor(winningNumber)
 
-    // 3. Calcular payout
-    const payout = calcPayout(bet_type, bet_value, winningNumber, amount)
+    // 2. Procesar cada apuesta: debitar, calcular payout, acreditar
+    let totalPayout = 0
+    let anyWon = false
 
-    // 4. Acreditar payout atomicamente
-    await getSupabase().rpc('resolve_bet', { p_bet_id: betId, p_payout: payout })
+    for (const bet of bets) {
+      // Debitar balance atomicamente
+      const { data: betId, error: betError } = await supabase
+        .rpc('place_bet', { p_user_id: user_id, p_game: 'roulette', p_amount: bet.amount })
 
-    // 5. Registrar resultado
-    await getSupabase().from('bets').update({
-      choice: `${bet_type}:${bet_value}`,
-      result_number: winningNumber,
-    }).eq('id', betId)
+      if (betError) {
+        const msg = betError.message.includes('insufficient') ? 'insufficient_balance' : betError.message
+        return NextResponse.json({ error: msg }, { status: 400 })
+      }
+
+      // Calcular payout con el numero ganador de esta ronda
+      const payout = calcPayout(bet.bet_type, bet.bet_value, winningNumber, bet.amount)
+
+      // Acreditar payout
+      await supabase.rpc('resolve_bet', { p_bet_id: betId, p_payout: payout })
+
+      // Registrar detalle
+      await supabase.from('bets').update({
+        choice: `${bet.bet_type}:${bet.bet_value}`,
+        result_number: winningNumber,
+      }).eq('id', betId)
+
+      totalPayout += payout
+      if (payout > 0) anyWon = true
+    }
 
     return NextResponse.json({
-      index: winningIndex,
+      index:  winningIndex,
       number: winningNumber,
-      color: getColor(winningNumber),
-      payout,
-      won: payout > 0,
+      color:  winningColor,
+      payout: totalPayout,
+      won:    anyWon,
     })
 
   } catch {
