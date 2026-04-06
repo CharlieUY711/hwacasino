@@ -331,30 +331,24 @@ export default function RoulettePlayPage() {
       let winColor: string | null = null
 
       try {
-        for (const bet of betsSnap) {
-          const res = await fetch('/api/play/roulette', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              user_id: userId,
-              bet_type: bet.type,
-              bet_value: bet.value,
-              amount: bet.amount,
-            }),
-          })
-          const data = await res.json()
-          if (data.error) {
-            setError(data.error === 'insufficient_balance' ? 'Saldo insuficiente' : 'Error al procesar')
-            setSpinning(false)
-            return
-          }
-          if (winNum === null) {
-            winNum = data.result
-            winColor = data.color
-          }
-          netPayout += data.payout
-          if (data.won) anyWin = true
+        const res = await fetch('/api/play/roulette', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: userId,
+            bets: betsSnap.map(b => ({ bet_type: b.type, bet_value: b.value, amount: b.amount })),
+          }),
+        })
+        const data = await res.json()
+        if (data.error) {
+          setError(data.error === 'insufficient_balance' ? 'Saldo insuficiente' : 'Error al procesar')
+          setSpinning(false)
+          return
         }
+        winNum = data.number
+        winColor = data.color
+        netPayout = data.payout
+        anyWin = data.won
       } catch {
         setError('Error de conexión')
         setSpinning(false)
