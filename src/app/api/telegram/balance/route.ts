@@ -1,52 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+function getSupabase() {
+  return createClient(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+}
 
-const BOT_SECRET = process.env.TELEGRAM_BOT_SECRET!
+function verifySecret(req: NextRequest): boolean {
+  return req.headers.get('x-telegram-secret') === process.env.TELEGRAM_BOT_SECRET
+}
+
+async function getBalance(telegram_id: string | null) {
+  if (!telegram_id) return NextResponse.json({ error: 'Missing telegram_id' }, { status: 400 })
+  const db = getSupabase()
+  const profile = await db.from('profiles').select('id, username').eq('telegram_id', Number(telegram_id)).maybeSingle()
+  if (!profile.data) return NextResponse.json({ error: 'User not found' }, { status: 404 })
+  const wallet = await db.from('wallets').select('balance').eq('user_id', profile.data.id).single()
+  return NextResponse.json({ user_id: profile.data.id, username: profile.data.username, balance: wallet.data?.balance ?? 0 })
+}
 
 export async function GET(req: NextRequest) {
-  // Auth check
-  const auth = req.headers.get('x-bot-secret')
-  if (auth !== BOT_SECRET) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  if (!verifySecret(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const telegram_id = req.nextUrl.searchParams.get('telegram_id')
+  return getBalance(telegram_id)
+}
 
-  const { searchParams } = new URL(req.url)
-  const telegram_id = searchParams.get('telegram_id')
-
-  if (!telegram_id) {
-    return NextResponse.json({ error: 'Missing telegram_id' }, { status: 400 })
-  }
-
-  // 1. Buscar profile por telegram_id
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('id, username')
-    .eq('telegram_id', parseInt(telegram_id, 10))
-    .maybeSingle()
-
-  if (profileError || !profile) {
-    return NextResponse.json({ error: 'User not found' }, { status: 404 })
-  }
-
-  // 2. Obtener balance de wallet
-  const { data: wallet, error: walletError } = await supabase
-    .from('wallets')
-    .select('balance')
-    .eq('user_id', profile.id)
-    .maybeSingle()
-
-  if (walletError || !wallet) {
-    return NextResponse.json({ error: 'Wallet not found' }, { status: 404 })
-  }
-
-  return NextResponse.json({
-    user_id: profile.id,
-    username: profile.username,
-    balance: wallet.balance,
-  })
+export async function POST(req: NextRequest) {
+  if (!verifySecret(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const { telegram_id } = await req.json()
+  return getBalance(String(telegram_id))
 }
