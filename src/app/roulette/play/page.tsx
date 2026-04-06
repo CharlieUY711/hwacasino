@@ -415,23 +415,33 @@ export default function RoulettePlayPage() {
 
       <main style={{ minHeight: '100dvh', background: DARK, fontFamily: "'Montserrat', sans-serif", maxWidth: '480px', margin: '0 auto', paddingBottom: '80px' }}>
 
+
         {/* --- HEADER --- */}
-        <div style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(212,175,55,0.12)', background: 'rgba(10,10,10,0.95)', position: 'sticky', top: 0, zIndex: 90 }}>
-          <button onClick={() => router.push('/roulette')} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.35)', cursor: 'pointer', fontSize: '0.55rem', letterSpacing: '0.25em', fontFamily: "'Montserrat', sans-serif" }}>
-            {'\u2190'} MESAS
+        <div style={{ padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(212,175,55,0.12)', background: 'rgba(10,10,10,0.95)', position: 'sticky', top: 0, zIndex: 90, gap: '8px', position: 'relative' }}>
+
+          {/* Volver */}
+          <button onClick={() => router.push('/roulette')} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '0.5rem', letterSpacing: '0.15em', fontFamily: "'Montserrat', sans-serif", display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', flexShrink: 0 }}>
+            {String.fromCharCode(8592)} Volver
           </button>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.1rem', color: GOLD, fontStyle: 'italic', letterSpacing: '0.1em' }}>HWA</span>
-              <span style={{ fontSize: '0.5rem', letterSpacing: '0.35em', color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>ROULETTE</span>
-            </div>
-            <span style={{ fontSize: '0.38rem', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.2)', textTransform: 'uppercase' }}>{room.toUpperCase()}</span>
+          {/* Logo + Titulo */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+            <img src='/logo-dorado.jpg' alt='HWA' style={{ height: '22px', width: 'auto' }} />
+            <span style={{ fontSize: '0.5rem', letterSpacing: '0.25em', color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>RULETA</span>
           </div>
-          <div style={{ background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.2)', borderRadius: '3px', padding: '6px 12px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}><span style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.7)', fontWeight: 700, letterSpacing: '0.05em' }}>{username}</span><span style={{ fontSize: '0.55rem', color: GOLD, fontWeight: 700, letterSpacing: '0.05em' }}>{formatChips(balance)}</span></div>
+
+          {/* Usuario + Balance */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginLeft: 'auto' }}>
+            {showResult && resultNumber !== null ? (
+              <span style={{ fontSize: '0.5rem', color: totalWon ? GOLD : '#f87171', fontWeight: 700, letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
+                {resultNumber} · {totalWon ? '+' + totalPayout!.toLocaleString('es-UY') : '-' + bets.reduce((s,b)=>s+b.amount,0).toLocaleString('es-UY')} <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic' }}>N</span>
+              </span>
+            ) : totalBet > 0 ? (
+              <span style={{ fontSize: '0.5rem', color: '#f87171', fontWeight: 700, letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>Apuesta: {totalBet.toLocaleString('es-UY')} <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic' }}>N</span></span>
+            ) : null}
+            <span style={{ fontSize: '0.5rem', color: 'rgba(255,255,255,0.7)', fontWeight: 700, letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>{username}</span>
+            <span style={{ fontSize: '0.5rem', color: GOLD, fontWeight: 700, letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>{balance.toLocaleString('es-UY')} <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic' }}>N</span></span>
           </div>
         </div>
-
         {/* --- RUEDA SVG --- */}
         <div style={{ background: 'radial-gradient(ellipse at center, #1a0e00 0%, #0a0a0a 70%)', padding: '24px 20px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <div style={{ position: 'relative', width: 240, height: 240 }}>
@@ -512,13 +522,6 @@ export default function RoulettePlayPage() {
               )}
             </div>
 
-            {/* Apuesta total */}
-            <div style={{ textAlign: 'center' }}>
-              <p style={{ fontSize: '0.42rem', letterSpacing: '0.25em', color: 'rgba(255,255,255,0.3)', marginBottom: '2px' }}>APUESTA TOTAL</p>
-              <p style={{ fontSize: '0.85rem', color: totalBet > 0 ? GOLD : 'rgba(255,255,255,0.2)', fontWeight: 700 }}>
-                {totalBet.toLocaleString('es-UY')} <span style={{ fontSize: '0.4rem', letterSpacing: '0.15em', opacity: 0.6 }}>N\u00c9CTAR</span>
-              </p>
-            </div>
 
             {/* Estado de la apuesta del usuario */}
             {hasBetThisRound && (
@@ -774,20 +777,6 @@ export default function RoulettePlayPage() {
           </div>
         </div>
 
-        {/* --- OVERLAY RESULTADO --- */}
-        {showResult && totalPayout !== null && resultNumber !== null && (
-          <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)", background: `linear-gradient(135deg, ${GOLD} 0%, #b89124 100%)`, border: "2px solid rgba(255,255,255,0.3)", borderRadius: "16px", padding: "24px 36px", zIndex: 300, textAlign: "center", minWidth: "200px", boxShadow: "0 0 40px rgba(212,175,55,0.5)" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "16px" }}>
-              <div style={{ width: 52, height: 52, borderRadius: "50%", background: colorHex(resultColor!), border: "3px solid rgba(255,255,255,0.5)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <span style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.8rem", color: "#fff", fontWeight: 700 }}>{resultNumber}</span>
-              </div>
-              <div>
-                <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "2rem", color: "#1a0e00", fontWeight: 700, lineHeight: 1 }}>{totalWon ? "+" + totalPayout!.toLocaleString("es-UY") : "-" + bets.reduce((s,b) => s+b.amount,0).toLocaleString("es-UY")}</p>
-                <p style={{ fontSize: "0.38rem", letterSpacing: "0.25em", color: "rgba(26,14,0,0.7)", marginTop: "3px" }}>{totalWon ? "GANASTE" : "PERDISTE"}</p>
-              </div>
-            </div>
-          </div>
-        )}
 
       </main>
     </>
