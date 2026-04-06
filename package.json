@@ -10,7 +10,9 @@
   "dependencies": {
     "@supabase/ssr": "^0.10.0",
     "@supabase/supabase-js": "^2.101.1",
+    "clsx": "^2.1.1",
     "dotenv": "^17.4.0",
+    "lucide-react": "^1.7.0",
     "next": "latest",
     "react": "latest",
     "react-dom": "latest",

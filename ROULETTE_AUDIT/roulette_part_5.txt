@@ -1,0 +1,84 @@
+==============================
+FILE: roulette_part_5
+LINES: 320 - 400
+==============================
+        copy[copy.length - 1] = { ...last, amount: last.amount - selectedChip.value }
+      } else {
+        copy.pop()
+      }
+      return copy
+    })
+  }
+
+  function clearBets()  { if (!hasBetThisRound) setBets([]) }
+  function repeatBets() { if (!hasBetThisRound && lastBets.length > 0) setBets(lastBets) }
+  function doubleBets() { if (!hasBetThisRound) setBets(prev => prev.map(b => ({ ...b, amount: b.amount * 2 }))) }
+
+  const totalBet = bets.reduce((sum, b) => sum + b.amount, 0)
+
+  function getBetOn(id: string): number { return bets.find(b => b.id === id)?.amount ?? 0 }
+
+  function isWinning(id: string): boolean {
+    if (resultNumber === null) return false
+    const bet = bets.find(b => b.id === id) ?? lastBets.find(b => b.id === id)
+    if (!bet) return false
+    return isWinningBet(bet, resultNumber)
+  }
+
+  // --- REGISTRAR APUESTAS EN LA RONDA ---
+  async function placeBets() {
+    if (!userId || bets.length === 0 || spinning) return
+    setError(null)
+
+    if (isSolo) {
+      // Modo solo: llamar al API real para descontar y acreditar
+      setSpinning(true)
+      const betsSnap = [...bets]
+      let netPayout = 0
+      let anyWin = false
+      let winNum: number | null = null
+      let winColor: string | null = null
+
+      try {
+        const res = await fetch('/api/play/roulette', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: userId,
+            bets: betsSnap.map(b => ({ bet_type: b.type, bet_value: b.value, amount: b.amount })),
+          }),
+        })
+        const data = await res.json()
+        if (data.error) {
+          setError(data.error === 'insufficient_balance' ? 'Saldo insuficiente' : 'Error al procesar')
+          setSpinning(false)
+          return
+        }
+        winNum = data.number
+        winColor = data.color
+        netPayout = data.payout
+        anyWin = data.won
+      } catch {
+        setError('Error de conexión')
+        setSpinning(false)
+        return
+      }
+
+      // Animar la rueda al número ganador
+      const winIdx = WHEEL_ORDER.indexOf(winNum!)
+      setResultNumber(null)
+      animateWheelTo(winIdx)
+
+      setTimeout(() => {
+        setResultNumber(winNum)
+        setResultColor(winColor)
+        setHistory(prev => [winNum!, ...prev].slice(0, 30))
+        setTotalPayout(netPayout)
+        setTotalWon(anyWin)
+        setLastBets(betsSnap)
+        setBets([])
+        setSpinning(false)
+        setTimeout(() => {
+          setShowResult(true)
+          setTimeout(() => {
+            setShowResult(false)

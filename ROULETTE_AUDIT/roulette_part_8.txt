@@ -1,0 +1,84 @@
+==============================
+FILE: roulette_part_8
+LINES: 560 - 640
+==============================
+                      <path d={`M ${x1} ${y1} A ${r1} ${r1} 0 0 1 ${x2} ${y2} L ${x3} ${y3} A ${r2} ${r2} 0 0 0 ${x4} ${y4} Z`}
+                        fill={fill} stroke="rgba(212,175,55,0.3)" strokeWidth="0.6" />
+                      <text x={tx} y={ty} textAnchor="middle" dominantBaseline="middle"
+                        fill="rgba(255,255,255,0.9)" fontSize="9" fontWeight="700"
+                        fontFamily="Montserrat, sans-serif"
+                        transform={`rotate(${angle + 90}, ${tx}, ${ty})`}>{num}</text>
+                    </g>
+                  )
+                })}
+                {WHEEL_ORDER.map((_, i) => {
+                  const angle = ((i / 37) * 360 - 360/37/2) * Math.PI / 180
+                  return (
+                    <line key={`sep-${i}`}
+                      x1={120 + 55 * Math.cos(angle)} y1={120 + 55 * Math.sin(angle)}
+                      x2={120 + 108 * Math.cos(angle)} y2={120 + 108 * Math.sin(angle)}
+                      stroke="rgba(212,175,55,0.5)" strokeWidth="0.8" />
+                  )
+                })}
+              </g>
+              <polygon points="120,16 117.5,6 122.5,6" fill={GOLD} filter="url(#shadow)" />
+              <circle cx="120" cy="16" r="2" fill="#0d0d0d" />
+            </svg>
+
+            {resultNumber !== null && !spinning && (
+              <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 56, height: 56, borderRadius: '50%', background: colorHex(resultColor!), border: `2px solid ${GOLD}`, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}>
+                <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.8rem', color: '#fff', fontWeight: 700 }}>{resultNumber}</span>
+              </div>
+            )}
+          </div>
+
+          {/* COUNTDOWN + INFO DE RONDA */}
+          <div style={{ marginTop: '12px', display: 'flex', gap: '20px', alignItems: 'center' }}>
+            {/* Countdown */}
+            <div style={{ textAlign: 'center', minWidth: '60px' }}>
+              <p style={{ fontSize: '0.42rem', letterSpacing: '0.25em', color: 'rgba(255,255,255,0.3)', marginBottom: '2px' }}>
+                {!isSolo && (roundStatus === 'betting' ? 'CIERRA EN' : roundStatus === 'spinning' ? 'GIRANDO' : 'NUEVA RONDA')}
+              </p>
+              {roundStatus === 'betting' && !isSolo && (
+                <p className={secondsRemaining <= 10 ? 'countdown-urgent' : ''} style={{ fontSize: '1.4rem', color: countdownColor, fontWeight: 700, fontFamily: "'Cormorant Garamond', serif" }}>
+                  {secondsRemaining} s
+                </p>
+              )}
+              {roundStatus === 'spinning' && (
+                <p style={{ fontSize: '0.7rem', color: GOLD, letterSpacing: '0.1em' }}>...</p>
+              )}
+            </div>
+
+            {/* Estado de la apuesta del usuario */}
+            {hasBetThisRound && (
+              <div style={{ textAlign: 'center' }}>
+                <p style={{ fontSize: '0.42rem', letterSpacing: '0.15em', color: 'rgba(212,175,55,0.6)' }}>{'\u2713'} APOSTASTE</p>
+              </div>
+            )}
+          </div>
+          </div>{/* fin rueda */}
+        </div>{/* fin zona rueda */}
+
+        {/* --- FICHAS HORIZONTALES --- */}
+        <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", gap: "8px", padding: "0 16px 6px", background: DARK }}>
+          {CHIP_DEFS.map(chip => {
+            const isActive = selectedChip.value === chip.value
+            const fontSize = chip.label.length > 2 ? "0.45rem" : "0.6rem"
+            return (
+              <button key={chip.value} className={`chip-btn${isActive ? " active" : ""}`}
+                onClick={() => setSelectedChip(chip)}
+                style={{ width: 34, height: 34, borderRadius: "50%", background: isActive ? `radial-gradient(circle at 35% 35%, #f5d060, ${GOLD} 50%, #a07820)` : `radial-gradient(circle at 35% 35%, #e8c540, ${GOLD} 55%, #8a6510)`, border: `2px dashed ${isActive ? "#fff" : CHIP_BORDER}`, color: chip.color, fontFamily: "Montserrat, sans-serif", fontWeight: 900, fontSize, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: isActive ? `0 0 10px rgba(212,175,55,0.8)` : `0 2px 6px rgba(0,0,0,0.6)`, cursor: "pointer" }}>
+                {chip.label}
+              </button>
+            )
+          })}
+        </div>
+
+        {/* --- BOTONERA: ACCIONES + GIRAR (encima del paño) --- */}
+        <div style={{ display: 'flex', gap: '4px', alignItems: 'stretch', padding: '0 16px 8px' }}>
+          {error && <p style={{ textAlign: 'center', color: '#f87171', fontSize: '0.55rem', letterSpacing: '0.1em' }}>{error}</p>}
+          {[
+            { label: 'LMP', action: clearBets  },
+            { label: 'BRR', action: removeLast },
+            { label: 'DBL', action: doubleBets },
+            { label: 'RPT', action: repeatBets },

@@ -1,0 +1,84 @@
+==============================
+FILE: roulette_part_6
+LINES: 400 - 480
+==============================
+            setResultNumber(null)
+          }, 2000)
+        }, 1000)
+      }, 6200)
+      return
+    }
+    // Modo multijugador
+    if (!roundId || hasBetThisRound || roundStatus !== 'betting') return
+    try {
+      const res = await fetch('/api/roulette/round/bet', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: userId,
+          round_id: roundId,
+          bets: bets.map(b => ({ bet_type: b.type, bet_value: b.value, amount: b.amount })),
+        }),
+      })
+      const data = await res.json()
+      if (data.error) {
+        setError(data.error === 'La ventana de apuestas cerro' ? 'La ventana cerr\u00f3' : data.error)
+        return
+      }
+      setLastBets(bets)
+      setHasBetThisRound(true)
+      setWaitingForResult(true)
+    } catch {
+      setError('Error de conexi\u00f3n')
+    }
+  }
+
+  const colorHex = (c: string) => c === 'red' ? '#cc2200' : c === 'green' ? '#15803d' : '#111'
+
+  // Modo solo vs multijugador
+  const isSolo = onlineCount <= 1
+
+  // Estado del boton APOSTAR
+  const canBet = isSolo
+    ? bets.length > 0 && !spinning
+    : roundStatus === 'betting' && !hasBetThisRound && bets.length > 0 && !spinning
+  const btnLabel = spinning ? '...'
+    : waitingForResult ? 'ESPERANDO'
+    : hasBetThisRound  ? 'APOSTASTE'
+    : isSolo ? 'GIRAR'
+    : roundStatus === 'betting' ? `APOSTAR ${secondsRemaining}s`
+    : roundStatus === 'spinning' ? 'GIRANDO'
+    : 'CERRADO'
+
+  // Color del countdown
+  const countdownColor = secondsRemaining <= 10 ? '#f87171' : GOLD
+
+  return (
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&family=Montserrat:wght@200;300;400;600;700&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { background: ${DARK}; overflow-x: hidden; }
+
+        @keyframes fadeUp { from { opacity:0; transform:translateY(12px) } to { opacity:1; transform:translateY(0) } }
+        @keyframes pulseGold { 0%,100% { box-shadow:0 0 0 0 rgba(212,175,55,0.4) } 50% { box-shadow:0 0 0 8px rgba(212,175,55,0) } }
+        @keyframes resultIn { from { opacity:0; transform:scale(0.7) } to { opacity:1; transform:scale(1) } }
+        @keyframes shimmer { 0% { background-position:-200% center } 100% { background-position:200% center } }
+        @keyframes winPulse { 0%,100% { box-shadow:0 0 6px rgba(212,175,55,0.5) } 50% { box-shadow:0 0 18px rgba(212,175,55,0.9) } }
+        @keyframes countdownPulse { 0%,100% { opacity:1 } 50% { opacity:0.5 } }
+
+        .chip-btn { transition:transform 0.15s ease,box-shadow 0.15s ease; cursor:pointer; }
+        .chip-btn:hover { opacity:0.85; }
+        .chip-btn.active { box-shadow:0 0 0 2.5px #D4AF37; outline:none; }
+
+        .bet-cell { position:relative; transition:background 0.15s ease; cursor:pointer; user-select:none; }
+        .bet-cell:hover { background:rgba(212,175,55,0.15) !important; }
+        .bet-cell:active { background:rgba(212,175,55,0.25) !important; }
+        .bet-cell.locked { pointer-events:none; opacity:0.85; }
+
+        .split-h { position:absolute; z-index:10; cursor:pointer; }
+        .split-v { position:absolute; z-index:10; cursor:pointer; }
+        .split-corner { position:absolute; z-index:11; cursor:pointer; }
+
+        .apostar-btn {
+          background: linear-gradient(135deg, #f2ca50 0%, #b89124 50%, #f2ca50 100%);

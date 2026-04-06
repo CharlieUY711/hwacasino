@@ -1,0 +1,84 @@
+==============================
+FILE: roulette_part_2
+LINES: 80 - 160
+==============================
+}
+
+// Calcula payout client-side para mostrar el resultado sin esperar al backend
+function calcLocalPayout(betList: Bet[], winNum: number): { total: number; won: boolean } {
+  let total = 0
+  for (const bet of betList) {
+    if (!isWinningBet(bet, winNum)) continue
+    switch (bet.type) {
+      case 'number': total += bet.amount * 35; break
+      case 'split2': total += bet.amount * 17; break
+      case 'split4': total += bet.amount * 8; break
+      case 'dozen':
+      case 'column': total += bet.amount * 3; break
+      default:       total += bet.amount * 2; break
+    }
+  }
+  return { total, won: total > 0 }
+}
+
+function fmtChipVal(amount: number): string {
+  if (amount >= 10000) return `${Math.floor(amount/10000)}0K`
+  if (amount >= 1000)  return `${Math.floor(amount/1000)}K`
+  return String(amount)
+}
+
+function ChipMarker({ amount, size = 18, winning = false }: { amount: number; size?: number; winning?: boolean }) {
+  const chip = CHIP_DEFS.slice().reverse().find(c => amount >= c.value) ?? CHIP_DEFS[0]
+  return (
+    <div style={{ width: size, height: size, borderRadius: '50%', background: winning ? '#fff' : CHIP_BG, border: `1.5px solid ${winning ? GOLD : CHIP_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: winning ? `0 0 8px ${GOLD}` : '0 2px 6px rgba(0,0,0,0.6)', transition: 'all 0.3s ease' }}>
+      <span style={{ fontSize: size * 0.28, fontWeight: 900, color: winning ? GOLD : chip.color, lineHeight: 1 }}>{fmtChipVal(amount)}</span>
+    </div>
+  )
+}
+
+function FloatingChip({ bet, winning }: { bet: Bet; winning: boolean }) {
+  const chip = CHIP_DEFS.slice().reverse().find(c => bet.amount >= c.value) ?? CHIP_DEFS[0]
+  const size = 16
+  return (
+    <div style={{ position: 'absolute', left: bet.chipX - size/2, top: bet.chipY - size/2, width: size, height: size, borderRadius: '50%', background: winning ? '#fff' : CHIP_BG, border: `1.5px solid ${winning ? GOLD : CHIP_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: winning ? `0 0 10px ${GOLD}, 0 0 20px rgba(212,175,55,0.5)` : '0 2px 6px rgba(0,0,0,0.7)', zIndex: 20, pointerEvents: 'none', transition: 'background 0.3s, box-shadow 0.3s' }}>
+      <span style={{ fontSize: 5, fontWeight: 900, color: winning ? GOLD : chip.color, lineHeight: 1 }}>{fmtChipVal(bet.amount)}</span>
+    </div>
+  )
+}
+
+export default function RoulettePlayPage() {
+  const router = useRouter()
+  const { balance, formatChips, username } = useWallet()
+  const [userId, setUserId] = useState<string | null>(null)
+  const [selectedChip, setSelectedChip] = useState(CHIP_DEFS[0])
+  const [bets, setBets] = useState<Bet[]>([])
+  const [lastBets, setLastBets] = useState<Bet[]>([])
+  const [spinning, setSpinning] = useState(false)
+  const [resultNumber, setResultNumber] = useState<number | null>(null)
+  const [resultColor, setResultColor]   = useState<string | null>(null)
+  const [totalPayout, setTotalPayout]   = useState<number | null>(null)
+  const [totalWon, setTotalWon]         = useState<boolean | null>(null)
+  const [history, setHistory]           = useState<number[]>(MOCK_HISTORY)
+  const [activeTab, setActiveTab]       = useState<'hot' | 'cold' | 'history'>('hot')
+  const [error, setError]               = useState<string | null>(null)
+  const [showResult, setShowResult]     = useState(false)
+
+  // --- ESTADO MULTIPLAYER ---
+  const [room, setRoom]                       = useState('vip-1')
+  const [roundId, setRoundId]                 = useState<string | null>(null)
+  const [roundStatus, setRoundStatus]         = useState<'betting' | 'spinning' | 'closed'>('betting')
+  const [secondsRemaining, setSecondsRemaining] = useState(40)
+  const [hasBetThisRound, setHasBetThisRound] = useState(false)
+  const [onlineCount, setOnlineCount] = useState(1)
+  const [waitingForResult, setWaitingForResult] = useState(false)
+
+  const wheelRef       = useRef<SVGGElement>(null)
+  const tableRef       = useRef<HTMLDivElement>(null)
+  const currentRotation = useRef(0)
+
+  // Refs para polling (evitar closures stale)
+  const prevRoundIdRef  = useRef<string | null>(null)
+  const animatedRoundRef = useRef<string | null>(null)
+  const lastBetsRef     = useRef<Bet[]>([])
+
+  // Sincronizar lastBets a ref para acceso desde timeout

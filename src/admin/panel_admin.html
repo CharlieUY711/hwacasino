@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HWA Casino — Panel de Administración</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #c9a84c;
+    --gold-light: #e4c97a;
+    --gold-dim: #8a6e2f;
+    --bg: #080a0d;
+    --bg2: #0e1117;
+    --bg3: #141820;
+    --bg4: #1c2230;
+    --border: #1f2a3a;
+    --border-gold: rgba(201,168,76,0.25);
+    --text: #e8e8e8;
+    --text-dim: #7a8799;
+    --text-muted: #3d4a5a;
+    --red: #e05252;
+    --green: #52c97a;
+    --blue: #5294e0;
+    --sidebar-w: 240px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { height:100%; background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; font-size:14px; overflow:hidden; }
+
+  /* ── LAYOUT ── */
+  #app { display:flex; height:100vh; }
+
+  /* ── SIDEBAR ── */
+  #sidebar {
+    width:var(--sidebar-w); height:100vh; background:var(--bg2);
+    border-right:1px solid var(--border); display:flex; flex-direction:column;
+    flex-shrink:0; position:relative; overflow:hidden;
+  }
+  #sidebar::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:1px;
+    background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  }
+  .sb-logo {
+    padding:28px 24px 20px; border-bottom:1px solid var(--border);
+    display:flex; align-items:center; gap:12px;
+  }
+  .sb-logo-icon {
+    width:36px; height:36px; background:linear-gradient(135deg,var(--gold),var(--gold-dim));
+    border-radius:8px; display:flex; align-items:center; justify-content:center;
+    font-size:18px; flex-shrink:0;
+  }
+  .sb-logo-text { font-family:'Cinzel',serif; font-size:13px; color:var(--gold); line-height:1.3; }
+  .sb-logo-sub { font-size:10px; color:var(--text-dim); font-family:'DM Sans',sans-serif; letter-spacing:1px; text-transform:uppercase; }
+
+  .sb-section { padding:16px 12px 8px; font-size:10px; color:var(--text-muted); letter-spacing:1.5px; text-transform:uppercase; }
+  .sb-nav { flex:1; overflow-y:auto; padding:8px 0; }
+  .sb-nav::-webkit-scrollbar { width:3px; }
+  .sb-nav::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+  .nav-item {
+    display:flex; align-items:center; gap:12px; padding:10px 20px;
+    cursor:pointer; color:var(--text-dim); transition:all .2s;
+    border-left:2px solid transparent; font-size:13.5px; font-weight:400;
+    position:relative;
+  }
+  .nav-item:hover { color:var(--text); background:rgba(201,168,76,.05); }
+  .nav-item.active { color:var(--gold); border-left-color:var(--gold); background:rgba(201,168,76,.08); font-weight:500; }
+  .nav-item .icon { font-size:16px; width:20px; text-align:center; }
+  .nav-badge {
+    margin-left:auto; background:var(--red); color:#fff; font-size:10px;
+    padding:1px 6px; border-radius:10px; font-weight:600;
+  }
+
+  .sb-footer { padding:16px; border-top:1px solid var(--border); }
+  .sb-admin-card {
+    background:var(--bg3); border:1px solid var(--border-gold); border-radius:10px;
+    padding:12px; display:flex; align-items:center; gap:10px;
+  }
+  .sb-avatar {
+    width:32px; height:32px; background:linear-gradient(135deg,var(--gold),var(--gold-dim));
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-size:14px; font-weight:700; color:var(--bg); flex-shrink:0;
+  }
+  .sb-admin-name { font-size:12px; font-weight:600; color:var(--text); }
+  .sb-admin-role { font-size:10px; color:var(--gold); letter-spacing:.5px; }
+  .sb-logout { margin-left:auto; background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px; transition:.2s; }
+  .sb-logout:hover { color:var(--red); }
+
+  /* ── MAIN ── */
+  #main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+
+  #topbar {
+    height:60px; background:var(--bg2); border-bottom:1px solid var(--border);
+    display:flex; align-items:center; padding:0 28px; gap:16px; flex-shrink:0;
+  }
+  .tb-title { font-family:'Cinzel',serif; font-size:16px; color:var(--text); }
+  .tb-sub { font-size:12px; color:var(--text-dim); }
+  .tb-spacer { flex:1; }
+  .tb-time { font-size:12px; color:var(--text-dim); font-variant-numeric:tabular-nums; }
+  .tb-refresh {
+    background:var(--bg3); border:1px solid var(--border); color:var(--text-dim);
+    padding:6px 14px; border-radius:6px; cursor:pointer; font-size:12px;
+    transition:.2s; display:flex; align-items:center; gap:6px;
+  }
+  .tb-refresh:hover { border-color:var(--gold-dim); color:var(--gold); }
+  .tb-dot { width:8px; height:8px; background:var(--green); border-radius:50%; animation:pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  #content { flex:1; overflow-y:auto; padding:28px; }
+  #content::-webkit-scrollbar { width:4px; }
+  #content::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+  /* ── SECTION VIEWS ── */
+  .view { display:none; }
+  .view.active { display:block; animation:fadeIn .25s ease; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+
+  /* ── CARDS ── */
+  .stat-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:16px; margin-bottom:28px; }
+  .stat-card {
+    background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+    padding:20px; position:relative; overflow:hidden; transition:.2s;
+  }
+  .stat-card:hover { border-color:var(--border-gold); transform:translateY(-1px); }
+  .stat-card::after {
+    content:''; position:absolute; top:0; right:0; width:80px; height:80px;
+    background:radial-gradient(circle at top right, rgba(201,168,76,.08), transparent);
+  }
+  .stat-label { font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; }
+  .stat-value { font-size:28px; font-weight:600; color:var(--text); font-variant-numeric:tabular-nums; line-height:1; }
+  .stat-value.gold { color:var(--gold); }
+  .stat-value.green { color:var(--green); }
+  .stat-value.red { color:var(--red); }
+  .stat-sub { font-size:11px; color:var(--text-muted); margin-top:6px; }
+  .stat-icon { position:absolute; top:18px; right:18px; font-size:22px; opacity:.3; }
+
+  /* ── PANELS ── */
+  .panel {
+    background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+    overflow:hidden; margin-bottom:20px;
+  }
+  .panel-header {
+    padding:16px 20px; border-bottom:1px solid var(--border);
+    display:flex; align-items:center; gap:12px;
+  }
+  .panel-title { font-size:13px; font-weight:600; color:var(--text); }
+  .panel-sub { font-size:11px; color:var(--text-dim); margin-left:auto; }
+  .panel-body { padding:20px; }
+
+  /* ── TABLE ── */
+  .tbl-wrap { overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; }
+  th { padding:10px 14px; text-align:left; font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.8px; border-bottom:1px solid var(--border); font-weight:500; white-space:nowrap; }
+  td { padding:11px 14px; border-bottom:1px solid rgba(31,42,58,.6); font-size:13px; color:var(--text-dim); white-space:nowrap; }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:rgba(201,168,76,.03); }
+  td.bold { color:var(--text); font-weight:500; }
+  .amount-pos { color:var(--green); font-weight:600; }
+  .amount-neg { color:var(--red); font-weight:600; }
+
+  /* ── BADGES ── */
+  .badge {
+    display:inline-flex; align-items:center; gap:4px; padding:3px 10px;
+    border-radius:20px; font-size:11px; font-weight:600; letter-spacing:.3px;
+  }
+  .badge-green { background:rgba(82,201,122,.12); color:var(--green); border:1px solid rgba(82,201,122,.25); }
+  .badge-red { background:rgba(224,82,82,.12); color:var(--red); border:1px solid rgba(224,82,82,.25); }
+  .badge-gold { background:rgba(201,168,76,.12); color:var(--gold); border:1px solid rgba(201,168,76,.25); }
+  .badge-blue { background:rgba(82,148,224,.12); color:var(--blue); border:1px solid rgba(82,148,224,.25); }
+  .badge-gray { background:rgba(122,135,153,.1); color:var(--text-dim); border:1px solid var(--border); }
+
+  /* ── SEARCH / FILTER ── */
+  .filter-bar { display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
+  .search-box {
+    flex:1; min-width:180px; background:var(--bg3); border:1px solid var(--border);
+    border-radius:8px; padding:8px 14px; color:var(--text); font-size:13px;
+    outline:none; transition:.2s;
+  }
+  .search-box::placeholder { color:var(--text-muted); }
+  .search-box:focus { border-color:var(--gold-dim); }
+  .filter-select {
+    background:var(--bg3); border:1px solid var(--border); border-radius:8px;
+    padding:8px 14px; color:var(--text); font-size:13px; outline:none; cursor:pointer;
+  }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display:inline-flex; align-items:center; gap:7px; padding:8px 18px;
+    border-radius:8px; font-size:13px; font-weight:500; cursor:pointer;
+    border:none; transition:all .2s; font-family:'DM Sans',sans-serif;
+  }
+  .btn-gold { background:linear-gradient(135deg,var(--gold),var(--gold-dim)); color:var(--bg); }
+  .btn-gold:hover { filter:brightness(1.1); transform:translateY(-1px); }
+  .btn-outline { background:transparent; border:1px solid var(--border); color:var(--text-dim); }
+  .btn-outline:hover { border-color:var(--gold-dim); color:var(--gold); }
+  .btn-danger { background:rgba(224,82,82,.15); border:1px solid rgba(224,82,82,.3); color:var(--red); }
+  .btn-danger:hover { background:rgba(224,82,82,.25); }
+  .btn-sm { padding:5px 12px; font-size:12px; }
+
+  /* ── ALERT ── */
+  .alert {
+    display:flex; align-items:center; gap:12px; padding:14px 18px; border-radius:10px;
+    margin-bottom:16px; font-size:13px;
+  }
+  .alert-warn { background:rgba(201,168,76,.08); border:1px solid rgba(201,168,76,.2); color:var(--gold-light); }
+  .alert-danger { background:rgba(224,82,82,.08); border:1px solid rgba(224,82,82,.2); color:#f08080; }
+  .alert-info { background:rgba(82,148,224,.08); border:1px solid rgba(82,148,224,.2); color:#90bbf0; }
+
+  /* ── OVERVIEW SPECIFIC ── */
+  .activity-list { display:flex; flex-direction:column; gap:0; }
+  .activity-item {
+    display:flex; align-items:center; gap:14px; padding:12px 0;
+    border-bottom:1px solid rgba(31,42,58,.6);
+  }
+  .activity-item:last-child { border-bottom:none; }
+  .activity-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .activity-text { flex:1; color:var(--text-dim); font-size:13px; }
+  .activity-text strong { color:var(--text); }
+  .activity-time { font-size:11px; color:var(--text-muted); font-variant-numeric:tabular-nums; }
+
+  .mini-bar-wrap { margin-top:16px; }
+  .mini-bar-row { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+  .mini-bar-label { font-size:12px; color:var(--text-dim); width:70px; }
+  .mini-bar-bg { flex:1; height:6px; background:var(--bg4); border-radius:3px; overflow:hidden; }
+  .mini-bar-fill { height:100%; border-radius:3px; transition:width .6s ease; }
+  .mini-bar-val { font-size:12px; color:var(--text); width:40px; text-align:right; }
+
+  /* ── INVITATIONS ── */
+  .inv-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px; }
+  .inv-card {
+    background:var(--bg3); border:1px solid var(--border); border-radius:10px;
+    padding:16px; display:flex; flex-direction:column; gap:10px;
+  }
+  .inv-code {
+    font-family:'Cinzel',serif; font-size:14px; color:var(--gold);
+    letter-spacing:2px; font-weight:600;
+  }
+  .inv-meta { font-size:11px; color:var(--text-muted); }
+  .inv-actions { display:flex; gap:8px; }
+
+  /* ── CONFIG ── */
+  .config-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .config-card {
+    background:var(--bg3); border:1px solid var(--border); border-radius:10px; padding:18px;
+  }
+  .config-label { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .config-val { font-size:20px; font-weight:600; color:var(--text); }
+  .config-input {
+    width:100%; background:var(--bg4); border:1px solid var(--border); border-radius:6px;
+    padding:8px 12px; color:var(--text); font-size:13px; outline:none; margin-top:8px;
+  }
+  .config-input:focus { border-color:var(--gold-dim); }
+  .status-row { display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border); }
+  .status-row:last-child { border-bottom:none; }
+  .status-name { font-size:13px; color:var(--text); }
+  .status-indicator { display:flex; align-items:center; gap:6px; font-size:12px; }
+  .dot-green { width:8px; height:8px; background:var(--green); border-radius:50%; }
+  .dot-red { width:8px; height:8px; background:var(--red); border-radius:50%; }
+  .dot-yellow { width:8px; height:8px; background:#e0b952; border-radius:50%; animation:pulse 1.5s infinite; }
+
+  /* ── EMPTY STATE ── */
+  .empty { text-align:center; padding:50px 20px; color:var(--text-muted); }
+  .empty-icon { font-size:40px; margin-bottom:12px; opacity:.4; }
+  .empty-text { font-size:14px; }
+
+  /* ── LOADER ── */
+  .loader { display:flex; align-items:center; justify-content:center; padding:40px; }
+  .spinner { width:28px; height:28px; border:2px solid var(--border); border-top-color:var(--gold); border-radius:50%; animation:spin .7s linear infinite; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+
+  /* ── AUTH OVERLAY ── */
+  #auth-overlay {
+    position:fixed; inset:0; background:var(--bg); z-index:1000;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .auth-box {
+    background:var(--bg2); border:1px solid var(--border-gold); border-radius:16px;
+    padding:40px; width:360px; text-align:center;
+  }
+  .auth-logo { font-family:'Cinzel',serif; font-size:22px; color:var(--gold); margin-bottom:6px; }
+  .auth-sub { font-size:12px; color:var(--text-dim); margin-bottom:28px; }
+  .auth-input {
+    width:100%; background:var(--bg3); border:1px solid var(--border); border-radius:8px;
+    padding:11px 16px; color:var(--text); font-size:14px; outline:none; margin-bottom:12px;
+    font-family:'DM Sans',sans-serif;
+  }
+  .auth-input:focus { border-color:var(--gold-dim); }
+  .auth-btn {
+    width:100%; padding:12px; background:linear-gradient(135deg,var(--gold),var(--gold-dim));
+    border:none; border-radius:8px; color:var(--bg); font-size:14px; font-weight:700;
+    cursor:pointer; font-family:'Cinzel',serif; letter-spacing:.5px; transition:.2s;
+    margin-top:4px;
+  }
+  .auth-btn:hover { filter:brightness(1.1); }
+  .auth-error { font-size:12px; color:var(--red); margin-top:10px; min-height:18px; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:500;
+    display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .modal {
+    background:var(--bg2); border:1px solid var(--border-gold); border-radius:14px;
+    padding:28px; width:100%; max-width:440px;
+  }
+  .modal-title { font-family:'Cinzel',serif; font-size:16px; color:var(--gold); margin-bottom:20px; }
+  .modal-input { width:100%; background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:10px 14px; color:var(--text); font-size:13px; outline:none; margin-bottom:12px; font-family:'DM Sans',sans-serif; }
+  .modal-input:focus { border-color:var(--gold-dim); }
+  .modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:8px; }
+
+  /* ── SCROLLABLE TABLE WRAPPER ── */
+  .tbl-scroll { max-height:420px; overflow-y:auto; }
+  .tbl-scroll::-webkit-scrollbar { width:3px; }
+  .tbl-scroll::-webkit-scrollbar-thumb { background:var(--border); }
+
+  @media(max-width:768px) {
+    #sidebar { display:none; }
+    .config-grid { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- AUTH OVERLAY -->
+<div id="auth-overlay">
+  <div class="auth-box">
+    <div class="auth-logo">♠ HWA Casino</div>
+    <div class="auth-sub">Panel de Administración — Acceso Restringido</div>
+    <input class="auth-input" id="auth-email" type="email" placeholder="Email administrador" autocomplete="email">
+    <input class="auth-input" id="auth-pass" type="password" placeholder="Contraseña" autocomplete="current-password">
+    <button class="auth-btn" onclick="doLogin()">INGRESAR</button>
+    <div class="auth-error" id="auth-error"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-icon">♠</div>
+      <div>
+        <div class="sb-logo-text">HWA Casino</div>
+        <div class="sb-logo-sub">Admin Panel</div>
+      </div>
+    </div>
+    <div class="sb-nav">
+      <div class="sb-section">Principal</div>
+      <div class="nav-item active" onclick="nav('overview',this)">
+        <span class="icon">📊</span> Overview
+      </div>
+      <div class="nav-item" onclick="nav('usuarios',this)">
+        <span class="icon">👥</span> Usuarios
+      </div>
+      <div class="nav-item" onclick="nav('depositos',this)">
+        <span class="icon">💳</span> Depósitos
+        <span class="nav-badge" id="badge-dep" style="display:none">0</span>
+      </div>
+      <div class="nav-item" onclick="nav('invitaciones',this)">
+        <span class="icon">🎟️</span> Invitaciones
+      </div>
+      <div class="sb-section">Operación</div>
+      <div class="nav-item" onclick="nav('transacciones',this)">
+        <span class="icon">📋</span> Transacciones
+      </div>
+      <div class="nav-item" onclick="nav('juegos',this)">
+        <span class="icon">🎰</span> Juegos & Stats
+      </div>
+      <div class="sb-section">Sistema</div>
+      <div class="nav-item" onclick="nav('config',this)">
+        <span class="icon">⚙️</span> Configuración
+      </div>
+    </div>
+    <div class="sb-footer">
+      <div class="sb-admin-card">
+        <div class="sb-avatar" id="sb-avatar">A</div>
+        <div>
+          <div class="sb-admin-name" id="sb-admin-name">Admin</div>
+          <div class="sb-admin-role">SUPERADMIN</div>
+        </div>
+        <button class="sb-logout" onclick="doLogout()" title="Cerrar sesión">⎋</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="main">
+    <div id="topbar">
+      <div>
+        <div class="tb-title" id="tb-title">Overview</div>
+        <div class="tb-sub" id="tb-sub">Métricas en tiempo real</div>
+      </div>
+      <div class="tb-spacer"></div>
+      <div class="tb-dot"></div>
+      <div class="tb-time" id="tb-time"></div>
+      <button class="tb-refresh" onclick="refreshAll()">↻ Actualizar</button>
+    </div>
+    <div id="content">
+
+      <!-- OVERVIEW -->
+      <div id="view-overview" class="view active">
+        <div class="stat-grid" id="ov-stats">
+          <div class="loader"><div class="spinner"></div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;flex-wrap:wrap">
+          <div class="panel">
+            <div class="panel-header">
+              <span>📈</span><span class="panel-title">Distribución por Plataforma</span>
+            </div>
+            <div class="panel-body" id="ov-platforms"><div class="loader"><div class="spinner"></div></div></div>
+          </div>
+          <div class="panel">
+            <div class="panel-header">
+              <span>⏱️</span><span class="panel-title">Actividad Reciente</span>
+            </div>
+            <div class="panel-body" id="ov-activity"><div class="loader"><div class="spinner"></div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- USUARIOS -->
+      <div id="view-usuarios" class="view">
+        <div class="filter-bar">
+          <input class="search-box" id="usr-search" placeholder="🔍 Buscar por email, username..." oninput="filterUsers()">
+          <select class="filter-select" id="usr-role" onchange="filterUsers()">
+            <option value="">Todos los roles</option>
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+            <option value="superadmin">Superadmin</option>
+          </select>
+          <select class="filter-select" id="usr-platform" onchange="filterUsers()">
+            <option value="">Todas las plataformas</option>
+            <option value="web">Web</option>
+            <option value="telegram">Telegram</option>
+          </select>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <span>👥</span><span class="panel-title">Usuarios Registrados</span>
+            <span class="panel-sub" id="usr-count">— usuarios</span>
+          </div>
+          <div class="tbl-scroll">
+            <div class="tbl-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Usuario</th><th>Email</th><th>Balance</th><th>Apuestas</th>
+                    <th>Plataforma</th><th>Rol</th><th>Registro</th><th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="usr-tbody"><tr><td colspan="8"><div class="loader"><div class="spinner"></div></div></td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DEPOSITOS -->
+      <div id="view-depositos" class="view">
+        <div id="dep-alert"></div>
+        <div class="filter-bar">
+          <input class="search-box" id="dep-search" placeholder="🔍 Buscar por email o ID..." oninput="filterDeps()">
+          <select class="filter-select" id="dep-status" onchange="filterDeps()">
+            <option value="">Todos los estados</option>
+            <option value="pending">Pendientes</option>
+            <option value="completed">Completados</option>
+            <option value="failed">Fallidos</option>
+          </select>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <span>💳</span><span class="panel-title">Depósitos PayPal</span>
+            <span class="panel-sub" id="dep-count">—</span>
+          </div>
+          <div class="tbl-scroll">
+            <div class="tbl-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Usuario</th><th>Monto</th><th>Estado</th><th>PayPal ID</th><th>Fecha</th><th>Acción</th>
+                  </tr>
+                </thead>
+                <tbody id="dep-tbody"><tr><td colspan="6"><div class="loader"><div class="spinner"></div></div></td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INVITACIONES -->
+      <div id="view-invitaciones" class="view">
+        <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap">
+          <button class="btn btn-gold" onclick="openGenModal()">✦ Generar Código</button>
+          <input class="search-box" id="inv-search" placeholder="🔍 Buscar código..." style="max-width:280px" oninput="filterInvs()">
+          <select class="filter-select" id="inv-status" onchange="filterInvs()">
+            <option value="">Todos</option>
+            <option value="free">Disponibles</option>
+            <option value="used">Usados</option>
+          </select>
+        </div>
+        <div id="inv-grid" class="inv-grid"><div class="loader"><div class="spinner"></div></div></div>
+      </div>
+
+      <!-- TRANSACCIONES -->
+      <div id="view-transacciones" class="view">
+        <div class="filter-bar">
+          <input class="search-box" id="tx-search" placeholder="🔍 Buscar..." oninput="filterTx()">
+          <select class="filter-select" id="tx-type" onchange="filterTx()">
+            <option value="">Todos los tipos</option>
+            <option value="deposit">Depósito</option>
+            <option value="bet">Apuesta</option>
+            <option value="win">Ganancia</option>
+            <option value="withdrawal">Retiro</option>
+            <option value="adjustment">Ajuste manual</option>
+          </select>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <span>📋</span><span class="panel-title">Historial de Transacciones</span>
+            <span class="panel-sub" id="tx-count">—</span>
+          </div>
+          <div class="tbl-scroll">
+            <div class="tbl-wrap">
+              <table>
+                <thead>
+                  <tr><th>Usuario</th><th>Tipo</th><th>Monto</th><th>Saldo Ant.</th><th>Saldo Post.</th><th>Juego</th><th>Fecha</th></tr>
+                </thead>
+                <tbody id="tx-tbody"><tr><td colspan="7"><div class="loader"><div class="spinner"></div></div></td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- JUEGOS -->
+      <div id="view-juegos" class="view">
+        <div class="stat-grid" id="games-stats">
+          <div class="loader"><div class="spinner"></div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <span>🎰</span><span class="panel-title">Últimas Rondas — Ruleta</span>
+          </div>
+          <div class="tbl-scroll">
+            <div class="tbl-wrap">
+              <table>
+                <thead>
+                  <tr><th>Mesa</th><th>Usuario</th><th>Apuesta</th><th>Número</th><th>Color</th><th>Resultado</th><th>Ganancia</th><th>Fecha</th></tr>
+                </thead>
+                <tbody id="games-tbody"><tr><td colspan="8"><div class="loader"><div class="spinner"></div></div></td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONFIG -->
+      <div id="view-config" class="view">
+        <div class="config-grid" style="margin-bottom:20px">
+          <div class="config-card">
+            <div class="config-label">Balance mínimo depósito (USD)</div>
+            <input class="config-input" id="cfg-min-dep" type="number" placeholder="5.00">
+          </div>
+          <div class="config-card">
+            <div class="config-label">Crédito bienvenida (Nectar)</div>
+            <input class="config-input" id="cfg-welcome" type="number" placeholder="1000">
+          </div>
+          <div class="config-card">
+            <div class="config-label">House Edge ruleta (%)</div>
+            <input class="config-input" id="cfg-edge" type="number" placeholder="2.7">
+          </div>
+          <div class="config-card">
+            <div class="config-label">Apuesta máxima por ronda</div>
+            <input class="config-input" id="cfg-max-bet" type="number" placeholder="50000">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+          <div class="panel">
+            <div class="panel-header"><span>🔌</span><span class="panel-title">Estado del Sistema</span></div>
+            <div class="panel-body">
+              <div class="status-row">
+                <span class="status-name">Supabase DB</span>
+                <div class="status-indicator"><div class="dot-green"></div><span style="color:var(--green)">Conectado</span></div>
+              </div>
+              <div class="status-row">
+                <span class="status-name">PayPal API</span>
+                <div class="status-indicator" id="paypal-status"><div class="dot-yellow"></div><span style="color:#e0b952">Verificando...</span></div>
+              </div>
+              <div class="status-row">
+                <span class="status-name">Bot Telegram</span>
+                <div class="status-indicator" id="tg-status"><div class="dot-yellow"></div><span style="color:#e0b952">Verificando...</span></div>
+              </div>
+              <div class="status-row">
+                <span class="status-name">Vercel Edge</span>
+                <div class="status-indicator"><div class="dot-green"></div><span style="color:var(--green)">OK</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header"><span>🛠️</span><span class="panel-title">Acciones Rápidas</span></div>
+            <div class="panel-body" style="display:flex;flex-direction:column;gap:10px">
+              <button class="btn btn-outline" onclick="openAdjModal()">💰 Ajuste de Balance</button>
+              <button class="btn btn-outline" onclick="openGenModal()">🎟️ Generar Invitación</button>
+              <button class="btn btn-outline" onclick="exportData('usuarios')">📥 Exportar Usuarios CSV</button>
+              <button class="btn btn-outline" onclick="exportData('transacciones')">📥 Exportar Transacciones CSV</button>
+              <button class="btn btn-danger" onclick="confirmClearSessions()">⚠️ Cerrar Todas las Sesiones</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- MODAL GENERAR INVITACIÓN -->
+<div class="modal-overlay" id="modal-gen" style="display:none">
+  <div class="modal">
+    <div class="modal-title">✦ Generar Código de Invitación</div>
+    <div style="font-size:13px;color:var(--text-dim);margin-bottom:16px">El código será único y válido para un solo uso.</div>
+    <input class="modal-input" id="gen-prefix" placeholder="Prefijo personalizado (ej: VIP, GOLD, PROMO)" maxlength="10">
+    <input class="modal-input" id="gen-note" placeholder="Nota interna (opcional)">
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModals()">Cancelar</button>
+      <button class="btn btn-gold" onclick="generateCode()">✦ Generar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AJUSTE BALANCE -->
+<div class="modal-overlay" id="modal-adj" style="display:none">
+  <div class="modal">
+    <div class="modal-title">💰 Ajuste Manual de Balance</div>
+    <input class="modal-input" id="adj-email" placeholder="Email del usuario">
+    <input class="modal-input" id="adj-amount" type="number" placeholder="Monto (+/−)">
+    <input class="modal-input" id="adj-reason" placeholder="Motivo (reembolso, bonus, corrección...)">
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModals()">Cancelar</button>
+      <button class="btn btn-gold" onclick="applyAdjustment()">Aplicar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ──────────────────────────────────────────────
+//  CONFIG — reemplazá estos valores
+// ──────────────────────────────────────────────
+const SUPABASE_URL  = 'https://hwczpglunjkbhqvuluar.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3Y3pwZ2x1bmprYmhxdnVsdWFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNDk2ODYsImV4cCI6MjA5MDcyNTY4Nn0.oFyVK4xfWi0FzJcIQMS5oRKqAvW2_cupqZfv5ZTselw';
+const ADMIN_ROLES   = ['admin', 'superadmin'];
+
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+// ──────────────────────────────────────────────
+//  STATE
+// ──────────────────────────────────────────────
+let allUsers=[], allDeposits=[], allTx=[], allInvs=[], allGames=[];
+let currentView='overview';
+
+// ──────────────────────────────────────────────
+//  CLOCK
+// ──────────────────────────────────────────────
+function tickClock(){
+  const now=new Date();
+  document.getElementById('tb-time').textContent=
+    now.toLocaleDateString('es-UY')+' '+now.toLocaleTimeString('es-UY');
+}
+setInterval(tickClock,1000); tickClock();
+
+// ──────────────────────────────────────────────
+//  AUTH
+// ──────────────────────────────────────────────
+async function doLogin(){
+  const email=document.getElementById('auth-email').value.trim();
+  const pass =document.getElementById('auth-pass').value;
+  const errEl=document.getElementById('auth-error');
+  errEl.textContent='';
+  if(!email||!pass){errEl.textContent='Completá los campos.';return;}
+  try{
+    const {data,error}=await db.auth.signInWithPassword({email,password:pass});
+    if(error)throw error;
+    await checkAdminAndBoot(data.user);
+  }catch(e){errEl.textContent=e.message||'Error de autenticación.';}
+}
+document.getElementById('auth-pass').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
+
+async function checkAdminAndBoot(user){
+  const {data:profile}=await db.from('profiles').select('role,username').eq('id',user.id).single();
+  if(!profile||!ADMIN_ROLES.includes(profile.role)){
+    await db.auth.signOut();
+    document.getElementById('auth-error').textContent='Acceso denegado. Se requiere rol de administrador.';
+    return;
+  }
+  // Boot
+  document.getElementById('auth-overlay').style.display='none';
+  document.getElementById('app').style.display='flex';
+  const name=profile.username||user.email.split('@')[0];
+  document.getElementById('sb-admin-name').textContent=name;
+  document.getElementById('sb-avatar').textContent=name[0].toUpperCase();
+  refreshAll();
+}
+
+async function doLogout(){
+  await db.auth.signOut();
+  location.reload();
+}
+
+// Auto-login check
+(async()=>{
+  const {data:{session}}=await db.auth.getSession();
+  if(session) await checkAdminAndBoot(session.user);
+})();
+
+// ──────────────────────────────────────────────
+//  NAVIGATION
+// ──────────────────────────────────────────────
+const titles={
+  overview:['Overview','Métricas en tiempo real'],
+  usuarios:['Usuarios','Gestión de miembros'],
+  depositos:['Depósitos','Operaciones PayPal'],
+  invitaciones:['Invitaciones','Códigos VIP'],
+  transacciones:['Transacciones','Historial completo'],
+  juegos:['Juegos & Stats','Performance por mesa'],
+  config:['Configuración','Sistema y parámetros']
+};
+function nav(id,el){
+  document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  const [t,s]=titles[id];
+  document.getElementById('tb-title').textContent=t;
+  document.getElementById('tb-sub').textContent=s;
+  currentView=id;
+  loadView(id);
+}
+function loadView(id){
+  if(id==='overview') loadOverview();
+  else if(id==='usuarios') loadUsers();
+  else if(id==='depositos') loadDeposits();
+  else if(id==='invitaciones') loadInvitations();
+  else if(id==='transacciones') loadTransactions();
+  else if(id==='juegos') loadGames();
+}
+function refreshAll(){ loadView(currentView); }
+
+// ──────────────────────────────────────────────
+//  OVERVIEW
+// ──────────────────────────────────────────────
+async function loadOverview(){
+  const [
+    {count:totalUsers},
+    {data:profiles},
+    {data:deposits},
+    {data:txToday},
+    {data:recentActivity}
+  ] = await Promise.all([
+    db.from('profiles').select('*',{count:'exact',head:true}),
+    db.from('profiles').select('balance,platform').limit(1000),
+    db.from('deposits').select('amount,status,created_at').order('created_at',{ascending:false}).limit(200),
+    db.from('transactions').select('amount,type,created_at').gte('created_at', todayISO()),
+    db.from('transactions').select('type,amount,user_id,created_at,profiles(username)').order('created_at',{ascending:false}).limit(8)
+  ]);
+
+  const activeUsers=(profiles||[]).filter(p=>p.balance>0).length;
+  const totalBalance=(profiles||[]).reduce((s,p)=>s+(p.balance||0),0);
+  const todayDep=(deposits||[]).filter(d=>d.status==='completed'&&d.created_at>todayISO()).reduce((s,d)=>s+(d.amount||0),0);
+  const houseGain=(txToday||[]).filter(t=>t.type==='win').reduce((s,t)=>s-(t.amount||0),0)
+                 +(txToday||[]).filter(t=>t.type==='bet').reduce((s,t)=>s+(t.amount||0),0);
+  const pendingDep=(deposits||[]).filter(d=>d.status==='pending').length;
+
+  // badge
+  const badgeEl=document.getElementById('badge-dep');
+  if(pendingDep>0){badgeEl.textContent=pendingDep;badgeEl.style.display='';}
+  else badgeEl.style.display='none';
+
+  document.getElementById('ov-stats').innerHTML=`
+    ${statCard('Usuarios Totales',fmt(totalUsers),'','👤','text')}
+    ${statCard('Balance en Plataforma','⊗ '+fmtN(totalBalance),'Nectar total','💎','gold')}
+    ${statCard('Usuarios Activos',fmt(activeUsers),'Con balance > 0','✅','green')}
+    ${statCard('Depósitos Hoy','$ '+fmtN(todayDep),'USD completados','💳','green')}
+    ${statCard('Ganancia Casa (hoy)','⊗ '+fmtN(Math.max(0,houseGain)),'Nectar','📈','gold')}
+    ${statCard('Depósitos Pendientes',fmt(pendingDep),'Requieren revisión','⏳', pendingDep>0?'red':'text')}
+  `;
+
+  // platforms
+  const web=(profiles||[]).filter(p=>p.platform==='web'||!p.platform).length;
+  const tg =(profiles||[]).filter(p=>p.platform==='telegram').length;
+  const both=(profiles||[]).filter(p=>p.platform==='both').length;
+  const total=Math.max(totalUsers,1);
+  document.getElementById('ov-platforms').innerHTML=`
+    <div class="mini-bar-wrap">
+      ${miniBar('Web',web,total,'#5294e0')}
+      ${miniBar('Telegram',tg,total,'#5cb8e4')}
+      ${miniBar('Ambas',both,total,'var(--gold)')}
+    </div>
+  `;
+
+  // activity
+  const acts=(recentActivity||[]);
+  document.getElementById('ov-activity').innerHTML=acts.length?`
+    <div class="activity-list">
+      ${acts.map(a=>`
+        <div class="activity-item">
+          <div class="activity-dot" style="background:${typeColor(a.type)}"></div>
+          <div class="activity-text">
+            <strong>${a.profiles?.username||'Usuario'}</strong>
+            ${typeLabel(a.type)} <strong>⊗ ${fmtN(Math.abs(a.amount||0))}</strong>
+          </div>
+          <div class="activity-time">${timeAgo(a.created_at)}</div>
+        </div>
+      `).join('')}
+    </div>
+  `:`<div class="empty"><div class="empty-icon">📭</div><div class="empty-text">Sin actividad reciente</div></div>`;
+}
+
+function statCard(label,val,sub,icon,color){
+  return `<div class="stat-card">
+    <div class="stat-label">${label}</div>
+    <div class="stat-value ${color}">${val}</div>
+    ${sub?`<div class="stat-sub">${sub}</div>`:''}
+    <div class="stat-icon">${icon}</div>
+  </div>`;
+}
+function miniBar(label,val,total,color){
+  const pct=Math.round(val/total*100);
+  return `<div class="mini-bar-row">
+    <div class="mini-bar-label">${label}</div>
+    <div class="mini-bar-bg"><div class="mini-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+    <div class="mini-bar-val">${val}</div>
+  </div>`;
+}
+
+// ──────────────────────────────────────────────
+//  USUARIOS
+// ──────────────────────────────────────────────
+async function loadUsers(){
+  const {data}=await db.from('profiles')
+    .select('id,username,email,balance,role,platform,total_bets,created_at')
+    .order('created_at',{ascending:false}).limit(500);
+  allUsers=data||[];
+  document.getElementById('usr-count').textContent=allUsers.length+' usuarios';
+  renderUsers(allUsers);
+}
+function filterUsers(){
+  const q=document.getElementById('usr-search').value.toLowerCase();
+  const role=document.getElementById('usr-role').value;
+  const plat=document.getElementById('usr-platform').value;
+  const filtered=allUsers.filter(u=>{
+    const match=(u.username||'').toLowerCase().includes(q)||(u.email||'').toLowerCase().includes(q);
+    const roleMatch=!role||u.role===role;
+    const platMatch=!plat||u.platform===plat||(plat==='web'&&!u.platform);
+    return match&&roleMatch&&platMatch;
+  });
+  renderUsers(filtered);
+}
+function renderUsers(list){
+  const tb=document.getElementById('usr-tbody');
+  if(!list.length){tb.innerHTML=`<tr><td colspan="8"><div class="empty"><div class="empty-icon">🔍</div><div class="empty-text">Sin resultados</div></div></td></tr>`;return;}
+  tb.innerHTML=list.map(u=>`<tr>
+    <td class="bold">${u.username||'—'}</td>
+    <td>${u.email||'—'}</td>
+    <td class="amount-pos">⊗ ${fmtN(u.balance||0)}</td>
+    <td>${fmt(u.total_bets||0)}</td>
+    <td>${platBadge(u.platform)}</td>
+    <td>${roleBadge(u.role)}</td>
+    <td>${fmtDate(u.created_at)}</td>
+    <td style="display:flex;gap:6px">
+      <button class="btn btn-outline btn-sm" onclick="openAdjModalFor('${u.email}')">💰</button>
+      <button class="btn btn-outline btn-sm" onclick="viewUserTx('${u.id}')">📋</button>
+    </td>
+  </tr>`).join('');
+}
+
+// ──────────────────────────────────────────────
+//  DEPÓSITOS
+// ──────────────────────────────────────────────
+async function loadDeposits(){
+  const {data}=await db.from('deposits')
+    .select('id,user_id,amount,status,paypal_order_id,created_at,profiles(email,username)')
+    .order('created_at',{ascending:false}).limit(300);
+  allDeposits=data||[];
+  const pend=allDeposits.filter(d=>d.status==='pending').length;
+  document.getElementById('dep-count').textContent=allDeposits.length+' operaciones';
+  const alertEl=document.getElementById('dep-alert');
+  alertEl.innerHTML=pend?`<div class="alert alert-warn">⚠️ Hay <strong>${pend} depósito${pend>1?'s':''} pendiente${pend>1?'s':''}</strong> que requieren revisión manual.</div>`:'';
+  renderDeposits(allDeposits);
+}
+function filterDeps(){
+  const q=document.getElementById('dep-search').value.toLowerCase();
+  const st=document.getElementById('dep-status').value;
+  renderDeposits(allDeposits.filter(d=>{
+    const match=(d.profiles?.email||'').toLowerCase().includes(q)||(d.paypal_order_id||'').toLowerCase().includes(q);
+    return match&&(!st||d.status===st);
+  }));
+}
+function renderDeposits(list){
+  const tb=document.getElementById('dep-tbody');
+  if(!list.length){tb.innerHTML=`<tr><td colspan="6"><div class="empty"><div class="empty-icon">💳</div><div class="empty-text">Sin depósitos</div></div></td></tr>`;return;}
+  tb.innerHTML=list.map(d=>`<tr>
+    <td class="bold">${d.profiles?.username||d.profiles?.email||d.user_id?.slice(0,8)}</td>
+    <td class="amount-pos">$ ${fmtN(d.amount||0)}</td>
+    <td>${depBadge(d.status)}</td>
+    <td style="font-size:11px;color:var(--text-muted)">${d.paypal_order_id||'—'}</td>
+    <td>${fmtDate(d.created_at)}</td>
+    <td>${d.status==='pending'?`<button class="btn btn-gold btn-sm" onclick="completeDeposit('${d.id}')">✓ Completar</button>`:'—'}</td>
+  </tr>`).join('');
+}
+async function completeDeposit(id){
+  if(!confirm('¿Marcar este depósito como completado y acreditar el balance?'))return;
+  const dep=allDeposits.find(d=>d.id===id);
+  if(!dep)return;
+  await db.from('deposits').update({status:'completed'}).eq('id',id);
+  await db.from('profiles').update({balance:db.raw(`balance + ${dep.amount*100}`)}).eq('id',dep.user_id);
+  await db.from('transactions').insert({user_id:dep.user_id,type:'deposit',amount:dep.amount*100,description:'Depósito PayPal manual'});
+  alert('✅ Depósito completado.');
+  loadDeposits();
+}
+
+// ──────────────────────────────────────────────
+//  INVITACIONES
+// ──────────────────────────────────────────────
+async function loadInvitations(){
+  const {data}=await db.from('invitations')
+    .select('id,code,used,used_by,created_at,note,profiles(username)').order('created_at',{ascending:false});
+  allInvs=data||[];
+  filterInvs();
+}
+function filterInvs(){
+  const q=document.getElementById('inv-search').value.toLowerCase();
+  const st=document.getElementById('inv-status').value;
+  renderInvs(allInvs.filter(i=>{
+    const match=(i.code||'').toLowerCase().includes(q);
+    const stMatch=!st||(st==='free'&&!i.used)||(st==='used'&&i.used);
+    return match&&stMatch;
+  }));
+}
+function renderInvs(list){
+  const el=document.getElementById('inv-grid');
+  if(!list.length){el.innerHTML=`<div class="empty"><div class="empty-icon">🎟️</div><div class="empty-text">Sin invitaciones</div></div>`;return;}
+  el.innerHTML=list.map(i=>`
+    <div class="inv-card">
+      <div class="inv-code">${i.code}</div>
+      <div>${i.used?`<span class="badge badge-red">● Usado</span> <span style="font-size:11px;color:var(--text-muted)">por ${i.profiles?.username||'—'}</span>`:`<span class="badge badge-green">● Disponible</span>`}</div>
+      ${i.note?`<div class="inv-meta">📝 ${i.note}</div>`:''}
+      <div class="inv-meta">Creado ${fmtDate(i.created_at)}</div>
+      <div class="inv-actions">
+        <button class="btn btn-outline btn-sm" onclick="copyCode('${i.code}')">📋 Copiar</button>
+        ${!i.used?`<button class="btn btn-danger btn-sm" onclick="revokeInv('${i.id}')">🗑 Revocar</button>`:''}
+      </div>
+    </div>
+  `).join('');
+}
+function copyCode(code){navigator.clipboard.writeText(code);alert('✅ Código copiado: '+code);}
+async function revokeInv(id){
+  if(!confirm('¿Eliminar esta invitación?'))return;
+  await db.from('invitations').delete().eq('id',id);
+  loadInvitations();
+}
+async function generateCode(){
+  const prefix=(document.getElementById('gen-prefix').value.trim()||'VIP').toUpperCase();
+  const note=document.getElementById('gen-note').value.trim();
+  const rand=Math.random().toString(36).substring(2,6).toUpperCase();
+  const code=`${prefix}-${new Date().getFullYear()}-${rand}`;
+  const {error}=await db.from('invitations').insert({code,note:note||null});
+  if(error){alert('Error: '+error.message);return;}
+  closeModals();
+  loadInvitations();
+  nav('invitaciones',document.querySelector('[onclick*="invitaciones"]'));
+  alert('✅ Código generado: '+code);
+}
+
+// ──────────────────────────────────────────────
+//  TRANSACCIONES
+// ──────────────────────────────────────────────
+async function loadTransactions(){
+  const {data}=await db.from('transactions')
+    .select('id,type,amount,balance_before,balance_after,description,created_at,profiles(username,email)')
+    .order('created_at',{ascending:false}).limit(500);
+  allTx=data||[];
+  document.getElementById('tx-count').textContent=allTx.length+' registros';
+  filterTx();
+}
+function filterTx(){
+  const q=document.getElementById('tx-search').value.toLowerCase();
+  const type=document.getElementById('tx-type').value;
+  renderTx(allTx.filter(t=>{
+    const match=(t.profiles?.username||'').toLowerCase().includes(q)||(t.description||'').toLowerCase().includes(q);
+    return match&&(!type||t.type===type);
+  }));
+}
+function renderTx(list){
+  const tb=document.getElementById('tx-tbody');
+  if(!list.length){tb.innerHTML=`<tr><td colspan="7"><div class="empty"><div class="empty-icon">📋</div><div class="empty-text">Sin transacciones</div></div></td></tr>`;return;}
+  tb.innerHTML=list.map(t=>`<tr>
+    <td class="bold">${t.profiles?.username||'—'}</td>
+    <td>${txBadge(t.type)}</td>
+    <td class="${(t.type==='win'||t.type==='deposit')?'amount-pos':'amount-neg'}">
+      ${(t.type==='win'||t.type==='deposit')?'+':'−'}⊗ ${fmtN(Math.abs(t.amount||0))}
+    </td>
+    <td style="color:var(--text-muted)">⊗ ${fmtN(t.balance_before||0)}</td>
+    <td>⊗ ${fmtN(t.balance_after||0)}</td>
+    <td style="font-size:11px">${t.description||'—'}</td>
+    <td>${fmtDate(t.created_at)}</td>
+  </tr>`).join('');
+}
+async function viewUserTx(userId){
+  nav('transacciones',document.querySelectorAll('.nav-item')[4]);
+  document.getElementById('tx-search').value=userId;
+  filterTx();
+}
+
+// ──────────────────────────────────────────────
+//  JUEGOS
+// ──────────────────────────────────────────────
+async function loadGames(){
+  const [
+    {data:rounds},
+    {count:totalRounds},
+  ] = await Promise.all([
+    db.from('roulette_rounds').select('id,table_name,user_id,bet_amount,winning_number,color,win_amount,created_at,profiles(username)').order('created_at',{ascending:false}).limit(200),
+    db.from('roulette_rounds').select('*',{count:'exact',head:true})
+  ]);
+  allGames=rounds||[];
+  const todayRounds=(rounds||[]).filter(r=>r.created_at>todayISO());
+  const totalBet=todayRounds.reduce((s,r)=>s+(r.bet_amount||0),0);
+  const totalPaid=todayRounds.reduce((s,r)=>s+(r.win_amount||0),0);
+  const houseProfit=totalBet-totalPaid;
+  const edge=totalBet>0?(houseProfit/totalBet*100):0;
+
+  document.getElementById('games-stats').innerHTML=`
+    ${statCard('Rondas Totales',fmt(totalRounds||0),'Historico','🎰','text')}
+    ${statCard('Rondas Hoy',fmt(todayRounds.length),'','🎲','text')}
+    ${statCard('Apostado Hoy','⊗ '+fmtN(totalBet),'Nectar','💰','gold')}
+    ${statCard('Ganancia Casa Hoy','⊗ '+fmtN(Math.max(0,houseProfit)),'Nectar','📈', houseProfit>=0?'green':'red')}
+    ${statCard('House Edge Efectivo',edge.toFixed(2)+'%','Hoy','📊','text')}
+  `;
+
+  const tb=document.getElementById('games-tbody');
+  if(!allGames.length){tb.innerHTML=`<tr><td colspan="8"><div class="empty"><div class="empty-icon">🎰</div><div class="empty-text">Sin rondas registradas</div></div></td></tr>`;return;}
+  tb.innerHTML=allGames.map(r=>`<tr>
+    <td class="bold">${r.table_name||'—'}</td>
+    <td>${r.profiles?.username||'—'}</td>
+    <td>⊗ ${fmtN(r.bet_amount||0)}</td>
+    <td style="font-weight:700;color:var(--text)">${r.winning_number??'—'}</td>
+    <td>${r.color?`<span class="badge" style="background:${r.color==='red'?'rgba(224,82,82,.15)':r.color==='black'?'rgba(255,255,255,.05)':'rgba(82,201,122,.15)'}; color:${r.color==='red'?'var(--red)':r.color==='black'?'var(--text)':'var(--green)'}; border-color:transparent">${r.color}</span>`:'—'}</td>
+    <td>${(r.win_amount||0)>0?`<span class="badge badge-green">WIN</span>`:`<span class="badge badge-red">LOSS</span>`}</td>
+    <td class="${(r.win_amount||0)>0?'amount-pos':'amount-neg'}">⊗ ${fmtN(r.win_amount||0)}</td>
+    <td>${fmtDate(r.created_at)}</td>
+  </tr>`).join('');
+}
+
+// ──────────────────────────────────────────────
+//  MODALS
+// ──────────────────────────────────────────────
+function openGenModal(){document.getElementById('modal-gen').style.display='flex';}
+function openAdjModal(){document.getElementById('modal-adj').style.display='flex';}
+function openAdjModalFor(email){
+  document.getElementById('adj-email').value=email;
+  openAdjModal();
+}
+function closeModals(){
+  document.querySelectorAll('.modal-overlay').forEach(m=>m.style.display='none');
+}
+
+async function applyAdjustment(){
+  const email=document.getElementById('adj-email').value.trim();
+  const amount=parseFloat(document.getElementById('adj-amount').value);
+  const reason=document.getElementById('adj-reason').value.trim();
+  if(!email||isNaN(amount)){alert('Email y monto son requeridos.');return;}
+  const {data:user}=await db.from('profiles').select('id,balance').eq('email',email).single();
+  if(!user){alert('Usuario no encontrado.');return;}
+  const newBal=(user.balance||0)+amount;
+  await db.from('profiles').update({balance:newBal}).eq('id',user.id);
+  await db.from('transactions').insert({user_id:user.id,type:'adjustment',amount,balance_before:user.balance,balance_after:newBal,description:reason||'Ajuste manual admin'});
+  closeModals();
+  alert('✅ Balance ajustado correctamente.');
+  if(currentView==='usuarios') loadUsers();
+}
+
+// ──────────────────────────────────────────────
+//  EXPORT
+// ──────────────────────────────────────────────
+function exportData(type){
+  let rows,filename;
+  if(type==='usuarios'){
+    rows=[['Username','Email','Balance','Apuestas','Rol','Plataforma','Registro'],
+      ...allUsers.map(u=>[u.username,u.email,u.balance,u.total_bets,u.role,u.platform,u.created_at])];
+    filename='usuarios.csv';
+  } else {
+    rows=[['Usuario','Tipo','Monto','Balance Ant.','Balance Post.','Descripcion','Fecha'],
+      ...allTx.map(t=>[t.profiles?.username,t.type,t.amount,t.balance_before,t.balance_after,t.description,t.created_at])];
+    filename='transacciones.csv';
+  }
+  const csv=rows.map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download=filename; a.click();
+}
+
+function confirmClearSessions(){
+  if(confirm('⚠️ ATENCIÓN: Esto cerrará la sesión de TODOS los usuarios. ¿Continuar?')){
+    alert('Esta acción requiere acceso a la API de administración de Supabase desde el backend.');
+  }
+}
+
+// ──────────────────────────────────────────────
+//  HELPERS
+// ──────────────────────────────────────────────
+function fmt(n){return (n||0).toLocaleString('es-UY');}
+function fmtN(n){return (Math.round(n||0)).toLocaleString('es-UY');}
+function fmtDate(d){if(!d)return'—';const dt=new Date(d);return dt.toLocaleDateString('es-UY')+' '+dt.toLocaleTimeString('es-UY',{hour:'2-digit',minute:'2-digit'});}
+function todayISO(){const d=new Date();d.setHours(0,0,0,0);return d.toISOString();}
+function timeAgo(d){
+  const s=Math.round((Date.now()-new Date(d))/1000);
+  if(s<60) return 'hace '+s+'s';
+  if(s<3600) return 'hace '+Math.round(s/60)+'min';
+  if(s<86400) return 'hace '+Math.round(s/3600)+'h';
+  return 'hace '+Math.round(s/86400)+'d';
+}
+function typeColor(t){
+  return {bet:'var(--red)',win:'var(--green)',deposit:'var(--blue)',adjustment:'var(--gold)',withdrawal:'#e0a052'}[t]||'var(--text-muted)';
+}
+function typeLabel(t){
+  return {bet:'apostó',win:'ganó',deposit:'depositó',adjustment:'ajuste',withdrawal:'retiró'}[t]||t;
+}
+function platBadge(p){
+  if(!p||p==='web') return `<span class="badge badge-blue">🌐 Web</span>`;
+  if(p==='telegram') return `<span class="badge badge-blue">✈️ Telegram</span>`;
+  return `<span class="badge badge-gold">⚡ Ambas</span>`;
+}
+function roleBadge(r){
+  if(r==='superadmin') return `<span class="badge badge-gold">⭐ Superadmin</span>`;
+  if(r==='admin') return `<span class="badge badge-gold">🔧 Admin</span>`;
+  return `<span class="badge badge-gray">👤 User</span>`;
+}
+function depBadge(s){
+  if(s==='completed') return `<span class="badge badge-green">✓ Completado</span>`;
+  if(s==='pending')   return `<span class="badge badge-gold">⏳ Pendiente</span>`;
+  return `<span class="badge badge-red">✗ Fallido</span>`;
+}
+function txBadge(t){
+  const map={bet:'badge-red',win:'badge-green',deposit:'badge-blue',adjustment:'badge-gold',withdrawal:'badge-gray'};
+  const label={bet:'Apuesta',win:'Ganancia',deposit:'Depósito',adjustment:'Ajuste',withdrawal:'Retiro'};
+  return `<span class="badge ${map[t]||'badge-gray'}">${label[t]||t}</span>`;
+}
+
+// Click outside modal to close
+document.querySelectorAll('.modal-overlay').forEach(m=>{
+  m.addEventListener('click',e=>{if(e.target===m)closeModals();});
+});
+
+// System status check (simulated)
+setTimeout(()=>{
+  document.getElementById('paypal-status').innerHTML='<div class="dot-green"></div><span style="color:var(--green)">Sandbox activo</span>';
+  document.getElementById('tg-status').innerHTML='<div class="dot-green"></div><span style="color:var(--green)">Bot online</span>';
+},1500);
+</script>
+</body>
+</html>

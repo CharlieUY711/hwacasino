@@ -1,0 +1,11 @@
+SYSTEM DUMP COMPLETO
+
+Files generated:
+- structure.txt
+- api_routes.txt
+- admin.txt
+- auth_db_usage.txt
+- roulette.txt
+- env_files.txt
+
+Base path: C:\Carlos\HWA\hwacasino

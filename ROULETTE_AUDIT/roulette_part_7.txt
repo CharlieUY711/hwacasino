@@ -1,0 +1,84 @@
+==============================
+FILE: roulette_part_7
+LINES: 480 - 560
+==============================
+          background-size: 200% 100%;
+          transition: all 0.2s ease;
+          cursor: pointer;
+        }
+        .apostar-btn:hover:not(:disabled) { animation:shimmer 1s linear infinite; transform:scale(1.02); box-shadow:0 0 40px rgba(212,175,55,0.5); }
+        .apostar-btn:disabled { opacity:0.5; cursor:not-allowed; }
+        .apostar-btn.waiting { background: rgba(212,175,55,0.15); color: rgba(212,175,55,0.6); }
+
+        .action-btn { transition:all 0.15s ease; cursor:pointer; }
+        .action-btn:hover { background:rgba(255,255,255,0.1) !important; }
+        .tab-btn { transition:all 0.2s ease; cursor:pointer; }
+        .result-overlay { animation:resultIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both; }
+        .number-badge { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.6rem; font-weight:700; flex-shrink:0; }
+        .win-cell { animation:winPulse 1.2s ease-in-out infinite; }
+        .countdown-urgent { animation:countdownPulse 0.8s ease-in-out infinite; }
+      `}</style>
+
+      <main style={{ minHeight: '100dvh', background: DARK, fontFamily: "'Montserrat', sans-serif", maxWidth: '480px', margin: '0 auto', paddingBottom: '80px' }}>
+
+
+        {/* --- HEADER --- */}
+        <div style={{ padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(212,175,55,0.12)', background: 'rgba(10,10,10,0.95)', position: 'sticky', top: 0, zIndex: 90, gap: '8px' }}>
+
+          {/* Volver */}
+          <button onClick={() => router.push('/roulette')} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '0.5rem', letterSpacing: '0.15em', fontFamily: "'Montserrat', sans-serif", display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', flexShrink: 0 }}>
+            {String.fromCharCode(8592)} Volver
+          </button>
+          {/* Logo + Titulo */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+            <img src='/logo-dorado.jpg' alt='HWA' style={{ height: '22px', width: 'auto' }} />
+            <span style={{ fontSize: '0.5rem', letterSpacing: '0.25em', color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>RULETA</span>
+          </div>
+
+          {/* Usuario + Balance */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginLeft: 'auto' }}>
+            {showResult && resultNumber !== null ? (
+              <span style={{ fontSize: '0.5rem', color: totalWon ? GOLD : '#f87171', fontWeight: 700, letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
+                {resultNumber} · {totalWon ? '+' + totalPayout!.toLocaleString('es-UY') : '-' + bets.reduce((s,b)=>s+b.amount,0).toLocaleString('es-UY')} <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic' }}>N</span>
+              </span>
+            ) : totalBet > 0 ? (
+              <span style={{ fontSize: '0.5rem', color: '#f87171', fontWeight: 700, letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>Apuesta: {totalBet.toLocaleString('es-UY')} <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic' }}>N</span></span>
+            ) : null}
+            <span style={{ fontSize: '0.5rem', color: 'rgba(255,255,255,0.7)', fontWeight: 700, letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>{username}</span>
+            <span style={{ fontSize: '0.5rem', color: GOLD, fontWeight: 700, letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>{balance.toLocaleString('es-UY')} <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic' }}>N</span></span>
+          </div>
+        </div>
+        {/* --- RUEDA SVG --- */}
+        <div style={{ background: "radial-gradient(ellipse at center, #1a0e00 0%, #0a0a0a 70%)", padding: "20px 12px 20px", display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <div style={{ position: 'relative', width: 280, height: 280 }}>
+            <svg width="280" height="280" viewBox="0 0 240 240" style={{ overflow: 'visible' }}>
+              <defs>
+                <radialGradient id="wheelGlow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="rgba(212,175,55,0.1)" />
+                  <stop offset="100%" stopColor="rgba(0,0,0,0)" />
+                </radialGradient>
+                <filter id="shadow">
+                  <feDropShadow dx="0" dy="4" stdDeviation="12" floodColor="rgba(0,0,0,0.8)" />
+                </filter>
+              </defs>
+              <circle cx="120" cy="120" r="118" fill="#1a1200" stroke={GOLD} strokeWidth="2.5" />
+              <circle cx="120" cy="120" r="112" fill="none" stroke="rgba(212,175,55,0.3)" strokeWidth="1" />
+              <g ref={wheelRef} style={{ transformOrigin: '120px 120px', transform: 'rotate(-90deg)' }}>
+                {WHEEL_ORDER.map((num, i) => {
+                  const angle = (i / 37) * 360
+                  const startAngle = (angle - 360/37/2) * Math.PI / 180
+                  const endAngle   = (angle + 360/37/2) * Math.PI / 180
+                  const r1 = 108, r2 = 20
+                  const x1 = 120 + r1 * Math.cos(startAngle), y1 = 120 + r1 * Math.sin(startAngle)
+                  const x2 = 120 + r1 * Math.cos(endAngle),   y2 = 120 + r1 * Math.sin(endAngle)
+                  const x3 = 120 + r2 * Math.cos(endAngle),   y3 = 120 + r2 * Math.sin(endAngle)
+                  const x4 = 120 + r2 * Math.cos(startAngle), y4 = 120 + r2 * Math.sin(startAngle)
+                  const c = getColor(num)
+                  const fill = c === 'green' ? '#0d5c1e' : c === 'red' ? '#8B0000' : '#111'
+                  const midAngle = angle * Math.PI / 180
+                  const rText = 97
+                  const tx = Math.round((120 + rText * Math.cos(midAngle)) * 1000) / 1000
+                  const ty = Math.round((120 + rText * Math.sin(midAngle)) * 1000) / 1000
+                  return (
+                    <g key={num}>

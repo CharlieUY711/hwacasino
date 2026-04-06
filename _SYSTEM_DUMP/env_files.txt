@@ -1,0 +1,5 @@
+
+FullName
+--------
+C:\Carlos\HWA\hwacasino\.env.local
+
