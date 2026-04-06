@@ -160,12 +160,37 @@ export default function RoulettePlayPage() {
   // Sincronizar lastBets a ref para acceso desde timeout
   useEffect(() => { lastBetsRef.current = lastBets }, [lastBets])
 
-  // Auth
+  // Auth — soporta login via tg_token (Telegram WebApp) o sesion Supabase normal
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    async function initAuth() {
+      const params = new URLSearchParams(window.location.search)
+      const tgToken = params.get('tg_token')
+
+      if (tgToken) {
+        // Limpiar token de la URL sin recargar
+        const cleanUrl = window.location.pathname + window.location.search.replace(/[?&]tg_token=[^&]*/g, '').replace(/^&/, '?')
+        window.history.replaceState({}, '', cleanUrl)
+
+        try {
+          const res = await fetch(`/api/telegram/auth?token=${tgToken}`)
+          if (!res.ok) { router.replace('/'); return }
+          const { access_token, refresh_token } = await res.json()
+          const { data: { user }, error } = await supabase.auth.setSession({ access_token, refresh_token })
+          if (error || !user) { router.replace('/'); return }
+          setUserId(user.id)
+          return
+        } catch {
+          router.replace('/')
+          return
+        }
+      }
+
+      // Auth normal
+      const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.replace('/'); return }
       setUserId(user.id)
-    })
+    }
+    initAuth()
   }, [router])
 
   // --- PRESENCIA REALTIME ---
