@@ -181,7 +181,6 @@ export default function RoulettePlayPage() {
 
         setSecondsRemaining(data.seconds_remaining ?? 0)
         setRoundStatus(data.status)
-        setOnlineCount(data.online_count ?? 1)
 
         // Nueva ronda detectada
         if (data.round_id !== prevRoundIdRef.current) {
@@ -418,7 +417,7 @@ export default function RoulettePlayPage() {
 
 
         {/* --- HEADER --- */}
-        <div style={{ padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(212,175,55,0.12)', background: 'rgba(10,10,10,0.95)', position: 'sticky', top: 0, zIndex: 90, gap: '8px' }}>
+        <div style={{ padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(212,175,55,0.12)', background: 'rgba(10,10,10,0.95)', position: 'sticky', top: 0, zIndex: 90, gap: '8px', position: 'relative' }}>
 
           {/* Volver */}
           <button onClick={() => router.push('/roulette')} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '0.5rem', letterSpacing: '0.15em', fontFamily: "'Montserrat', sans-serif", display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', flexShrink: 0 }}>
@@ -444,10 +443,56 @@ export default function RoulettePlayPage() {
           </div>
         </div>
         {/* --- RUEDA SVG --- */}
-        <div style={{ background: "radial-gradient(ellipse at center, #1a0e00 0%, #0a0a0a 70%)", padding: "16px 12px", display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <div style={{ background: "radial-gradient(ellipse at center, #1a0e00 0%, #0a0a0a 70%)", padding: "16px 12px", display: "flex", flexDirection: "row", alignItems: "flex-start", justifyContent: "center", gap: "8px" }}>
+          {/* --- PANEL CALIENTES / FRIOS / HISTORIAL --- */}
+
+          <div style={{ display: "flex", flexDirection: "row", gap: "6px", alignSelf: "flex-start", marginTop: "4px" }}>
+          {/* --- FICHAS VERTICAL DERECHA --- */}
+          {/* --- FICHAS VERTICAL DERECHA --- */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "4px", alignSelf: "flex-start", marginTop: "4px" }}>
+            {CHIP_DEFS.map(chip => {
+              const isActive = selectedChip.value === chip.value
+              const fontSize = chip.label.length > 2 ? "0.45rem" : "0.6rem"
+              return (
+                <button key={chip.value} className={`chip-btn${isActive ? " active" : ""}`}
+                  onClick={() => setSelectedChip(chip)}
+                  style={{ width: 26, height: 26, borderRadius: "50%", background: isActive ? `radial-gradient(circle at 35% 35%, #f5d060, ${GOLD} 50%, #a07820)` : `radial-gradient(circle at 35% 35%, #e8c540, ${GOLD} 55%, #8a6510)`, border: `2px dashed ${isActive ? "#fff" : CHIP_BORDER}`, color: chip.color, fontFamily: "Montserrat, sans-serif", fontWeight: 900, fontSize, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: isActive ? `0 0 10px rgba(212,175,55,0.8)` : `0 2px 6px rgba(0,0,0,0.6)`, cursor: "pointer" }}>
+                  {chip.label}
+                </button>
+              )
+            })}
+          </div>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+              <span style={{ fontSize: "0.3rem", letterSpacing: "0.15em", color: GOLD, marginBottom: "2px" }}>🔥</span>
+              {MOCK_HOT.map((n) => (
+                <div key={n} className="number-badge" style={{ background: colorHex(getColor(n)), border: "1px solid rgba(255,255,255,0.15)", width: "22px", height: "22px", fontSize: "0.45rem" }}>
+                  <span style={{ color: "#fff", fontWeight: 700 }}>{n}</span>
+                </div>
+              ))}
+            </div>
+            {/* FRIOS */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+              <span style={{ fontSize: "0.3rem", letterSpacing: "0.15em", color: "#4B9CD3", marginBottom: "2px" }}>❄️</span>
+              {MOCK_COLD.map((n) => (
+                <div key={n} className="number-badge" style={{ background: colorHex(getColor(n)), border: "1px solid rgba(255,255,255,0.1)", width: "22px", height: "22px", fontSize: "0.45rem", opacity: 0.8 }}>
+                  <span style={{ color: "#fff", fontWeight: 700 }}>{n}</span>
+                </div>
+              ))}
+            </div>
+            {/* HISTORIAL */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+              <span style={{ fontSize: "0.3rem", letterSpacing: "0.15em", color: "rgba(255,255,255,0.3)", marginBottom: "2px" }}>📋</span>
+              {history.slice(0, 8).map((n, i) => (
+                <div key={i} className="number-badge" style={{ background: colorHex(getColor(n)), border: "1px solid rgba(255,255,255,0.1)", width: "22px", height: "22px", fontSize: "0.45rem", opacity: 1 - i * 0.08 }}>
+                  <span style={{ color: "#fff", fontWeight: 700 }}>{n}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* Rueda centrada */}
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <div style={{ position: 'relative', width: 280, height: 280 }}>
-            <svg width="280" height="280" viewBox="0 0 240 240" style={{ overflow: 'visible' }}>
+          <div style={{ position: 'relative', width: 240, height: 240 }}>
+            <svg width="240" height="240" viewBox="0 0 240 240" style={{ overflow: 'visible' }}>
               <defs>
                 <radialGradient id="wheelGlow" cx="50%" cy="50%" r="50%">
                   <stop offset="0%" stopColor="rgba(212,175,55,0.1)" />
@@ -524,6 +569,7 @@ export default function RoulettePlayPage() {
               )}
             </div>
 
+
             {/* Estado de la apuesta del usuario */}
             {hasBetThisRound && (
               <div style={{ textAlign: 'center' }}>
@@ -531,45 +577,7 @@ export default function RoulettePlayPage() {
               </div>
             )}
           </div>
-          </div>{/* fin rueda */}
-        </div>{/* fin zona rueda */}
-
-        {/* --- FICHAS HORIZONTALES --- */}
-        <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", gap: "8px", padding: "10px 16px 6px", background: DARK }}>
-          {CHIP_DEFS.map(chip => {
-            const isActive = selectedChip.value === chip.value
-            const fontSize = chip.label.length > 2 ? "0.45rem" : "0.6rem"
-            return (
-              <button key={chip.value} className={`chip-btn${isActive ? " active" : ""}`}
-                onClick={() => setSelectedChip(chip)}
-                style={{ width: 34, height: 34, borderRadius: "50%", background: isActive ? `radial-gradient(circle at 35% 35%, #f5d060, ${GOLD} 50%, #a07820)` : `radial-gradient(circle at 35% 35%, #e8c540, ${GOLD} 55%, #8a6510)`, border: `2px dashed ${isActive ? "#fff" : CHIP_BORDER}`, color: chip.color, fontFamily: "Montserrat, sans-serif", fontWeight: 900, fontSize, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: isActive ? `0 0 10px rgba(212,175,55,0.8)` : `0 2px 6px rgba(0,0,0,0.6)`, cursor: "pointer" }}>
-                {chip.label}
-              </button>
-            )
-          })}
         </div>
-
-        {/* --- BOTONERA: ACCIONES + GIRAR (encima del paño) --- */}
-        <div style={{ display: 'flex', gap: '6px', alignItems: 'stretch', padding: '0 16px 8px' }}>
-          {error && <p style={{ textAlign: 'center', color: '#f87171', fontSize: '0.55rem', letterSpacing: '0.1em' }}>{error}</p>}
-          {[
-            { label: 'LIMPIAR', action: clearBets  },
-            { label: 'BORRAR',  action: removeLast },
-            { label: 'DOBLAR',  action: doubleBets },
-            { label: 'REPETIR', action: repeatBets },
-          ].map(btn => (
-            <button key={btn.label} className="action-btn" onClick={btn.action}
-              style={{ flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '3px', padding: '8px 2px', color: 'rgba(255,255,255,0.5)', fontFamily: "'Montserrat', sans-serif", fontWeight: 700, fontSize: '0.42rem', letterSpacing: '0.15em', cursor: 'pointer', opacity: hasBetThisRound ? 0.4 : 1 }}>
-              {btn.label}
-            </button>
-          ))}
-          <button
-            className={`apostar-btn${(waitingForResult || hasBetThisRound) ? ' waiting' : ''}`}
-            onClick={placeBets}
-            disabled={!canBet}
-            style={{ flex: '0 0 72px', border: '1px solid rgba(212,175,55,0.3)', borderRadius: '4px', color: (waitingForResult || hasBetThisRound) ? 'rgba(212,175,55,0.6)' : '#1a0e00', fontFamily: "'Montserrat', sans-serif", fontWeight: 900, fontSize: '0.6rem', letterSpacing: '0.15em', boxShadow: canBet ? '0 0 30px rgba(212,175,55,0.35)' : 'none' }}>
-            {btnLabel}
-          </button>
         </div>
 
 
@@ -720,40 +728,35 @@ export default function RoulettePlayPage() {
           </div>
         </div>
 
-        {/* --- HISTÓRICOS + CALIENTES/FRÍOS debajo del paño --- */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "5px", padding: "8px 16px 16px" }}>
+        {/* --- FICHAS NECTAR --- */}
 
-          {/* LÍNEA 1: HISTORIAL — todo el ancho */}
-          <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "3px", flexWrap: "nowrap", overflow: "hidden" }}>
-            <span style={{ fontSize: "0.55rem", marginRight: "3px", flexShrink: 0 }}>📋</span>
-            {history.slice(0, 20).map((n, i) => (
-              <div key={i} className="number-badge" style={{ background: colorHex(getColor(n)), border: "1px solid rgba(255,255,255,0.1)", width: "20px", height: "20px", fontSize: "0.38rem", flexShrink: 0, opacity: 1 - i * 0.04 }}>
-                <span style={{ color: "#fff", fontWeight: 700 }}>{n}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* LÍNEA 2: CALIENTES izquierda | FRÍOS derecha */}
-          <div style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-            <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "4px" }}>
-              <span style={{ fontSize: "0.55rem", marginRight: "2px" }}>🔥</span>
-              {MOCK_HOT.map((n) => (
-                <div key={n} className="number-badge" style={{ background: colorHex(getColor(n)), border: "1px solid rgba(255,255,255,0.15)", width: "22px", height: "22px", fontSize: "0.45rem" }}>
-                  <span style={{ color: "#fff", fontWeight: 700 }}>{n}</span>
-                </div>
+        {/* --- ACCIONES + APOSTAR --- */}
+        <div style={{ padding: '0 16px 16px' }}>
+          {error && <p style={{ textAlign: 'center', color: '#f87171', fontSize: '0.55rem', letterSpacing: '0.1em', marginBottom: '10px' }}>{error}</p>}
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'stretch' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', flex: 1 }}>
+              {[
+                { label: 'BORRAR',  action: removeLast },
+                { label: 'LIMPIAR', action: clearBets  },
+                { label: 'REPETIR', action: repeatBets },
+                { label: 'DOBLAR',  action: doubleBets },
+              ].map(btn => (
+                <button key={btn.label} className="action-btn" onClick={btn.action}
+                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '3px', padding: '10px 4px', color: 'rgba(255,255,255,0.5)', fontFamily: "'Montserrat', sans-serif", fontWeight: 700, fontSize: '0.45rem', letterSpacing: '0.2em', cursor: 'pointer', opacity: hasBetThisRound ? 0.4 : 1 }}>
+                  {btn.label}
+                </button>
               ))}
             </div>
-            <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "4px" }}>
-              {MOCK_COLD.map((n) => (
-                <div key={n} className="number-badge" style={{ background: colorHex(getColor(n)), border: "1px solid rgba(255,255,255,0.1)", width: "22px", height: "22px", fontSize: "0.45rem", opacity: 0.8 }}>
-                  <span style={{ color: "#fff", fontWeight: 700 }}>{n}</span>
-                </div>
-              ))}
-              <span style={{ fontSize: "0.55rem", marginLeft: "2px" }}>❄️</span>
-            </div>
+            <button
+              className={`apostar-btn${(waitingForResult || hasBetThisRound) ? ' waiting' : ''}`}
+              onClick={placeBets}
+              disabled={!canBet}
+              style={{ flex: '0 0 100px', border: '1px solid rgba(212,175,55,0.3)', borderRadius: '4px', color: (waitingForResult || hasBetThisRound) ? 'rgba(212,175,55,0.6)' : '#1a0e00', fontFamily: "'Montserrat', sans-serif", fontWeight: 900, fontSize: '0.65rem', letterSpacing: '0.15em', boxShadow: canBet ? '0 0 30px rgba(212,175,55,0.35)' : 'none' }}>
+              {btnLabel}
+            </button>
           </div>
-
         </div>
+
 
       </main>
     </>
