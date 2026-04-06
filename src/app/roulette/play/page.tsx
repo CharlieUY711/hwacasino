@@ -443,7 +443,41 @@ export default function RoulettePlayPage() {
           </div>
         </div>
         {/* --- RUEDA SVG --- */}
-        <div style={{ background: 'radial-gradient(ellipse at center, #1a0e00 0%, #0a0a0a 70%)', padding: '24px 20px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div style={{ background: "radial-gradient(ellipse at center, #1a0e00 0%, #0a0a0a 70%)", padding: "16px 12px", display: "flex", flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between" }}>
+
+          {/* --- ZONA IZQUIERDA: PANEL CALIENTES / FRIOS / HISTORIAL --- */}
+          <div style={{ display: "flex", flexDirection: "row", gap: "6px", alignSelf: "flex-start" }}>
+            {/* CALIENTES */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+              <span style={{ fontSize: "0.3rem", letterSpacing: "0.15em", color: GOLD, marginBottom: "2px" }}>🔥</span>
+              {MOCK_HOT.map((n) => (
+                <div key={n} className="number-badge" style={{ background: colorHex(getColor(n)), border: "1px solid rgba(255,255,255,0.15)", width: "22px", height: "22px", fontSize: "0.45rem" }}>
+                  <span style={{ color: "#fff", fontWeight: 700 }}>{n}</span>
+                </div>
+              ))}
+            </div>
+            {/* FRIOS */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+              <span style={{ fontSize: "0.3rem", letterSpacing: "0.15em", color: "#4B9CD3", marginBottom: "2px" }}>❄️</span>
+              {MOCK_COLD.map((n) => (
+                <div key={n} className="number-badge" style={{ background: colorHex(getColor(n)), border: "1px solid rgba(255,255,255,0.1)", width: "22px", height: "22px", fontSize: "0.45rem", opacity: 0.8 }}>
+                  <span style={{ color: "#fff", fontWeight: 700 }}>{n}</span>
+                </div>
+              ))}
+            </div>
+            {/* HISTORIAL */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+              <span style={{ fontSize: "0.3rem", letterSpacing: "0.15em", color: "rgba(255,255,255,0.3)", marginBottom: "2px" }}>📋</span>
+              {history.slice(0, 8).map((n, i) => (
+                <div key={i} className="number-badge" style={{ background: colorHex(getColor(n)), border: "1px solid rgba(255,255,255,0.1)", width: "22px", height: "22px", fontSize: "0.45rem", opacity: 1 - i * 0.08 }}>
+                  <span style={{ color: "#fff", fontWeight: 700 }}>{n}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* --- ZONA CENTRAL: RUEDA --- */}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
           <div style={{ position: 'relative', width: 240, height: 240 }}>
             <svg width="240" height="240" viewBox="0 0 240 240" style={{ overflow: 'visible' }}>
               <defs>
@@ -522,7 +556,6 @@ export default function RoulettePlayPage() {
               )}
             </div>
 
-
             {/* Estado de la apuesta del usuario */}
             {hasBetThisRound && (
               <div style={{ textAlign: 'center' }}>
@@ -530,60 +563,25 @@ export default function RoulettePlayPage() {
               </div>
             )}
           </div>
-        </div>
+          </div>{/* fin zona central */}
 
-        {/* --- PANEL CALIENTES / FRIOS / HISTORIAL --- */}
-        <div style={{ margin: '0 16px 16px', background: '#111', border: '1px solid rgba(212,175,55,0.1)', borderRadius: '6px', overflow: 'hidden' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', borderBottom: '1px solid rgba(212,175,55,0.1)' }}>
-            {(['hot', 'cold', 'history'] as const).map(tab => (
-              <button key={tab} className="tab-btn" onClick={() => setActiveTab(tab)}
-                style={{ background: activeTab === tab ? 'rgba(212,175,55,0.1)' : 'transparent', border: 'none', borderBottom: activeTab === tab ? `2px solid ${GOLD}` : '2px solid transparent', padding: '10px 0', fontSize: '0.42rem', letterSpacing: '0.2em', color: activeTab === tab ? GOLD : 'rgba(255,255,255,0.3)', fontWeight: 600, fontFamily: "'Montserrat', sans-serif", cursor: 'pointer', textTransform: 'uppercase' }}>
-                {tab === 'hot' ? '\uD83D\uDD25 CALIENTES' : tab === 'cold' ? '\u2744\uFE0F FR\u00CDOS' : '\uD83D\uDCCB HISTORIAL'}
-              </button>
-            ))}
+          {/* --- ZONA DERECHA: FICHAS --- */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "4px", alignSelf: "flex-start" }}>
+            {CHIP_DEFS.map(chip => {
+              const isActive = selectedChip.value === chip.value
+              const fontSize = chip.label.length > 2 ? "0.45rem" : "0.6rem"
+              return (
+                <button key={chip.value} className={`chip-btn${isActive ? " active" : ""}`}
+                  onClick={() => setSelectedChip(chip)}
+                  style={{ width: 26, height: 26, borderRadius: "50%", background: isActive ? `radial-gradient(circle at 35% 35%, #f5d060, ${GOLD} 50%, #a07820)` : `radial-gradient(circle at 35% 35%, #e8c540, ${GOLD} 55%, #8a6510)`, border: `2px dashed ${isActive ? "#fff" : CHIP_BORDER}`, color: chip.color, fontFamily: "Montserrat, sans-serif", fontWeight: 900, fontSize, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: isActive ? `0 0 10px rgba(212,175,55,0.8)` : `0 2px 6px rgba(0,0,0,0.6)`, cursor: "pointer" }}>
+                  {chip.label}
+                </button>
+              )
+            })}
           </div>
-          <div style={{ padding: '12px 14px' }}>
-            {activeTab === 'hot' && (
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-                {MOCK_HOT.map((n, i) => (
-                  <div key={n} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                    <div className="number-badge" style={{ background: colorHex(getColor(n)), border: '1px solid rgba(255,255,255,0.15)' }}>
-                      <span style={{ color: '#fff', fontSize: '0.6rem', fontWeight: 700 }}>{n}</span>
-                    </div>
-                    <div style={{ height: '3px', width: 28, background: 'rgba(255,255,255,0.08)', borderRadius: '2px', overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${100 - i * 18}%`, background: GOLD, borderRadius: '2px' }} />
-                    </div>
-                  </div>
-                ))}
-                <p style={{ fontSize: '0.42rem', color: 'rgba(255,255,255,0.2)', letterSpacing: '0.1em', marginLeft: '4px' }}>\u00FAltimas 50 rondas</p>
-              </div>
-            )}
-            {activeTab === 'cold' && (
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-                {MOCK_COLD.map((n, i) => (
-                  <div key={n} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                    <div className="number-badge" style={{ background: colorHex(getColor(n)), border: '1px solid rgba(255,255,255,0.1)', opacity: 0.7 }}>
-                      <span style={{ color: '#fff', fontSize: '0.6rem', fontWeight: 700 }}>{n}</span>
-                    </div>
-                    <div style={{ height: '3px', width: 28, background: 'rgba(255,255,255,0.08)', borderRadius: '2px', overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${20 + i * 10}%`, background: '#4B9CD3', borderRadius: '2px' }} />
-                    </div>
-                  </div>
-                ))}
-                <p style={{ fontSize: '0.42rem', color: 'rgba(255,255,255,0.2)', letterSpacing: '0.1em', marginLeft: '4px' }}>sin salir hace m\u00e1s tiempo</p>
-              </div>
-            )}
-            {activeTab === 'history' && (
-              <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
-                {history.slice(0, 20).map((n, i) => (
-                  <div key={i} className="number-badge" style={{ background: colorHex(getColor(n)), border: '1px solid rgba(255,255,255,0.1)', opacity: 1 - i * 0.03 }}>
-                    <span style={{ color: '#fff', fontSize: '0.55rem', fontWeight: 700 }}>{n}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+
+        </div>{/* fin contenedor 3 zonas */}
+
 
         {/* === MESA DE APUESTAS === */}
         <div style={{ margin: '0 16px 16px', overflowX: 'auto' }}>
@@ -733,22 +731,6 @@ export default function RoulettePlayPage() {
         </div>
 
         {/* --- FICHAS NECTAR --- */}
-        <div style={{ padding: '0 16px 12px' }}>
-          <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', paddingBottom: '8px', paddingTop: '4px' }}>
-            {CHIP_DEFS.map(chip => {
-              const isActive = selectedChip.value === chip.value
-              const chars = chip.label.length
-              const fontSize = chars >= 3 ? '0.65rem' : '0.85rem'
-              return (
-                <button key={chip.value} className={`chip-btn${isActive ? ' active' : ''}`}
-                  onClick={() => setSelectedChip(chip)}
-                  style={{ flexShrink: 0, width: 44, height: 44, borderRadius: '50%', background: isActive ? `radial-gradient(circle at 35% 35%, #f5d060, ${GOLD} 50%, #a07820)` : `radial-gradient(circle at 35% 35%, #e8c540, ${GOLD} 55%, #8a6510)`, border: `2.5px dashed ${isActive ? '#fff' : CHIP_BORDER}`, color: chip.color, fontFamily: "'Montserrat', sans-serif", fontWeight: 900, fontSize, letterSpacing: chars >= 3 ? '-0.03em' : '0', display: 'flex', alignItems: 'center', justifyContent: 'center', outline: isActive ? `2px solid ${GOLD}` : 'none', outlineOffset: '2px', boxShadow: isActive ? `0 0 14px rgba(212,175,55,0.8), inset 0 -2px 4px rgba(0,0,0,0.3)` : `0 2px 8px rgba(0,0,0,0.6), inset 0 -2px 4px rgba(0,0,0,0.2)`, transition: 'all 0.15s ease', cursor: 'pointer' }}>
-                  {chip.label}
-                </button>
-              )
-            })}
-          </div>
-        </div>
 
         {/* --- ACCIONES + APOSTAR --- */}
         <div style={{ padding: '0 16px 16px' }}>
