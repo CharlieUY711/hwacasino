@@ -145,6 +145,7 @@ export default function RoulettePlayPage() {
   const [roundStatus, setRoundStatus]         = useState<'betting' | 'spinning' | 'closed'>('betting')
   const [secondsRemaining, setSecondsRemaining] = useState(40)
   const [hasBetThisRound, setHasBetThisRound] = useState(false)
+  const [onlineCount, setOnlineCount] = useState(1)
   const [waitingForResult, setWaitingForResult] = useState(false)
 
   const wheelRef       = useRef<SVGGElement>(null)
@@ -293,8 +294,38 @@ export default function RoulettePlayPage() {
 
   // --- REGISTRAR APUESTAS EN LA RONDA ---
   async function placeBets() {
-    if (!userId || !roundId || hasBetThisRound || bets.length === 0 || roundStatus !== 'betting') return
+    if (!userId || bets.length === 0 || spinning) return
     setError(null)
+
+    if (isSolo) {
+      // Modo solo: girar directo sin ronda
+      const WHEEL = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26]
+      const winIdx = Math.floor(Math.random() * 37)
+      const winNum = WHEEL[winIdx]
+      const betsSnap = [...bets]
+      setResultNumber(null)
+      animateWheelTo(winIdx)
+      setTimeout(() => {
+        setResultNumber(winNum)
+        setResultColor(getColor(winNum))
+        setHistory(prev => [winNum, ...prev].slice(0, 30))
+        const { total, won } = calcLocalPayout(betsSnap, winNum)
+        setTotalPayout(total)
+        setTotalWon(won)
+        setSpinning(false)
+        setTimeout(() => {
+          setShowResult(true)
+          setTimeout(() => {
+            setShowResult(false)
+            setResultNumber(null)
+            setBets([])
+          }, 2000)
+        }, 1000)
+      }, 6200)
+      return
+    }
+    // Modo multijugador
+    if (!roundId || hasBetThisRound || roundStatus !== 'betting') return
     try {
       const res = await fetch('/api/roulette/round/bet', {
         method: 'POST',
@@ -320,11 +351,17 @@ export default function RoulettePlayPage() {
 
   const colorHex = (c: string) => c === 'red' ? '#cc2200' : c === 'green' ? '#15803d' : '#111'
 
+  // Modo solo vs multijugador
+  const isSolo = onlineCount <= 1
+
   // Estado del boton APOSTAR
-  const canBet = roundStatus === 'betting' && !hasBetThisRound && bets.length > 0 && !spinning
+  const canBet = isSolo
+    ? bets.length > 0 && !spinning
+    : roundStatus === 'betting' && !hasBetThisRound && bets.length > 0 && !spinning
   const btnLabel = spinning ? '...'
     : waitingForResult ? 'ESPERANDO'
     : hasBetThisRound  ? 'APOSTASTE'
+    : isSolo ? 'GIRAR'
     : 'APOSTAR'
 
   // Color del countdown
@@ -463,9 +500,9 @@ export default function RoulettePlayPage() {
             {/* Countdown */}
             <div style={{ textAlign: 'center', minWidth: '60px' }}>
               <p style={{ fontSize: '0.42rem', letterSpacing: '0.25em', color: 'rgba(255,255,255,0.3)', marginBottom: '2px' }}>
-                {roundStatus === 'betting' ? 'CIERRA EN' : roundStatus === 'spinning' ? 'GIRANDO' : 'NUEVA RONDA'}
+                {!isSolo && (roundStatus === 'betting' ? 'CIERRA EN' : roundStatus === 'spinning' ? 'GIRANDO' : 'NUEVA RONDA')}
               </p>
-              {roundStatus === 'betting' && (
+              {roundStatus === 'betting' && !isSolo && (
                 <p className={secondsRemaining <= 10 ? 'countdown-urgent' : ''} style={{ fontSize: '1.4rem', color: countdownColor, fontWeight: 700, fontFamily: "'Cormorant Garamond', serif" }}>
                   {secondsRemaining} s
                 </p>
@@ -738,21 +775,16 @@ export default function RoulettePlayPage() {
         </div>
 
         {/* --- OVERLAY RESULTADO --- */}
-        {showResult && totalPayout !== null && (
-          <div onClick={() => { setShowResult(false); setResultNumber(null) }}
-            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 200, cursor: 'pointer' }}>
-            <div className="result-overlay" style={{ textAlign: 'center' }}>
-              <p style={{ fontSize: '0.45rem', letterSpacing: '0.4em', color: 'rgba(255,255,255,0.35)', marginBottom: '16px', textTransform: 'uppercase' }}>Resultado</p>
-              <div style={{ width: 80, height: 80, borderRadius: '50%', background: colorHex(resultColor!), border: `2px solid ${GOLD}`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
-                <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2.5rem', color: '#fff', fontWeight: 700 }}>{resultNumber}</span>
+        {showResult && totalPayout !== null && resultNumber !== null && (
+          <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)", background: `linear-gradient(135deg, ${GOLD} 0%, #b89124 100%)`, border: "2px solid rgba(255,255,255,0.3)", borderRadius: "16px", padding: "24px 36px", zIndex: 300, textAlign: "center", minWidth: "200px", boxShadow: "0 0 40px rgba(212,175,55,0.5)" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "16px" }}>
+              <div style={{ width: 52, height: 52, borderRadius: "50%", background: colorHex(resultColor!), border: "3px solid rgba(255,255,255,0.5)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <span style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.8rem", color: "#fff", fontWeight: 700 }}>{resultNumber}</span>
               </div>
-              <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2.8rem', color: totalWon ? GOLD : '#f87171', fontWeight: 700, marginBottom: '6px' }}>
-                {totalWon
-                  ? `+${totalPayout.toLocaleString('es-UY')}`
-                  : `-${lastBets.reduce((s, b) => s + b.amount, 0).toLocaleString('es-UY')}`}
-              </p>
-              <p style={{ fontSize: '0.55rem', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.25)', marginBottom: '32px' }}>N\u00e9ctar</p>
-              <p style={{ fontSize: '0.45rem', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.15)' }}>Toca para continuar</p>
+              <div>
+                <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "2rem", color: "#1a0e00", fontWeight: 700, lineHeight: 1 }}>{totalWon ? "+" + totalPayout!.toLocaleString("es-UY") : "-" + bets.reduce((s,b) => s+b.amount,0).toLocaleString("es-UY")}</p>
+                <p style={{ fontSize: "0.38rem", letterSpacing: "0.25em", color: "rgba(26,14,0,0.7)", marginTop: "3px" }}>{totalWon ? "GANASTE" : "PERDISTE"}</p>
+              </div>
             </div>
           </div>
         )}
@@ -924,3 +956,9 @@ function SplitOverlay({
     </div>
   )
 }
+
+
+
+
+
+
