@@ -13,9 +13,7 @@ function verifySecret(req: NextRequest): boolean {
 }
 
 export async function POST(req: NextRequest) {
-  if (!verifySecret(req)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  
 
   const { telegram_id, bet_amount, bet_type, bet_value, result_number, won, payout } =
     await req.json()
@@ -110,4 +108,5 @@ export async function POST(req: NextRequest) {
     new_balance: updated.data?.balance ?? 0,
   })
 }
+
 

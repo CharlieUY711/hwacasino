@@ -102,3 +102,4 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ status: 'registered', user_id, username: display_username })
 }
 
+

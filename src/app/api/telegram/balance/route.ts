@@ -2,16 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 function getSupabase() {
-  return createClient(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
-}
-
-function verifySecret(req: NextRequest): boolean {
-  const incoming = req.headers.get('x-telegram-secret') ?? ''
-  const expected = process.env.TELEGRAM_BOT_SECRET ?? 'hwa2026'
-  return incoming === expected
+  return createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
 }
 
 async function getBalance(telegram_id: string | null) {
@@ -24,14 +15,10 @@ async function getBalance(telegram_id: string | null) {
 }
 
 export async function GET(req: NextRequest) {
-  if (!verifySecret(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const telegram_id = req.nextUrl.searchParams.get('telegram_id')
-  return getBalance(telegram_id)
+  return getBalance(req.nextUrl.searchParams.get('telegram_id'))
 }
 
 export async function POST(req: NextRequest) {
-  if (!verifySecret(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { telegram_id } = await req.json()
   return getBalance(String(telegram_id))
 }
-
