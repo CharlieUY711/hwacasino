@@ -417,7 +417,7 @@ export default function RoulettePlayPage() {
 
 
         {/* --- HEADER --- */}
-        <div style={{ padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(212,175,55,0.12)', background: 'rgba(10,10,10,0.95)', position: 'sticky', top: 0, zIndex: 90, gap: '8px', position: 'relative' }}>
+        <div style={{ padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(212,175,55,0.12)', background: 'rgba(10,10,10,0.95)', position: 'sticky', top: 0, zIndex: 90, gap: '8px' }}>
 
           {/* Volver */}
           <button onClick={() => router.push('/roulette')} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '0.5rem', letterSpacing: '0.15em', fontFamily: "'Montserrat', sans-serif", display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', flexShrink: 0 }}>
@@ -827,7 +827,7 @@ function NumberGrid({ TABLE_COLS, getBetOn, addBet, resultNumber, showResult, be
   }
 
   return (
-    <div ref={gridRef} style={{ flex: 1, position: 'relative' }}>
+    <div ref={gridRef} style={{ flex: 1 }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gridTemplateRows: 'repeat(3, 1fr)', gap: '2px', height: '100%' }}>
         {[0, 1, 2].flatMap(row =>
           TABLE_COLS.map((col, ci) => {
@@ -839,7 +839,7 @@ function NumberGrid({ TABLE_COLS, getBetOn, addBet, resultNumber, showResult, be
               <div key={num}
                 className={`bet-cell${winning ? ' win-cell' : ''}${locked ? ' locked' : ''}`}
                 onClick={e => addBet('number', String(num), e)}
-                style={{ background: betAmt > 0 ? c === 'red' ? 'rgba(180,0,0,0.7)' : 'rgba(30,30,30,0.9)' : c === 'red' ? 'rgba(120,0,0,0.5)' : 'rgba(15,15,15,0.5)', border: `1px solid ${winning ? GOLD : betAmt > 0 ? GOLD : 'rgba(255,255,255,0.08)'}`, boxShadow: winning ? `0 0 10px rgba(212,175,55,0.6)` : 'none', borderRadius: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '28px', padding: '2px', position: 'relative' }}>
+                style={{ background: betAmt > 0 ? c === 'red' ? 'rgba(180,0,0,0.7)' : 'rgba(30,30,30,0.9)' : c === 'red' ? 'rgba(120,0,0,0.5)' : 'rgba(15,15,15,0.5)', border: `1px solid ${winning ? GOLD : betAmt > 0 ? GOLD : 'rgba(255,255,255,0.08)'}`, boxShadow: winning ? `0 0 10px rgba(212,175,55,0.6)` : 'none', borderRadius: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '28px', padding: '2px' }}>
                 <span style={{ color: c === 'red' ? '#fca5a5' : 'rgba(255,255,255,0.8)', fontSize: '0.55rem', fontWeight: 600, lineHeight: 1 }}>{num}</span>
               </div>
             )
