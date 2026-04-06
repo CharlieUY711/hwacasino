@@ -1,935 +1,704 @@
-'use client'
+"use client";
 
-import { useState, useEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabaseClient'
-import { useWallet } from '@/hooks/useWallet'
+import { useState, useMemo } from "react";
+import {
+  TrendingUp, TrendingDown, Wallet, Plus, Search,
+  ChevronUp, ChevronDown, CreditCard, Building2,
+  Smartphone, Banknote, CheckCircle2, Clock, XCircle,
+  AlertCircle, ArrowRightLeft, Target, BarChart3,
+  Filter, Download, RefreshCw, Eye, ChevronRight,
+  Zap,
+} from "lucide-react";
+import { Card, CardHeader } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
 
-const GOLD = '#D4AF37'
-const DARK = '#0A0A0A'
-const GREEN_FELT = '#0a3d24'
+// ─── helpers ─────────────────────────────────────────────────────────────────
+const fmt = (n: number) =>
+  new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);
 
-const WHEEL_ORDER = [
-  0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26
-]
+const fmtDate = (d: string) =>
+  new Date(d).toLocaleDateString("es-AR", { day: "2-digit", month: "short" });
 
-const RED_NUMBERS = new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36])
+// ─── mock data ────────────────────────────────────────────────────────────────
+const MOCK_INGRESOS = [
+  { id: "1", descripcion: "Cuota marzo - Grupo A", monto: 45000, estado: "confirmado", categoria: "cuota_viaje", fecha_confirmada: "2026-03-10", estudiante: "Lucía Gómez" },
+  { id: "2", descripcion: "Cuota marzo - Grupo B", monto: 38000, estado: "confirmado", categoria: "cuota_viaje", fecha_confirmada: "2026-03-11", estudiante: "Mateo Silva" },
+  { id: "3", descripcion: "Sponsor Tecno SA", monto: 120000, estado: "confirmado", categoria: "sponsor", fecha_confirmada: "2026-03-05", estudiante: null },
+  { id: "4", descripcion: "Inscripción viaje adicional", monto: 25000, estado: "pendiente", categoria: "inscripcion", fecha_confirmada: "2026-03-15", estudiante: "Valentina Ruiz" },
+  { id: "5", descripcion: "Cuota abril - Grupo A", monto: 45000, estado: "pendiente", categoria: "cuota_viaje", fecha_confirmada: "2026-04-01", estudiante: "Lucía Gómez" },
+  { id: "6", descripcion: "Subsidio municipal", monto: 80000, estado: "confirmado", categoria: "subsidio", fecha_confirmada: "2026-02-28", estudiante: null },
+];
 
-function getColor(n: number): 'red' | 'black' | 'green' {
-  if (n === 0) return 'green'
-  return RED_NUMBERS.has(n) ? 'red' : 'black'
-}
+const MOCK_EGRESOS = [
+  { id: "1", descripcion: "Reserva hotel Bariloche", monto: 180000, estado: "confirmado", categoria: "alojamiento", fecha_confirmada: "2026-03-01", proveedor: "Hotel Nevada" },
+  { id: "2", descripcion: "Micros ida y vuelta", monto: 95000, estado: "confirmado", categoria: "transporte", fecha_confirmada: "2026-03-08", proveedor: "TransPatagonia" },
+  { id: "3", descripcion: "Seguro de viaje grupal", monto: 42000, estado: "confirmado", categoria: "seguro", fecha_confirmada: "2026-03-03", proveedor: "Aseguradora Plus" },
+  { id: "4", descripcion: "Pack actividades aventura", monto: 35000, estado: "pendiente", categoria: "actividad", fecha_confirmada: "2026-04-10", proveedor: "AventuraBRC" },
+  { id: "5", descripcion: "Comida durante viaje", monto: 28000, estado: "pendiente", categoria: "alimentacion", fecha_confirmada: "2026-04-12", proveedor: null },
+];
 
-const CHIP_DEFS = [
-  { value: 10,    label: '10',  color: '#1a0e00' },
-  { value: 50,    label: '50',  color: '#7c1d1d' },
-  { value: 100,   label: '100', color: '#1a3a6e' },
-  { value: 250,   label: '250', color: '#2d4a1e' },
-  { value: 500,   label: '500', color: '#4a1a6e' },
-  { value: 1000,  label: '1K',  color: '#6e3a00' },
-  { value: 10000, label: '10K', color: '#0d0d0d' },
-]
-const CHIP_BG     = GOLD
-const CHIP_BORDER = '#b8941f'
+const MOCK_INSTRUMENTOS = [
+  { id: "1", nombre: "Cuenta Bancaria Principal", tipo: "cuenta_bancaria", estado: "activa", saldo_actual: 353000, es_principal: true, banco: "Banco Nación", alias: "GRUPO.EGRESADOS" },
+  { id: "2", nombre: "MercadoPago Grupo", tipo: "mercado_pago", estado: "activa", saldo_actual: 87000, es_principal: false, mp_email: "pagos@egresados2026.com" },
+  { id: "3", nombre: "Caja Chica", tipo: "efectivo", estado: "activa", saldo_actual: 15000, es_principal: false },
+];
 
-const MOCK_HOT  = [17, 32, 5, 21, 0]
-const MOCK_COLD = [3, 36, 14, 25, 8]
-const MOCK_HISTORY = [17,0,32,5,21,14,7,32,19,3,25,11,17,0,6,32,21,8,14,17]
+const MOCK_CONCILIACIONES = [
+  { id: "1", descripcion: "Pago MP #9823746", monto: 45000, tipo: "ingreso", estado_conc: "conciliado", fecha: "2026-03-10", match: "Cuota marzo - Grupo A", confianza: 1.0 },
+  { id: "2", descripcion: "Transferencia recibida", monto: 38000, tipo: "ingreso", estado_conc: "conciliado", fecha: "2026-03-11", match: "Cuota marzo - Grupo B", confianza: 0.85 },
+  { id: "3", descripcion: "Débito #445872", monto: 180000, tipo: "egreso", estado_conc: "pendiente", fecha: "2026-03-01", match: null, confianza: null },
+  { id: "4", descripcion: "Pago MP #9823891", monto: 25000, tipo: "ingreso", estado_conc: "pendiente", fecha: "2026-03-14", match: null, confianza: null },
+];
 
-const TABLE_COLS: [number, number, number][] = Array.from({ length: 12 }, (_, col) => [
-  col * 3 + 3,
-  col * 3 + 2,
-  col * 3 + 1,
-])
+// ─── sub-components ───────────────────────────────────────────────────────────
 
-type BetType = 'number' | 'color' | 'parity' | 'dozen' | 'column' | 'half' | 'split2' | 'split4'
-
-type Bet = {
-  id: string
-  type: BetType
-  value: string
-  amount: number
-  chipX: number
-  chipY: number
-}
-
-function isWinningBet(bet: Bet, result: number): boolean {
-  const c = getColor(result)
-  switch (bet.type) {
-    case 'number':  return parseInt(bet.value) === result
-    case 'color':   return bet.value === c
-    case 'parity':  return result !== 0 && (bet.value === 'even' ? result % 2 === 0 : result % 2 !== 0)
-    case 'half':    return result !== 0 && (bet.value === 'low' ? result <= 18 : result >= 19)
-    case 'dozen': {
-      const d = parseInt(bet.value)
-      return result !== 0 && result >= (d-1)*12+1 && result <= d*12
-    }
-    case 'column': {
-      const col = parseInt(bet.value)
-      return result !== 0 && result % 3 === (col === 3 ? 0 : col === 2 ? 2 : 1)
-    }
-    case 'split2': {
-      const nums = bet.value.split('-').map(Number)
-      return nums.includes(result)
-    }
-    case 'split4': {
-      const nums = bet.value.split('-').map(Number)
-      return nums.includes(result)
-    }
-    default: return false
-  }
-}
-
-// Calcula payout client-side para mostrar el resultado sin esperar al backend
-function calcLocalPayout(betList: Bet[], winNum: number): { total: number; won: boolean } {
-  let total = 0
-  for (const bet of betList) {
-    if (!isWinningBet(bet, winNum)) continue
-    switch (bet.type) {
-      case 'number': total += bet.amount * 35; break
-      case 'split2': total += bet.amount * 17; break
-      case 'split4': total += bet.amount * 8; break
-      case 'dozen':
-      case 'column': total += bet.amount * 3; break
-      default:       total += bet.amount * 2; break
-    }
-  }
-  return { total, won: total > 0 }
-}
-
-function fmtChipVal(amount: number): string {
-  if (amount >= 10000) return `${Math.floor(amount/10000)}0K`
-  if (amount >= 1000)  return `${Math.floor(amount/1000)}K`
-  return String(amount)
-}
-
-function ChipMarker({ amount, size = 18, winning = false }: { amount: number; size?: number; winning?: boolean }) {
-  const chip = CHIP_DEFS.slice().reverse().find(c => amount >= c.value) ?? CHIP_DEFS[0]
+function KpiCard({ label, value, sub, icon, color, trend }: {
+  label: string; value: string; sub?: string;
+  icon: React.ReactNode; color: "emerald" | "rose" | "amber" | "orange"; trend?: "up" | "down";
+}) {
+  const colors = {
+    emerald: { bg: "bg-emerald-50", border: "border-emerald-100", icon: "text-emerald-600", value: "text-emerald-700" },
+    rose:    { bg: "bg-rose-50",    border: "border-rose-100",    icon: "text-rose-500",    value: "text-rose-600"    },
+    amber:   { bg: "bg-amber-50",   border: "border-amber-100",   icon: "text-amber-600",   value: "text-amber-700"   },
+    orange:  { bg: "bg-orange-50",  border: "border-orange-100",  icon: "text-orange-600",  value: "text-orange-700"  },
+  };
+  const c = colors[color];
   return (
-    <div style={{ width: size, height: size, borderRadius: '50%', background: winning ? '#fff' : CHIP_BG, border: `1.5px solid ${winning ? GOLD : CHIP_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: winning ? `0 0 8px ${GOLD}` : '0 2px 6px rgba(0,0,0,0.6)', transition: 'all 0.3s ease' }}>
-      <span style={{ fontSize: size * 0.28, fontWeight: 900, color: winning ? GOLD : chip.color, lineHeight: 1 }}>{fmtChipVal(amount)}</span>
-    </div>
-  )
-}
-
-function FloatingChip({ bet, winning }: { bet: Bet; winning: boolean }) {
-  const chip = CHIP_DEFS.slice().reverse().find(c => bet.amount >= c.value) ?? CHIP_DEFS[0]
-  const size = 16
-  return (
-    <div style={{ position: 'absolute', left: bet.chipX - size/2, top: bet.chipY - size/2, width: size, height: size, borderRadius: '50%', background: winning ? '#fff' : CHIP_BG, border: `1.5px solid ${winning ? GOLD : CHIP_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: winning ? `0 0 10px ${GOLD}, 0 0 20px rgba(212,175,55,0.5)` : '0 2px 6px rgba(0,0,0,0.7)', zIndex: 20, pointerEvents: 'none', transition: 'background 0.3s, box-shadow 0.3s' }}>
-      <span style={{ fontSize: 5, fontWeight: 900, color: winning ? GOLD : chip.color, lineHeight: 1 }}>{fmtChipVal(bet.amount)}</span>
-    </div>
-  )
-}
-
-export default function RoulettePlayPage() {
-  const router = useRouter()
-  const { balance, formatChips, username } = useWallet()
-  const [userId, setUserId] = useState<string | null>(null)
-  const [selectedChip, setSelectedChip] = useState(CHIP_DEFS[0])
-  const [bets, setBets] = useState<Bet[]>([])
-  const [lastBets, setLastBets] = useState<Bet[]>([])
-  const [spinning, setSpinning] = useState(false)
-  const [resultNumber, setResultNumber] = useState<number | null>(null)
-  const [resultColor, setResultColor]   = useState<string | null>(null)
-  const [totalPayout, setTotalPayout]   = useState<number | null>(null)
-  const [totalWon, setTotalWon]         = useState<boolean | null>(null)
-  const [history, setHistory]           = useState<number[]>(MOCK_HISTORY)
-  const [activeTab, setActiveTab]       = useState<'hot' | 'cold' | 'history'>('hot')
-  const [error, setError]               = useState<string | null>(null)
-  const [showResult, setShowResult]     = useState(false)
-
-  // --- ESTADO MULTIPLAYER ---
-  const [room, setRoom]                       = useState('vip-1')
-  const [roundId, setRoundId]                 = useState<string | null>(null)
-  const [roundStatus, setRoundStatus]         = useState<'betting' | 'spinning' | 'closed'>('betting')
-  const [secondsRemaining, setSecondsRemaining] = useState(40)
-  const [hasBetThisRound, setHasBetThisRound] = useState(false)
-  const [onlineCount, setOnlineCount] = useState(1)
-  const [waitingForResult, setWaitingForResult] = useState(false)
-
-  const wheelRef       = useRef<SVGGElement>(null)
-  const tableRef       = useRef<HTMLDivElement>(null)
-  const currentRotation = useRef(0)
-
-  // Refs para polling (evitar closures stale)
-  const prevRoundIdRef  = useRef<string | null>(null)
-  const animatedRoundRef = useRef<string | null>(null)
-  const lastBetsRef     = useRef<Bet[]>([])
-
-  // Sincronizar lastBets a ref para acceso desde timeout
-  useEffect(() => { lastBetsRef.current = lastBets }, [lastBets])
-
-  // Auth
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) { router.replace('/'); return }
-      setUserId(user.id)
-    })
-  }, [router])
-
-  // --- POLLING DE RONDA ---
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const r = params.get('room') ?? 'vip-1'
-    setRoom(r)
-
-    const poll = async () => {
-      try {
-        const res = await fetch(`/api/roulette/round/status?room=${r}`)
-        const data = await res.json()
-
-        setSecondsRemaining(data.seconds_remaining ?? 0)
-        setRoundStatus(data.status)
-
-        // Nueva ronda detectada
-        if (data.round_id !== prevRoundIdRef.current) {
-          prevRoundIdRef.current = data.round_id
-          setRoundId(data.round_id)
-          setHasBetThisRound(false)
-          setShowResult(false)
-          setResultNumber(null)
-          setWaitingForResult(false)
-          setBets([])
-        }
-
-        // Ronda entrando en spinning — animar rueda (una sola vez por ronda)
-        if (data.status === 'spinning' && animatedRoundRef.current !== data.round_id) {
-          animatedRoundRef.current = data.round_id
-          setSpinning(true)
-          animateWheelTo(data.winning_index)
-
-          setTimeout(() => {
-            const wNum = data.winning_number
-            setResultNumber(wNum)
-            setResultColor(getColor(wNum))
-            setHistory(prev => [wNum, ...prev].slice(0, 30))
-            const { total, won } = calcLocalPayout(lastBetsRef.current, wNum)
-            setTotalPayout(total)
-            setTotalWon(won)
-            if (lastBetsRef.current.length > 0) setShowResult(true)
-            setSpinning(false)
-            setWaitingForResult(false)
-          }, 6200)
-        }
-      } catch { /* silencioso */ }
-    }
-
-    poll()
-    const interval = setInterval(poll, 2000)
-    return () => clearInterval(interval)
-  }, [])
-
-  // --- ANIMACION DE RUEDA ---
-  function animateWheelTo(winningIndex: number) {
-    if (!wheelRef.current) return
-    const DEG = 360 / 37
-    const slotAngle = -(winningIndex * DEG)
-    const normalizedCurrent = ((currentRotation.current % 360) + 360) % 360
-    const normalizedTarget  = ((slotAngle % 360) + 360) % 360
-    let delta = normalizedTarget - normalizedCurrent
-    if (delta <= 0) delta += 360
-    const totalRotation = 6 * 360 + delta
-    const newRotation = currentRotation.current + totalRotation
-    currentRotation.current = newRotation
-    const finalDeg = newRotation - 90
-    wheelRef.current.style.transition = 'none'
-    void wheelRef.current.getBoundingClientRect()
-    wheelRef.current.style.transition = 'transform 6s cubic-bezier(0.17, 0.67, 0.12, 0.99)'
-    wheelRef.current.style.transform = `rotate(${finalDeg}deg)`
-  }
-
-  // --- POSICION DE CLICK RELATIVA AL PANO ---
-  function getRelativePos(e: React.MouseEvent): { x: number; y: number } {
-    if (!tableRef.current) return { x: 0, y: 0 }
-    const rect = tableRef.current.getBoundingClientRect()
-    return { x: e.clientX - rect.left, y: e.clientY - rect.top }
-  }
-
-  // --- AGREGAR APUESTA ---
-  function addBet(type: BetType, value: string, e: React.MouseEvent) {
-    if (roundStatus !== 'betting' || hasBetThisRound) return
-    const { x, y } = getRelativePos(e)
-    const id = `${type}:${value}`
-    setBets(prev => {
-      const existing = prev.find(b => b.id === id)
-      if (existing) {
-        return prev.map(b => b.id === id
-          ? { ...b, amount: b.amount + selectedChip.value, chipX: x, chipY: y }
-          : b)
-      }
-      return [...prev, { id, type, value, amount: selectedChip.value, chipX: x, chipY: y }]
-    })
-  }
-
-  function removeLast() {
-    if (hasBetThisRound) return
-    setBets(prev => {
-      if (prev.length === 0) return prev
-      const copy = [...prev]
-      const last = copy[copy.length - 1]
-      if (last.amount > selectedChip.value) {
-        copy[copy.length - 1] = { ...last, amount: last.amount - selectedChip.value }
-      } else {
-        copy.pop()
-      }
-      return copy
-    })
-  }
-
-  function clearBets()  { if (!hasBetThisRound) setBets([]) }
-  function repeatBets() { if (!hasBetThisRound && lastBets.length > 0) setBets(lastBets) }
-  function doubleBets() { if (!hasBetThisRound) setBets(prev => prev.map(b => ({ ...b, amount: b.amount * 2 }))) }
-
-  const totalBet = bets.reduce((sum, b) => sum + b.amount, 0)
-
-  function getBetOn(id: string): number { return bets.find(b => b.id === id)?.amount ?? 0 }
-
-  function isWinning(id: string): boolean {
-    if (resultNumber === null) return false
-    const bet = bets.find(b => b.id === id) ?? lastBets.find(b => b.id === id)
-    if (!bet) return false
-    return isWinningBet(bet, resultNumber)
-  }
-
-  // --- REGISTRAR APUESTAS EN LA RONDA ---
-  async function placeBets() {
-    if (!userId || bets.length === 0 || spinning) return
-    setError(null)
-
-    if (isSolo) {
-      // Modo solo: girar directo sin ronda
-      const WHEEL = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26]
-      const winIdx = Math.floor(Math.random() * 37)
-      const winNum = WHEEL[winIdx]
-      const betsSnap = [...bets]
-      setResultNumber(null)
-      animateWheelTo(winIdx)
-      setTimeout(() => {
-        setResultNumber(winNum)
-        setResultColor(getColor(winNum))
-        setHistory(prev => [winNum, ...prev].slice(0, 30))
-        const { total, won } = calcLocalPayout(betsSnap, winNum)
-        setTotalPayout(total)
-        setTotalWon(won)
-        setSpinning(false)
-        setTimeout(() => {
-          setShowResult(true)
-          setTimeout(() => {
-            setShowResult(false)
-            setResultNumber(null)
-            setBets([])
-          }, 2000)
-        }, 1000)
-      }, 6200)
-      return
-    }
-    // Modo multijugador
-    if (!roundId || hasBetThisRound || roundStatus !== 'betting') return
-    try {
-      const res = await fetch('/api/roulette/round/bet', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: userId,
-          round_id: roundId,
-          bets: bets.map(b => ({ bet_type: b.type, bet_value: b.value, amount: b.amount })),
-        }),
-      })
-      const data = await res.json()
-      if (data.error) {
-        setError(data.error === 'La ventana de apuestas cerro' ? 'La ventana cerr\u00f3' : data.error)
-        return
-      }
-      setLastBets(bets)
-      setHasBetThisRound(true)
-      setWaitingForResult(true)
-    } catch {
-      setError('Error de conexi\u00f3n')
-    }
-  }
-
-  const colorHex = (c: string) => c === 'red' ? '#cc2200' : c === 'green' ? '#15803d' : '#111'
-
-  // Modo solo vs multijugador
-  const isSolo = onlineCount <= 1
-
-  // Estado del boton APOSTAR
-  const canBet = isSolo
-    ? bets.length > 0 && !spinning
-    : roundStatus === 'betting' && !hasBetThisRound && bets.length > 0 && !spinning
-  const btnLabel = spinning ? '...'
-    : waitingForResult ? 'ESPERANDO'
-    : hasBetThisRound  ? 'APOSTASTE'
-    : isSolo ? 'GIRAR'
-    : 'APOSTAR'
-
-  // Color del countdown
-  const countdownColor = secondsRemaining <= 10 ? '#f87171' : GOLD
-
-  return (
-    <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&family=Montserrat:wght@200;300;400;600;700&display=swap');
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { background: ${DARK}; overflow-x: hidden; }
-
-        @keyframes fadeUp { from { opacity:0; transform:translateY(12px) } to { opacity:1; transform:translateY(0) } }
-        @keyframes pulseGold { 0%,100% { box-shadow:0 0 0 0 rgba(212,175,55,0.4) } 50% { box-shadow:0 0 0 8px rgba(212,175,55,0) } }
-        @keyframes resultIn { from { opacity:0; transform:scale(0.7) } to { opacity:1; transform:scale(1) } }
-        @keyframes shimmer { 0% { background-position:-200% center } 100% { background-position:200% center } }
-        @keyframes winPulse { 0%,100% { box-shadow:0 0 6px rgba(212,175,55,0.5) } 50% { box-shadow:0 0 18px rgba(212,175,55,0.9) } }
-        @keyframes countdownPulse { 0%,100% { opacity:1 } 50% { opacity:0.5 } }
-
-        .chip-btn { transition:transform 0.15s ease,box-shadow 0.15s ease; cursor:pointer; }
-        .chip-btn:hover { opacity:0.85; }
-        .chip-btn.active { box-shadow:0 0 0 2.5px #D4AF37; outline:none; }
-
-        .bet-cell { position:relative; transition:background 0.15s ease; cursor:pointer; user-select:none; }
-        .bet-cell:hover { background:rgba(212,175,55,0.15) !important; }
-        .bet-cell:active { background:rgba(212,175,55,0.25) !important; }
-        .bet-cell.locked { pointer-events:none; opacity:0.85; }
-
-        .split-h { position:absolute; z-index:10; cursor:pointer; }
-        .split-v { position:absolute; z-index:10; cursor:pointer; }
-        .split-corner { position:absolute; z-index:11; cursor:pointer; }
-
-        .apostar-btn {
-          background: linear-gradient(135deg, #f2ca50 0%, #b89124 50%, #f2ca50 100%);
-          background-size: 200% 100%;
-          transition: all 0.2s ease;
-          cursor: pointer;
-        }
-        .apostar-btn:hover:not(:disabled) { animation:shimmer 1s linear infinite; transform:scale(1.02); box-shadow:0 0 40px rgba(212,175,55,0.5); }
-        .apostar-btn:disabled { opacity:0.5; cursor:not-allowed; }
-        .apostar-btn.waiting { background: rgba(212,175,55,0.15); color: rgba(212,175,55,0.6); }
-
-        .action-btn { transition:all 0.15s ease; cursor:pointer; }
-        .action-btn:hover { background:rgba(255,255,255,0.1) !important; }
-        .tab-btn { transition:all 0.2s ease; cursor:pointer; }
-        .result-overlay { animation:resultIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both; }
-        .number-badge { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.6rem; font-weight:700; flex-shrink:0; }
-        .win-cell { animation:winPulse 1.2s ease-in-out infinite; }
-        .countdown-urgent { animation:countdownPulse 0.8s ease-in-out infinite; }
-      `}</style>
-
-      <main style={{ minHeight: '100dvh', background: DARK, fontFamily: "'Montserrat', sans-serif", maxWidth: '480px', margin: '0 auto', paddingBottom: '80px' }}>
-
-
-        {/* --- HEADER --- */}
-        <div style={{ padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(212,175,55,0.12)', background: 'rgba(10,10,10,0.95)', position: 'sticky', top: 0, zIndex: 90, gap: '8px' }}>
-
-          {/* Volver */}
-          <button onClick={() => router.push('/roulette')} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '0.5rem', letterSpacing: '0.15em', fontFamily: "'Montserrat', sans-serif", display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', flexShrink: 0 }}>
-            {String.fromCharCode(8592)} Volver
-          </button>
-          {/* Logo + Titulo */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-            <img src='/logo-dorado.jpg' alt='HWA' style={{ height: '22px', width: 'auto' }} />
-            <span style={{ fontSize: '0.5rem', letterSpacing: '0.25em', color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>RULETA</span>
-          </div>
-
-          {/* Usuario + Balance */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginLeft: 'auto' }}>
-            {showResult && resultNumber !== null ? (
-              <span style={{ fontSize: '0.5rem', color: totalWon ? GOLD : '#f87171', fontWeight: 700, letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
-                {resultNumber} · {totalWon ? '+' + totalPayout!.toLocaleString('es-UY') : '-' + bets.reduce((s,b)=>s+b.amount,0).toLocaleString('es-UY')} <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic' }}>N</span>
-              </span>
-            ) : totalBet > 0 ? (
-              <span style={{ fontSize: '0.5rem', color: '#f87171', fontWeight: 700, letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>Apuesta: {totalBet.toLocaleString('es-UY')} <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic' }}>N</span></span>
-            ) : null}
-            <span style={{ fontSize: '0.5rem', color: 'rgba(255,255,255,0.7)', fontWeight: 700, letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>{username}</span>
-            <span style={{ fontSize: '0.5rem', color: GOLD, fontWeight: 700, letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>{balance.toLocaleString('es-UY')} <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic' }}>N</span></span>
-          </div>
-        </div>
-        {/* --- RUEDA SVG --- */}
-        <div style={{ background: "radial-gradient(ellipse at center, #1a0e00 0%, #0a0a0a 70%)", padding: "16px 12px", display: "flex", flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between" }}>
-
-          {/* --- ZONA IZQUIERDA: PANEL CALIENTES / FRIOS / HISTORIAL --- */}
-          <div style={{ display: "flex", flexDirection: "row", gap: "6px", alignSelf: "flex-start" }}>
-            {/* CALIENTES */}
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
-              <span style={{ fontSize: "0.3rem", letterSpacing: "0.15em", color: GOLD, marginBottom: "2px" }}>🔥</span>
-              {MOCK_HOT.map((n) => (
-                <div key={n} className="number-badge" style={{ background: colorHex(getColor(n)), border: "1px solid rgba(255,255,255,0.15)", width: "22px", height: "22px", fontSize: "0.45rem" }}>
-                  <span style={{ color: "#fff", fontWeight: 700 }}>{n}</span>
-                </div>
-              ))}
-            </div>
-            {/* FRIOS */}
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
-              <span style={{ fontSize: "0.3rem", letterSpacing: "0.15em", color: "#4B9CD3", marginBottom: "2px" }}>❄️</span>
-              {MOCK_COLD.map((n) => (
-                <div key={n} className="number-badge" style={{ background: colorHex(getColor(n)), border: "1px solid rgba(255,255,255,0.1)", width: "22px", height: "22px", fontSize: "0.45rem", opacity: 0.8 }}>
-                  <span style={{ color: "#fff", fontWeight: 700 }}>{n}</span>
-                </div>
-              ))}
-            </div>
-            {/* HISTORIAL */}
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
-              <span style={{ fontSize: "0.3rem", letterSpacing: "0.15em", color: "rgba(255,255,255,0.3)", marginBottom: "2px" }}>📋</span>
-              {history.slice(0, 8).map((n, i) => (
-                <div key={i} className="number-badge" style={{ background: colorHex(getColor(n)), border: "1px solid rgba(255,255,255,0.1)", width: "22px", height: "22px", fontSize: "0.45rem", opacity: 1 - i * 0.08 }}>
-                  <span style={{ color: "#fff", fontWeight: 700 }}>{n}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* --- ZONA CENTRAL: RUEDA --- */}
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <div style={{ position: 'relative', width: 240, height: 240 }}>
-            <svg width="240" height="240" viewBox="0 0 240 240" style={{ overflow: 'visible' }}>
-              <defs>
-                <radialGradient id="wheelGlow" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="rgba(212,175,55,0.1)" />
-                  <stop offset="100%" stopColor="rgba(0,0,0,0)" />
-                </radialGradient>
-                <filter id="shadow">
-                  <feDropShadow dx="0" dy="4" stdDeviation="12" floodColor="rgba(0,0,0,0.8)" />
-                </filter>
-              </defs>
-              <circle cx="120" cy="120" r="118" fill="#1a1200" stroke={GOLD} strokeWidth="2.5" />
-              <circle cx="120" cy="120" r="112" fill="none" stroke="rgba(212,175,55,0.3)" strokeWidth="1" />
-              <g ref={wheelRef} style={{ transformOrigin: '120px 120px', transform: 'rotate(-90deg)' }}>
-                {WHEEL_ORDER.map((num, i) => {
-                  const angle = (i / 37) * 360
-                  const startAngle = (angle - 360/37/2) * Math.PI / 180
-                  const endAngle   = (angle + 360/37/2) * Math.PI / 180
-                  const r1 = 108, r2 = 20
-                  const x1 = 120 + r1 * Math.cos(startAngle), y1 = 120 + r1 * Math.sin(startAngle)
-                  const x2 = 120 + r1 * Math.cos(endAngle),   y2 = 120 + r1 * Math.sin(endAngle)
-                  const x3 = 120 + r2 * Math.cos(endAngle),   y3 = 120 + r2 * Math.sin(endAngle)
-                  const x4 = 120 + r2 * Math.cos(startAngle), y4 = 120 + r2 * Math.sin(startAngle)
-                  const c = getColor(num)
-                  const fill = c === 'green' ? '#0d5c1e' : c === 'red' ? '#8B0000' : '#111'
-                  const midAngle = angle * Math.PI / 180
-                  const rText = 97
-                  const tx = Math.round((120 + rText * Math.cos(midAngle)) * 1000) / 1000
-                  const ty = Math.round((120 + rText * Math.sin(midAngle)) * 1000) / 1000
-                  return (
-                    <g key={num}>
-                      <path d={`M ${x1} ${y1} A ${r1} ${r1} 0 0 1 ${x2} ${y2} L ${x3} ${y3} A ${r2} ${r2} 0 0 0 ${x4} ${y4} Z`}
-                        fill={fill} stroke="rgba(212,175,55,0.3)" strokeWidth="0.6" />
-                      <text x={tx} y={ty} textAnchor="middle" dominantBaseline="middle"
-                        fill="rgba(255,255,255,0.9)" fontSize="9" fontWeight="700"
-                        fontFamily="Montserrat, sans-serif"
-                        transform={`rotate(${angle + 90}, ${tx}, ${ty})`}>{num}</text>
-                    </g>
-                  )
-                })}
-                {WHEEL_ORDER.map((_, i) => {
-                  const angle = ((i / 37) * 360 - 360/37/2) * Math.PI / 180
-                  return (
-                    <line key={`sep-${i}`}
-                      x1={120 + 55 * Math.cos(angle)} y1={120 + 55 * Math.sin(angle)}
-                      x2={120 + 108 * Math.cos(angle)} y2={120 + 108 * Math.sin(angle)}
-                      stroke="rgba(212,175,55,0.5)" strokeWidth="0.8" />
-                  )
-                })}
-              </g>
-              <polygon points="120,16 117.5,6 122.5,6" fill={GOLD} filter="url(#shadow)" />
-              <circle cx="120" cy="16" r="2" fill="#0d0d0d" />
-            </svg>
-
-            {resultNumber !== null && !spinning && (
-              <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 56, height: 56, borderRadius: '50%', background: colorHex(resultColor!), border: `2px solid ${GOLD}`, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}>
-                <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.8rem', color: '#fff', fontWeight: 700 }}>{resultNumber}</span>
-              </div>
-            )}
-          </div>
-
-          {/* COUNTDOWN + INFO DE RONDA */}
-          <div style={{ marginTop: '12px', display: 'flex', gap: '20px', alignItems: 'center' }}>
-            {/* Countdown */}
-            <div style={{ textAlign: 'center', minWidth: '60px' }}>
-              <p style={{ fontSize: '0.42rem', letterSpacing: '0.25em', color: 'rgba(255,255,255,0.3)', marginBottom: '2px' }}>
-                {!isSolo && (roundStatus === 'betting' ? 'CIERRA EN' : roundStatus === 'spinning' ? 'GIRANDO' : 'NUEVA RONDA')}
-              </p>
-              {roundStatus === 'betting' && !isSolo && (
-                <p className={secondsRemaining <= 10 ? 'countdown-urgent' : ''} style={{ fontSize: '1.4rem', color: countdownColor, fontWeight: 700, fontFamily: "'Cormorant Garamond', serif" }}>
-                  {secondsRemaining} s
-                </p>
-              )}
-              {roundStatus === 'spinning' && (
-                <p style={{ fontSize: '0.7rem', color: GOLD, letterSpacing: '0.1em' }}>...</p>
-              )}
-            </div>
-
-            {/* Estado de la apuesta del usuario */}
-            {hasBetThisRound && (
-              <div style={{ textAlign: 'center' }}>
-                <p style={{ fontSize: '0.42rem', letterSpacing: '0.15em', color: 'rgba(212,175,55,0.6)' }}>{'\u2713'} APOSTASTE</p>
-              </div>
-            )}
-          </div>
-          </div>{/* fin zona central */}
-
-          {/* --- ZONA DERECHA: FICHAS --- */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "4px", alignSelf: "flex-start" }}>
-            {CHIP_DEFS.map(chip => {
-              const isActive = selectedChip.value === chip.value
-              const fontSize = chip.label.length > 2 ? "0.45rem" : "0.6rem"
-              return (
-                <button key={chip.value} className={`chip-btn${isActive ? " active" : ""}`}
-                  onClick={() => setSelectedChip(chip)}
-                  style={{ width: 26, height: 26, borderRadius: "50%", background: isActive ? `radial-gradient(circle at 35% 35%, #f5d060, ${GOLD} 50%, #a07820)` : `radial-gradient(circle at 35% 35%, #e8c540, ${GOLD} 55%, #8a6510)`, border: `2px dashed ${isActive ? "#fff" : CHIP_BORDER}`, color: chip.color, fontFamily: "Montserrat, sans-serif", fontWeight: 900, fontSize, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: isActive ? `0 0 10px rgba(212,175,55,0.8)` : `0 2px 6px rgba(0,0,0,0.6)`, cursor: "pointer" }}>
-                  {chip.label}
-                </button>
-              )
-            })}
-          </div>
-
-        </div>{/* fin contenedor 3 zonas */}
-
-
-        {/* === MESA DE APUESTAS === */}
-        <div style={{ margin: '0 16px 16px', overflowX: 'auto' }}>
-          <div
-            ref={tableRef}
-            style={{
-              position: 'relative',
-              background: `radial-gradient(ellipse at center, #0d4a2a 0%, ${GREEN_FELT} 60%, #051d11 100%)`,
-              border: '1px solid rgba(212,175,55,0.2)',
-              borderRadius: '6px',
-              padding: '12px',
-              minWidth: '320px',
-              opacity: (roundStatus !== 'betting' || hasBetThisRound) ? 0.7 : 1,
-              transition: 'opacity 0.3s ease',
-            }}
-          >
-            {/* Fichas flotantes de apuestas actuales */}
-            {bets.map(bet => (
-              <FloatingChip key={bet.id} bet={bet}
-                winning={resultNumber !== null && !showResult && isWinningBet(bet, resultNumber)} />
-            ))}
-            {/* Fichas de la ultima ronda durante overlay */}
-            {showResult && lastBets.map(bet => (
-              <FloatingChip key={`last-${bet.id}`} bet={bet}
-                winning={resultNumber !== null && isWinningBet(bet, resultNumber)} />
-            ))}
-
-            {/* FILA: 0 + GRID + 2:1 */}
-            <div style={{ display: 'flex', gap: '4px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                <div
-                  className={`bet-cell${(roundStatus !== 'betting' || hasBetThisRound) ? ' locked' : ''}${getBetOn('number:0') > 0 && resultNumber !== null && !showResult && resultNumber === 0 ? ' win-cell' : ''}`}
-                  onClick={e => addBet('number', '0', e)}
-                  style={{
-                    width: 32, height: 90,
-                    background: getBetOn('number:0') > 0 ? 'rgba(15,92,30,0.8)' : 'rgba(15,92,30,0.4)',
-                    border: `1px solid ${resultNumber === 0 && !showResult ? GOLD : 'rgba(212,175,55,0.3)'}`,
-                    boxShadow: resultNumber === 0 && !showResult ? `0 0 10px rgba(212,175,55,0.5)` : 'none',
-                    borderRadius: '4px 0 0 4px',
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px',
-                  }}
-                >
-                  <span style={{ color: '#4ade80', fontWeight: 700, fontSize: '1rem' }}>0</span>
-                </div>
-              </div>
-
-              <NumberGrid
-                TABLE_COLS={TABLE_COLS}
-                getBetOn={getBetOn}
-                addBet={addBet}
-                resultNumber={resultNumber}
-                showResult={showResult}
-                bets={bets}
-                lastBets={lastBets}
-                locked={roundStatus !== 'betting' || hasBetThisRound}
-              />
-
-              {/* Columnas 2:1 */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                {(['3', '2', '1'] as const).map(col => {
-                  const id = `column:${col}`
-                  const won = resultNumber !== null && !showResult && getBetOn(id) > 0 && isWinningBet({ id, type: 'column', value: col, amount: getBetOn(id), chipX: 0, chipY: 0 }, resultNumber)
-                  return (
-                    <div key={col} className={`bet-cell${won ? ' win-cell' : ''}${(roundStatus !== 'betting' || hasBetThisRound) ? ' locked' : ''}`}
-                      onClick={e => addBet('column', col, e)}
-                      style={{ width: 28, flex: 1, background: getBetOn(id) > 0 ? 'rgba(212,175,55,0.2)' : 'rgba(212,175,55,0.05)', border: `1px solid ${won ? GOLD : getBetOn(id) > 0 ? GOLD : 'rgba(212,175,55,0.2)'}`, boxShadow: won ? `0 0 8px rgba(212,175,55,0.4)` : 'none', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <span style={{ color: won ? GOLD : 'rgba(212,175,55,0.7)', fontSize: '0.35rem', letterSpacing: '0.05em', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>2:1</span>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* DOCENAS */}
-            <div style={{ display: 'grid', gridTemplateColumns: '32px 1fr 1fr 1fr 28px', gap: '2px', marginTop: '4px' }}>
-              <div />
-              {[{ v: '1', l: '1a DOCENA' }, { v: '2', l: '2a DOCENA' }, { v: '3', l: '3a DOCENA' }].map(d => {
-                const id = `dozen:${d.v}`
-                const won = resultNumber !== null && !showResult && getBetOn(id) > 0 && isWinningBet({ id, type: 'dozen', value: d.v, amount: getBetOn(id), chipX: 0, chipY: 0 }, resultNumber)
-                return (
-                  <div key={d.v} className={`bet-cell${won ? ' win-cell' : ''}${(roundStatus !== 'betting' || hasBetThisRound) ? ' locked' : ''}`}
-                    onClick={e => addBet('dozen', d.v, e)}
-                    style={{ height: 24, background: getBetOn(id) > 0 ? 'rgba(212,175,55,0.2)' : 'rgba(212,175,55,0.05)', border: `1px solid ${won ? GOLD : getBetOn(id) > 0 ? GOLD : 'rgba(212,175,55,0.2)'}`, boxShadow: won ? `0 0 8px rgba(212,175,55,0.4)` : 'none', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span style={{ color: won ? GOLD : 'rgba(212,175,55,0.7)', fontSize: '0.38rem', letterSpacing: '0.1em', fontWeight: 600 }}>{d.l}</span>
-                  </div>
-                )
-              })}
-              <div />
-            </div>
-
-            {/* EXTERNAS */}
-            <div style={{ display: 'grid', gridTemplateColumns: '32px 1fr 1fr 1fr 1fr 1fr 1fr 28px', gap: '2px', marginTop: '2px' }}>
-              <div />
-              {[
-                { type: 'half'   as const, val: 'low',  label: '1-18' },
-                { type: 'parity' as const, val: 'even', label: 'PAR' },
-              ].map(b => {
-                const id = `${b.type}:${b.val}`
-                const won = resultNumber !== null && !showResult && getBetOn(id) > 0 && isWinningBet({ id, type: b.type, value: b.val, amount: getBetOn(id), chipX: 0, chipY: 0 }, resultNumber)
-                return (
-                  <div key={b.val} className={`bet-cell${won ? ' win-cell' : ''}${(roundStatus !== 'betting' || hasBetThisRound) ? ' locked' : ''}`}
-                    onClick={e => addBet(b.type, b.val, e)}
-                    style={{ height: 24, background: getBetOn(id) > 0 ? 'rgba(212,175,55,0.2)' : 'rgba(212,175,55,0.05)', border: `1px solid ${won ? GOLD : 'rgba(212,175,55,0.2)'}`, boxShadow: won ? `0 0 8px rgba(212,175,55,0.4)` : 'none', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span style={{ color: won ? GOLD : 'rgba(212,175,55,0.7)', fontSize: '0.38rem', letterSpacing: '0.1em', fontWeight: 600 }}>{b.label}</span>
-                  </div>
-                )
-              })}
-              {(() => {
-                const id = 'color:red'
-                const won = resultNumber !== null && !showResult && getBetOn(id) > 0 && isWinningBet({ id, type: 'color', value: 'red', amount: getBetOn(id), chipX: 0, chipY: 0 }, resultNumber)
-                return (
-                  <div className={`bet-cell${won ? ' win-cell' : ''}${(roundStatus !== 'betting' || hasBetThisRound) ? ' locked' : ''}`}
-                    onClick={e => addBet('color', 'red', e)}
-                    style={{ height: 24, background: getBetOn(id) > 0 ? 'rgba(180,0,0,0.6)' : 'rgba(120,0,0,0.4)', border: `1px solid ${won ? GOLD : 'rgba(255,255,255,0.1)'}`, boxShadow: won ? `0 0 10px rgba(212,175,55,0.5)` : 'none', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span style={{ color: won ? GOLD : '#fca5a5', fontSize: '0.7rem' }}>{'\u25C6'}</span>
-                  </div>
-                )
-              })()}
-              {(() => {
-                const id = 'color:black'
-                const won = resultNumber !== null && !showResult && getBetOn(id) > 0 && isWinningBet({ id, type: 'color', value: 'black', amount: getBetOn(id), chipX: 0, chipY: 0 }, resultNumber)
-                return (
-                  <div className={`bet-cell${won ? ' win-cell' : ''}${(roundStatus !== 'betting' || hasBetThisRound) ? ' locked' : ''}`}
-                    onClick={e => addBet('color', 'black', e)}
-                    style={{ height: 24, background: getBetOn(id) > 0 ? 'rgba(50,50,50,0.8)' : 'rgba(20,20,20,0.6)', border: `1px solid ${won ? GOLD : 'rgba(255,255,255,0.1)'}`, boxShadow: won ? `0 0 10px rgba(212,175,55,0.5)` : 'none', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span style={{ color: won ? GOLD : 'rgba(255,255,255,0.6)', fontSize: '0.7rem' }}>{'\u25C6'}</span>
-                  </div>
-                )
-              })()}
-              {[
-                { type: 'parity' as const, val: 'odd',  label: 'IMPAR' },
-                { type: 'half'   as const, val: 'high', label: '19-36' },
-              ].map(b => {
-                const id = `${b.type}:${b.val}`
-                const won = resultNumber !== null && !showResult && getBetOn(id) > 0 && isWinningBet({ id, type: b.type, value: b.val, amount: getBetOn(id), chipX: 0, chipY: 0 }, resultNumber)
-                return (
-                  <div key={b.val} className={`bet-cell${won ? ' win-cell' : ''}${(roundStatus !== 'betting' || hasBetThisRound) ? ' locked' : ''}`}
-                    onClick={e => addBet(b.type, b.val, e)}
-                    style={{ height: 24, background: getBetOn(id) > 0 ? 'rgba(212,175,55,0.2)' : 'rgba(212,175,55,0.05)', border: `1px solid ${won ? GOLD : 'rgba(212,175,55,0.2)'}`, boxShadow: won ? `0 0 8px rgba(212,175,55,0.4)` : 'none', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span style={{ color: won ? GOLD : 'rgba(212,175,55,0.7)', fontSize: '0.38rem', letterSpacing: '0.1em', fontWeight: 600 }}>{b.label}</span>
-                  </div>
-                )
-              })}
-              <div />
-            </div>
-          </div>
-        </div>
-
-        {/* --- FICHAS NECTAR --- */}
-
-        {/* --- ACCIONES + APOSTAR --- */}
-        <div style={{ padding: '0 16px 16px' }}>
-          {error && <p style={{ textAlign: 'center', color: '#f87171', fontSize: '0.55rem', letterSpacing: '0.1em', marginBottom: '10px' }}>{error}</p>}
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'stretch' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', flex: 1 }}>
-              {[
-                { label: 'BORRAR',  action: removeLast },
-                { label: 'LIMPIAR', action: clearBets  },
-                { label: 'REPETIR', action: repeatBets },
-                { label: 'DOBLAR',  action: doubleBets },
-              ].map(btn => (
-                <button key={btn.label} className="action-btn" onClick={btn.action}
-                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '3px', padding: '10px 4px', color: 'rgba(255,255,255,0.5)', fontFamily: "'Montserrat', sans-serif", fontWeight: 700, fontSize: '0.45rem', letterSpacing: '0.2em', cursor: 'pointer', opacity: hasBetThisRound ? 0.4 : 1 }}>
-                  {btn.label}
-                </button>
-              ))}
-            </div>
-            <button
-              className={`apostar-btn${(waitingForResult || hasBetThisRound) ? ' waiting' : ''}`}
-              onClick={placeBets}
-              disabled={!canBet}
-              style={{ flex: '0 0 100px', border: '1px solid rgba(212,175,55,0.3)', borderRadius: '4px', color: (waitingForResult || hasBetThisRound) ? 'rgba(212,175,55,0.6)' : '#1a0e00', fontFamily: "'Montserrat', sans-serif", fontWeight: 900, fontSize: '0.65rem', letterSpacing: '0.15em', boxShadow: canBet ? '0 0 30px rgba(212,175,55,0.35)' : 'none' }}>
-              {btnLabel}
-            </button>
-          </div>
-        </div>
-
-
-      </main>
-    </>
-  )
-}
-
-// ===
-// COMPONENTE: Grid de numeros con splits superpuestos
-// ===
-type NumberGridProps = {
-  TABLE_COLS: [number, number, number][]
-  getBetOn: (id: string) => number
-  addBet: (type: BetType, value: string, e: React.MouseEvent) => void
-  resultNumber: number | null
-  showResult: boolean
-  bets: Bet[]
-  lastBets: Bet[]
-  locked: boolean
-}
-
-function NumberGrid({ TABLE_COLS, getBetOn, addBet, resultNumber, showResult, bets, lastBets, locked }: NumberGridProps) {
-  const gridRef = useRef<HTMLDivElement>(null)
-
-  function isNumWinning(num: number): boolean {
-    return resultNumber !== null && !showResult && resultNumber === num
-  }
-
-  function isSplitWinning(id: string): boolean {
-    if (resultNumber === null || showResult) return false
-    const allBets = [...bets, ...lastBets]
-    const bet = allBets.find(b => b.id === id)
-    if (!bet) return false
-    return isWinningBet(bet, resultNumber)
-  }
-
-  function getSplitBet(nums: number[]): number {
-    const sorted = [...nums].sort((a, b) => a - b)
-    const id = nums.length === 2 ? `split2:${sorted.join('-')}` : `split4:${sorted.join('-')}`
-    return getBetOn(id)
-  }
-
-  function addSplitBet(nums: number[], e: React.MouseEvent) {
-    e.stopPropagation()
-    const sorted = [...nums].sort((a, b) => a - b)
-    const type: BetType = nums.length === 2 ? 'split2' : 'split4'
-    const value = sorted.join('-')
-    addBet(type, value, e)
-  }
-
-  return (
-    <div ref={gridRef} style={{ flex: 1, position: 'relative' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gridTemplateRows: 'repeat(3, 1fr)', gap: '2px', height: '100%' }}>
-        {[0, 1, 2].flatMap(row =>
-          TABLE_COLS.map((col, ci) => {
-            const num = col[row]
-            const c = getColor(num)
-            const betAmt = getBetOn(`number:${num}`)
-            const winning = isNumWinning(num)
-            return (
-              <div key={num}
-                className={`bet-cell${winning ? ' win-cell' : ''}${locked ? ' locked' : ''}`}
-                onClick={e => addBet('number', String(num), e)}
-                style={{ background: betAmt > 0 ? c === 'red' ? 'rgba(180,0,0,0.7)' : 'rgba(30,30,30,0.9)' : c === 'red' ? 'rgba(120,0,0,0.5)' : 'rgba(15,15,15,0.5)', border: `1px solid ${winning ? GOLD : betAmt > 0 ? GOLD : 'rgba(255,255,255,0.08)'}`, boxShadow: winning ? `0 0 10px rgba(212,175,55,0.6)` : 'none', borderRadius: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '28px', padding: '2px', position: 'relative' }}>
-                <span style={{ color: c === 'red' ? '#fca5a5' : 'rgba(255,255,255,0.8)', fontSize: '0.55rem', fontWeight: 600, lineHeight: 1 }}>{num}</span>
-              </div>
-            )
-          })
+    <div className={cn("rounded-2xl p-5 border", c.bg, c.border)}>
+      <div className="flex items-start justify-between mb-3">
+        <span className={cn("p-2 rounded-xl bg-white/70 shadow-sm", c.icon)}>{icon}</span>
+        {trend && (
+          <span className={cn("text-xs font-semibold flex items-center gap-0.5",
+            trend === "up" ? "text-emerald-600" : "text-rose-500")}>
+            {trend === "up" ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+            +12%
+          </span>
         )}
       </div>
-      <SplitOverlay TABLE_COLS={TABLE_COLS} getBetOn={getBetOn} addSplitBet={addSplitBet} isSplitWinning={isSplitWinning} locked={locked} />
+      <p className="text-xs text-navy-400 font-medium mb-0.5">{label}</p>
+      <p className={cn("text-xl font-black tracking-tight leading-none", c.value)}>{value}</p>
+      {sub && <p className="text-xs text-navy-400 mt-1">{sub}</p>}
     </div>
-  )
+  );
 }
 
-function SplitOverlay({
-  TABLE_COLS, getBetOn, addSplitBet, isSplitWinning, locked,
-}: {
-  TABLE_COLS: [number, number, number][]
-  getBetOn: (id: string) => number
-  addSplitBet: (nums: number[], e: React.MouseEvent) => void
-  isSplitWinning: (id: string) => boolean
-  locked: boolean
+function EstadoBadge({ estado }: { estado: string }) {
+  const map: Record<string, { label: string; cls: string; icon: React.ReactNode }> = {
+    confirmado: { label: "Confirmado", cls: "bg-emerald-50 text-emerald-700 border-emerald-200", icon: <CheckCircle2 size={10} /> },
+    pendiente:  { label: "Pendiente",  cls: "bg-amber-50 text-amber-700 border-amber-200",       icon: <Clock size={10} />         },
+    rechazado:  { label: "Rechazado",  cls: "bg-rose-50 text-rose-600 border-rose-200",           icon: <XCircle size={10} />       },
+    anulado:    { label: "Anulado",    cls: "bg-gray-50 text-gray-500 border-gray-200",           icon: <XCircle size={10} />       },
+    conciliado: { label: "Conciliado", cls: "bg-emerald-50 text-emerald-700 border-emerald-200",  icon: <CheckCircle2 size={10} />  },
+  };
+  const s = map[estado] ?? { label: estado, cls: "bg-gray-50 text-gray-500 border-gray-200", icon: null };
+  return (
+    <span className={cn("inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-lg border", s.cls)}>
+      {s.icon}{s.label}
+    </span>
+  );
+}
+
+function InstrumentoIcon({ tipo }: { tipo: string }) {
+  const map: Record<string, { icon: React.ReactNode; color: string }> = {
+    cuenta_bancaria: { icon: <Building2 size={16} />, color: "bg-blue-100 text-blue-600" },
+    mercado_pago:    { icon: <Smartphone size={16} />, color: "bg-sky-100 text-sky-600"  },
+    efectivo:        { icon: <Banknote size={16} />,   color: "bg-green-100 text-green-600" },
+    otro:            { icon: <CreditCard size={16} />, color: "bg-gray-100 text-gray-600"   },
+  };
+  const m = map[tipo] ?? map.otro;
+  return <span className={cn("p-2 rounded-xl", m.color)}>{m.icon}</span>;
+}
+
+// ─── tabs ─────────────────────────────────────────────────────────────────────
+type Tab = "resumen" | "ingresos" | "egresos" | "instrumentos" | "conciliacion";
+
+const TABS: { key: Tab; label: string; icon: React.ReactNode }[] = [
+  { key: "resumen",       label: "Resumen",       icon: <BarChart3 size={14} />       },
+  { key: "ingresos",      label: "Ingresos",      icon: <TrendingUp size={14} />      },
+  { key: "egresos",       label: "Egresos",       icon: <TrendingDown size={14} />    },
+  { key: "instrumentos",  label: "Instrumentos",  icon: <Wallet size={14} />          },
+  { key: "conciliacion",  label: "Conciliación",  icon: <ArrowRightLeft size={14} />  },
+];
+
+// ─── modal nueva transacción ──────────────────────────────────────────────────
+function ModalNuevaTransaccion({ open, onClose, tipo: tipoInicial }: {
+  open: boolean; onClose: () => void; tipo: "ingreso" | "egreso";
 }) {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [dims, setDims] = useState({ w: 0, h: 0 })
+  const [form, setForm] = useState({
+    tipo: tipoInicial, monto: "", descripcion: "", categoria: "", fecha: "", notas: "",
+  });
 
-  useEffect(() => {
-    if (!containerRef.current) return
-    const ro = new ResizeObserver(entries => {
-      const { width, height } = entries[0].contentRect
-      setDims({ w: width, h: height })
-    })
-    ro.observe(containerRef.current)
-    return () => ro.disconnect()
-  }, [])
-
-  if (dims.w === 0) return <div ref={containerRef} style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }} />
-
-  const COLS = 12, ROWS = 3, GAP = 2
-  const cellW = (dims.w - GAP * (COLS - 1)) / COLS
-  const cellH = (dims.h - GAP * (ROWS - 1)) / ROWS
-
-  function cx(col: number) { return col * (cellW + GAP) + cellW / 2 }
-  function cy(row: number) { return row * (cellH + GAP) + cellH / 2 }
-  function bx(col: number) { return col * (cellW + GAP) + cellW + GAP / 2 }
-  function by(row: number) { return row * (cellH + GAP) + cellH + GAP / 2 }
-  function numAt(col: number, row: number) { return TABLE_COLS[col][row] }
-
-  const HIT = 8
-  const splits: React.ReactNode[] = []
-
-  for (let col = 0; col < COLS; col++) {
-    for (let row = 0; row < ROWS - 1; row++) {
-      const n1 = numAt(col, row), n2 = numAt(col, row + 1)
-      const sorted = [n1, n2].sort((a, b) => a - b)
-      const id = `split2:${sorted.join('-')}`
-      const hasBet = getBetOn(id) > 0, winning = isSplitWinning(id)
-      splits.push(
-        <rect key={id} x={col * (cellW + GAP)} y={by(row) - HIT / 2} width={cellW} height={HIT}
-          fill={winning ? 'rgba(212,175,55,0.4)' : hasBet ? 'rgba(212,175,55,0.2)' : 'rgba(255,255,255,0.02)'}
-          style={{ cursor: locked ? 'default' : 'pointer', pointerEvents: locked ? 'none' : 'all' }}
-          onClick={e => addSplitBet([n1, n2], e as unknown as React.MouseEvent)} />
-      )
-      if (winning) splits.push(<circle key={`${id}-w`} cx={cx(col)} cy={by(row)} r={5} fill={GOLD} opacity={0.9} style={{ pointerEvents: 'none' }} />)
-    }
-  }
-
-  for (let col = 0; col < COLS - 1; col++) {
-    for (let row = 0; row < ROWS; row++) {
-      const n1 = numAt(col, row), n2 = numAt(col + 1, row)
-      const sorted = [n1, n2].sort((a, b) => a - b)
-      const id = `split2:${sorted.join('-')}`
-      const hasBet = getBetOn(id) > 0, winning = isSplitWinning(id)
-      splits.push(
-        <rect key={id} x={bx(col) - HIT / 2} y={row * (cellH + GAP)} width={HIT} height={cellH}
-          fill={winning ? 'rgba(212,175,55,0.4)' : hasBet ? 'rgba(212,175,55,0.2)' : 'rgba(255,255,255,0.02)'}
-          style={{ cursor: locked ? 'default' : 'pointer', pointerEvents: locked ? 'none' : 'all' }}
-          onClick={e => addSplitBet([n1, n2], e as unknown as React.MouseEvent)} />
-      )
-      if (winning) splits.push(<circle key={`${id}-w`} cx={bx(col)} cy={cy(row)} r={5} fill={GOLD} opacity={0.9} style={{ pointerEvents: 'none' }} />)
-    }
-  }
-
-  for (let col = 0; col < COLS - 1; col++) {
-    for (let row = 0; row < ROWS - 1; row++) {
-      const nums = [numAt(col, row), numAt(col+1, row), numAt(col, row+1), numAt(col+1, row+1)]
-      const sorted = [...nums].sort((a, b) => a - b)
-      const id = `split4:${sorted.join('-')}`
-      const hasBet = getBetOn(id) > 0, winning = isSplitWinning(id)
-      const px = bx(col), py = by(row)
-      splits.push(
-        <circle key={id} cx={px} cy={py} r={HIT}
-          fill={winning ? 'rgba(212,175,55,0.5)' : hasBet ? 'rgba(212,175,55,0.25)' : 'rgba(255,255,255,0.03)'}
-          style={{ cursor: locked ? 'default' : 'pointer', pointerEvents: locked ? 'none' : 'all' }}
-          onClick={e => addSplitBet(nums, e as unknown as React.MouseEvent)} />
-      )
-      if (winning) splits.push(<circle key={`${id}-w`} cx={px} cy={py} r={4} fill={GOLD} style={{ pointerEvents: 'none' }} />)
-    }
-  }
+  if (!open) return null;
 
   return (
-    <div ref={containerRef} style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-      <svg width={dims.w} height={dims.h} style={{ position: 'absolute', inset: 0, overflow: 'visible' }}>
-        {splits}
-      </svg>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-white rounded-t-3xl sm:rounded-2xl w-full sm:max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-5 border-b border-cream-100">
+          <div>
+            <h3 className="font-bold text-navy-900">Nuevo {form.tipo === "ingreso" ? "Ingreso" : "Egreso"}</h3>
+            <p className="text-xs text-navy-400 mt-0.5">Completá los datos del movimiento</p>
+          </div>
+          <button onClick={onClose} className="p-2 rounded-xl hover:bg-cream-50 text-navy-400 transition-colors">
+            <XCircle size={18} />
+          </button>
+        </div>
+        <div className="p-5 space-y-4">
+          <div className="flex gap-2">
+            {(["ingreso", "egreso"] as const).map(t => (
+              <button key={t} onClick={() => setForm({ ...form, tipo: t })}
+                className={cn("flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-all",
+                  form.tipo === t
+                    ? t === "ingreso" ? "bg-emerald-500 text-white border-emerald-500" : "bg-rose-500 text-white border-rose-500"
+                    : "bg-white text-navy-400 border-cream-200 hover:border-navy-300")}>
+                {t === "ingreso" ? "Ingreso" : "Egreso"}
+              </button>
+            ))}
+          </div>
+          <div>
+            <label className="label-base">Monto *</label>
+            <div className="relative">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-navy-400 text-sm font-bold">$</span>
+              <input type="number" value={form.monto} onChange={e => setForm({ ...form, monto: e.target.value })}
+                className="input-base pl-7" placeholder="0.00" />
+            </div>
+          </div>
+          <div>
+            <label className="label-base">Descripción *</label>
+            <input value={form.descripcion} onChange={e => setForm({ ...form, descripcion: e.target.value })}
+              className="input-base" placeholder="Ej: Cuota viaje grupo A" />
+          </div>
+          <div>
+            <label className="label-base">Categoría</label>
+            <select value={form.categoria} onChange={e => setForm({ ...form, categoria: e.target.value })}
+              className="input-base">
+              <option value="">Seleccionar...</option>
+              {form.tipo === "ingreso"
+                ? ["cuota_viaje", "inscripcion", "sponsor", "subsidio", "otro_ingreso"].map(c =>
+                    <option key={c} value={c}>{c.replace("_", " ")}</option>)
+                : ["transporte", "alojamiento", "alimentacion", "seguro", "actividad", "otro_egreso"].map(c =>
+                    <option key={c} value={c}>{c.replace("_", " ")}</option>)
+              }
+            </select>
+          </div>
+          <div>
+            <label className="label-base">Fecha</label>
+            <input type="date" value={form.fecha} onChange={e => setForm({ ...form, fecha: e.target.value })}
+              className="input-base" />
+          </div>
+          <div>
+            <label className="label-base">Notas</label>
+            <textarea value={form.notas} onChange={e => setForm({ ...form, notas: e.target.value })}
+              className="input-base min-h-[72px] resize-none" placeholder="Observaciones opcionales..." />
+          </div>
+          <div className="flex gap-2 pt-1">
+            <Button variant="outline" className="flex-1" onClick={onClose}>Cancelar</Button>
+            <Button className="flex-1" disabled={!form.monto || !form.descripcion}>
+              Guardar movimiento
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
-  )
+  );
 }
 
+// ─── tab resumen ──────────────────────────────────────────────────────────────
+function TabResumen() {
+  const totalIngresos = MOCK_INGRESOS.filter(i => i.estado === "confirmado").reduce((s, i) => s + i.monto, 0);
+  const totalEgresos  = MOCK_EGRESOS.filter(e => e.estado === "confirmado").reduce((s, e) => s + e.monto, 0);
+  const resultado     = totalIngresos - totalEgresos;
+  const meta          = 700000;
+  const pct           = Math.min(Math.round((totalIngresos / meta) * 100), 100);
+  const pendIngresos  = MOCK_INGRESOS.filter(i => i.estado === "pendiente").reduce((s, i) => s + i.monto, 0);
+  const saldoTotal    = MOCK_INSTRUMENTOS.reduce((s, i) => s + i.saldo_actual, 0);
 
+  // flujo de caja simplificado (últimos 6 meses mock)
+  const meses = ["Oct", "Nov", "Dic", "Ene", "Feb", "Mar"];
+  const ingData = [20000, 45000, 60000, 95000, 200000, 353000];
+  const egrData = [10000, 25000, 35000, 50000, 120000, 317000];
+  const maxVal  = Math.max(...ingData, ...egrData);
 
+  return (
+    <div className="space-y-5">
+      {/* KPIs */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <KpiCard label="Ingresos confirmados" value={fmt(totalIngresos)} icon={<TrendingUp size={18} />} color="emerald" trend="up" />
+        <KpiCard label="Egresos confirmados"  value={fmt(totalEgresos)}  icon={<TrendingDown size={18} />} color="rose" />
+        <KpiCard label="Resultado neto"       value={fmt(resultado)}     icon={<Target size={18} />} color="amber"
+          sub={resultado >= 0 ? "Superávit" : "Déficit"} />
+        <KpiCard label="Saldo en instrumentos" value={fmt(saldoTotal)}   icon={<Wallet size={18} />} color="orange" />
+      </div>
 
+      {/* Meta de recaudación */}
+      <Card>
+        <CardHeader
+          title="Meta de recaudación"
+          subtitle={`${fmt(totalIngresos)} de ${fmt(meta)}`}
+          action={<span className="font-black text-2xl text-orange-500">{pct}%</span>}
+        />
+        <div className="h-3 bg-cream-100 rounded-full overflow-hidden mb-2">
+          <div className="h-full rounded-full transition-all duration-700"
+            style={{ width: `${pct}%`, background: "linear-gradient(90deg, #f97316, #fb923c)" }} />
+        </div>
+        <div className="flex items-center justify-between text-xs text-navy-400">
+          <span>{fmt(meta - totalIngresos)} restantes</span>
+          <span className="text-amber-600 font-semibold flex items-center gap-1">
+            <Clock size={11} /> {fmt(pendIngresos)} pendientes de cobro
+          </span>
+        </div>
+      </Card>
 
+      {/* Flujo de caja */}
+      <Card>
+        <CardHeader title="Flujo de caja" subtitle="Últimos 6 meses" />
+        <div className="flex items-end gap-2 h-32">
+          {meses.map((mes, i) => (
+            <div key={mes} className="flex-1 flex flex-col items-center gap-1">
+              <div className="w-full flex flex-col-reverse gap-0.5">
+                <div className="w-full rounded-t-md bg-rose-200 transition-all duration-500"
+                  style={{ height: `${(egrData[i] / maxVal) * 80}px` }} />
+                <div className="w-full rounded-t-md bg-emerald-400 transition-all duration-500"
+                  style={{ height: `${(ingData[i] / maxVal) * 80}px` }} />
+              </div>
+              <span className="text-[10px] text-navy-400 font-medium">{mes}</span>
+            </div>
+          ))}
+        </div>
+        <div className="flex items-center gap-4 mt-3 pt-3 border-t border-cream-100">
+          <span className="flex items-center gap-1.5 text-xs text-navy-500">
+            <span className="w-3 h-3 rounded-sm bg-emerald-400 inline-block" /> Ingresos
+          </span>
+          <span className="flex items-center gap-1.5 text-xs text-navy-500">
+            <span className="w-3 h-3 rounded-sm bg-rose-200 inline-block" /> Egresos
+          </span>
+        </div>
+      </Card>
 
+      {/* Últimos movimientos */}
+      <Card padding="none">
+        <div className="p-5 pb-3">
+          <CardHeader title="Últimos movimientos" subtitle="Actividad reciente" className="mb-0" />
+        </div>
+        <div className="divide-y divide-cream-100">
+          {[
+            ...MOCK_INGRESOS.slice(0, 3).map(i => ({ ...i, _tipo: "ingreso" as const })),
+            ...MOCK_EGRESOS.slice(0, 2).map(e => ({ ...e, _tipo: "egreso" as const })),
+          ]
+            .sort((a, b) => new Date(b.fecha_confirmada).getTime() - new Date(a.fecha_confirmada).getTime())
+            .slice(0, 5)
+            .map(mov => (
+              <div key={mov.id + mov._tipo} className="flex items-center gap-3 px-5 py-3 hover:bg-cream-50 transition-colors">
+                <div className={cn("p-2 rounded-xl flex-shrink-0",
+                  mov._tipo === "ingreso" ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-500")}>
+                  {mov._tipo === "ingreso" ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-navy-800 truncate">{mov.descripcion}</p>
+                  <p className="text-xs text-navy-400">{fmtDate(mov.fecha_confirmada)}</p>
+                </div>
+                <div className="text-right flex-shrink-0">
+                  <p className={cn("text-sm font-bold", mov._tipo === "ingreso" ? "text-emerald-600" : "text-rose-500")}>
+                    {mov._tipo === "ingreso" ? "+" : "-"}{fmt(mov.monto)}
+                  </p>
+                  <EstadoBadge estado={mov.estado} />
+                </div>
+              </div>
+            ))}
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+// ─── tab ingresos ─────────────────────────────────────────────────────────────
+function TabIngresos({ onAdd }: { onAdd: () => void }) {
+  const [search, setSearch] = useState("");
+  const [filtroEstado, setFiltroEstado] = useState<string>("todos");
+
+  const filtered = MOCK_INGRESOS.filter(i => {
+    const matchSearch = i.descripcion.toLowerCase().includes(search.toLowerCase());
+    const matchEstado = filtroEstado === "todos" || i.estado === filtroEstado;
+    return matchSearch && matchEstado;
+  });
+
+  const totalFiltrado = filtered.reduce((s, i) => s + i.monto, 0);
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap gap-2">
+          {["todos", "confirmado", "pendiente"].map(e => (
+            <button key={e} onClick={() => setFiltroEstado(e)}
+              className={cn("px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all",
+                filtroEstado === e
+                  ? "bg-orange-500 text-white border-orange-500"
+                  : "bg-white text-navy-500 border-cream-200 hover:border-orange-300")}>
+              {e === "todos" ? "Todos" : e.charAt(0).toUpperCase() + e.slice(1)}
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-2">
+          <div className="flex items-center gap-2 bg-cream-50 border border-cream-200 rounded-xl px-3 py-2">
+            <Search size={13} className="text-navy-300" />
+            <input value={search} onChange={e => setSearch(e.target.value)}
+              placeholder="Buscar..." className="bg-transparent text-sm text-navy-700 placeholder:text-navy-300 w-28" />
+          </div>
+          <Button size="sm" icon={<Plus size={13} />} onClick={onAdd}>Nuevo</Button>
+        </div>
+      </div>
+
+      <Card padding="none">
+        <div className="flex items-center justify-between px-5 py-3 bg-emerald-50 rounded-t-2xl border-b border-emerald-100">
+          <span className="text-xs font-semibold text-emerald-700">{filtered.length} movimientos</span>
+          <span className="text-sm font-black text-emerald-700">{fmt(totalFiltrado)}</span>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="border-b border-cream-100 bg-cream-50/50">
+              <tr>
+                <th className="table-th">Descripción</th>
+                <th className="table-th">Categoría</th>
+                <th className="table-th">Estudiante</th>
+                <th className="table-th text-right">Monto</th>
+                <th className="table-th">Fecha</th>
+                <th className="table-th">Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map(ing => (
+                <tr key={ing.id} className="table-row">
+                  <td className="table-td font-semibold text-navy-800">{ing.descripcion}</td>
+                  <td className="table-td">
+                    <span className="text-xs bg-cream-100 text-navy-500 px-2 py-0.5 rounded-lg font-medium">
+                      {ing.categoria.replace("_", " ")}
+                    </span>
+                  </td>
+                  <td className="table-td text-navy-500">{ing.estudiante ?? <span className="text-navy-300">—</span>}</td>
+                  <td className="table-td text-right font-bold text-emerald-700">{fmt(ing.monto)}</td>
+                  <td className="table-td text-navy-400">{fmtDate(ing.fecha_confirmada)}</td>
+                  <td className="table-td"><EstadoBadge estado={ing.estado} /></td>
+                </tr>
+              ))}
+              {filtered.length === 0 && (
+                <tr><td colSpan={6} className="text-center py-10 text-navy-400">Sin resultados</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+// ─── tab egresos ──────────────────────────────────────────────────────────────
+function TabEgresos({ onAdd }: { onAdd: () => void }) {
+  const [search, setSearch] = useState("");
+  const [filtroEstado, setFiltroEstado] = useState<string>("todos");
+
+  const filtered = MOCK_EGRESOS.filter(e => {
+    const matchSearch = e.descripcion.toLowerCase().includes(search.toLowerCase());
+    const matchEstado = filtroEstado === "todos" || e.estado === filtroEstado;
+    return matchSearch && matchEstado;
+  });
+
+  const totalFiltrado = filtered.reduce((s, e) => s + e.monto, 0);
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap gap-2">
+          {["todos", "confirmado", "pendiente"].map(e => (
+            <button key={e} onClick={() => setFiltroEstado(e)}
+              className={cn("px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all",
+                filtroEstado === e
+                  ? "bg-orange-500 text-white border-orange-500"
+                  : "bg-white text-navy-500 border-cream-200 hover:border-orange-300")}>
+              {e === "todos" ? "Todos" : e.charAt(0).toUpperCase() + e.slice(1)}
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-2">
+          <div className="flex items-center gap-2 bg-cream-50 border border-cream-200 rounded-xl px-3 py-2">
+            <Search size={13} className="text-navy-300" />
+            <input value={search} onChange={e => setSearch(e.target.value)}
+              placeholder="Buscar..." className="bg-transparent text-sm text-navy-700 placeholder:text-navy-300 w-28" />
+          </div>
+          <Button size="sm" icon={<Plus size={13} />} onClick={onAdd}>Nuevo</Button>
+        </div>
+      </div>
+
+      <Card padding="none">
+        <div className="flex items-center justify-between px-5 py-3 bg-rose-50 rounded-t-2xl border-b border-rose-100">
+          <span className="text-xs font-semibold text-rose-600">{filtered.length} movimientos</span>
+          <span className="text-sm font-black text-rose-600">{fmt(totalFiltrado)}</span>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="border-b border-cream-100 bg-cream-50/50">
+              <tr>
+                <th className="table-th">Descripción</th>
+                <th className="table-th">Categoría</th>
+                <th className="table-th">Proveedor</th>
+                <th className="table-th text-right">Monto</th>
+                <th className="table-th">Fecha</th>
+                <th className="table-th">Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map(egr => (
+                <tr key={egr.id} className="table-row">
+                  <td className="table-td font-semibold text-navy-800">{egr.descripcion}</td>
+                  <td className="table-td">
+                    <span className="text-xs bg-cream-100 text-navy-500 px-2 py-0.5 rounded-lg font-medium">
+                      {egr.categoria.replace("_", " ")}
+                    </span>
+                  </td>
+                  <td className="table-td text-navy-500">{egr.proveedor ?? <span className="text-navy-300">—</span>}</td>
+                  <td className="table-td text-right font-bold text-rose-600">{fmt(egr.monto)}</td>
+                  <td className="table-td text-navy-400">{fmtDate(egr.fecha_confirmada)}</td>
+                  <td className="table-td"><EstadoBadge estado={egr.estado} /></td>
+                </tr>
+              ))}
+              {filtered.length === 0 && (
+                <tr><td colSpan={6} className="text-center py-10 text-navy-400">Sin resultados</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+// ─── tab instrumentos ─────────────────────────────────────────────────────────
+function TabInstrumentos() {
+  const saldoTotal = MOCK_INSTRUMENTOS.reduce((s, i) => s + i.saldo_actual, 0);
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {MOCK_INSTRUMENTOS.map(inst => (
+          <div key={inst.id}
+            className={cn("rounded-2xl p-5 border-2 transition-all cursor-pointer hover:-translate-y-0.5 hover:shadow-lg",
+              inst.es_principal ? "border-orange-300 bg-orange-50" : "border-cream-200 bg-white")}>
+            <div className="flex items-start justify-between mb-4">
+              <InstrumentoIcon tipo={inst.tipo} />
+              <div className="flex flex-col items-end gap-1">
+                {inst.es_principal && (
+                  <span className="text-[10px] font-bold bg-orange-500 text-white px-2 py-0.5 rounded-full">PRINCIPAL</span>
+                )}
+                <span className={cn("w-2 h-2 rounded-full",
+                  inst.estado === "activa" ? "bg-emerald-500" : "bg-gray-300")} />
+              </div>
+            </div>
+            <p className="font-bold text-navy-800 text-sm leading-tight mb-0.5">{inst.nombre}</p>
+            <p className="text-xs text-navy-400 mb-3">
+              {inst.tipo === "cuenta_bancaria" && (inst as any).banco}
+              {inst.tipo === "mercado_pago" && (inst as any).mp_email}
+              {inst.tipo === "efectivo" && "Efectivo en mano"}
+            </p>
+            <p className="text-2xl font-black text-navy-900 tracking-tight">{fmt(inst.saldo_actual)}</p>
+            <p className="text-xs text-navy-400 mt-0.5">{Math.round((inst.saldo_actual / saldoTotal) * 100)}% del total</p>
+            <div className="mt-3 h-1.5 bg-cream-100 rounded-full overflow-hidden">
+              <div className="h-full bg-orange-400 rounded-full transition-all duration-500"
+                style={{ width: `${(inst.saldo_actual / saldoTotal) * 100}%` }} />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <Card>
+        <CardHeader title="Distribución de fondos" subtitle={`Total: ${fmt(saldoTotal)}`} />
+        <div className="space-y-3">
+          {MOCK_INSTRUMENTOS.map(inst => (
+            <div key={inst.id} className="flex items-center gap-3">
+              <InstrumentoIcon tipo={inst.tipo} />
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm font-semibold text-navy-700">{inst.nombre}</span>
+                  <span className="text-sm font-bold text-navy-900">{fmt(inst.saldo_actual)}</span>
+                </div>
+                <div className="h-2 bg-cream-100 rounded-full overflow-hidden">
+                  <div className="h-full rounded-full transition-all duration-700"
+                    style={{
+                      width: `${(inst.saldo_actual / saldoTotal) * 100}%`,
+                      background: inst.tipo === "cuenta_bancaria" ? "#3b82f6"
+                        : inst.tipo === "mercado_pago" ? "#0ea5e9" : "#22c55e"
+                    }} />
+                </div>
+              </div>
+              <span className="text-xs text-navy-400 w-10 text-right font-medium">
+                {Math.round((inst.saldo_actual / saldoTotal) * 100)}%
+              </span>
+            </div>
+          ))}
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+// ─── tab conciliacion ─────────────────────────────────────────────────────────
+function TabConciliacion() {
+  const pendientes = MOCK_CONCILIACIONES.filter(c => c.estado_conc === "pendiente");
+  const conciliados = MOCK_CONCILIACIONES.filter(c => c.estado_conc === "conciliado");
+
+  return (
+    <div className="space-y-4">
+      {/* Banner estado */}
+      <div className={cn("rounded-2xl p-4 flex items-center gap-3 border",
+        pendientes.length > 0 ? "bg-amber-50 border-amber-200" : "bg-emerald-50 border-emerald-200")}>
+        {pendientes.length > 0
+          ? <AlertCircle size={20} className="text-amber-600 flex-shrink-0" />
+          : <CheckCircle2 size={20} className="text-emerald-600 flex-shrink-0" />}
+        <div>
+          <p className={cn("text-sm font-bold", pendientes.length > 0 ? "text-amber-800" : "text-emerald-800")}>
+            {pendientes.length > 0
+              ? `${pendientes.length} movimiento${pendientes.length > 1 ? "s" : ""} sin conciliar`
+              : "Todo conciliado"}
+          </p>
+          <p className={cn("text-xs", pendientes.length > 0 ? "text-amber-600" : "text-emerald-600")}>
+            {pendientes.length > 0
+              ? "Revisá los movimientos pendientes y asignalos manualmente"
+              : "Todos los movimientos están reconciliados"}
+          </p>
+        </div>
+        {pendientes.length > 0 && (
+          <Button size="sm" className="ml-auto flex-shrink-0" icon={<Zap size={13} />}>
+            Auto-conciliar
+          </Button>
+        )}
+      </div>
+
+      {/* Movimientos pendientes */}
+      {pendientes.length > 0 && (
+        <Card padding="none">
+          <div className="p-5 pb-3 border-b border-cream-100">
+            <h4 className="font-semibold text-navy-800 text-sm">Pendientes de conciliación</h4>
+          </div>
+          <div className="divide-y divide-cream-100">
+            {pendientes.map(mov => (
+              <div key={mov.id} className="flex items-center gap-3 p-4 hover:bg-cream-50 transition-colors">
+                <div className={cn("p-2 rounded-xl flex-shrink-0",
+                  mov.tipo === "ingreso" ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-500")}>
+                  {mov.tipo === "ingreso" ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-navy-800">{mov.descripcion}</p>
+                  <p className="text-xs text-navy-400">{fmtDate(mov.fecha)}</p>
+                </div>
+                <p className={cn("text-sm font-bold flex-shrink-0",
+                  mov.tipo === "ingreso" ? "text-emerald-700" : "text-rose-600")}>
+                  {fmt(mov.monto)}
+                </p>
+                <Button size="sm" variant="outline" icon={<ArrowRightLeft size={12} />}>
+                  Asignar
+                </Button>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* Conciliados */}
+      <Card padding="none">
+        <div className="p-5 pb-3 border-b border-cream-100">
+          <h4 className="font-semibold text-navy-800 text-sm">Conciliados recientemente</h4>
+        </div>
+        <div className="divide-y divide-cream-100">
+          {conciliados.map(mov => (
+            <div key={mov.id} className="flex items-center gap-3 p-4">
+              <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600 flex-shrink-0">
+                <CheckCircle2 size={14} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-navy-700">{mov.descripcion}</p>
+                <p className="text-xs text-navy-400 flex items-center gap-1 mt-0.5">
+                  <ChevronRight size={10} />
+                  <span className="text-emerald-700 font-medium">{mov.match}</span>
+                </p>
+              </div>
+              <div className="text-right flex-shrink-0">
+                <p className="text-sm font-bold text-navy-800">{fmt(mov.monto)}</p>
+                <div className="flex items-center gap-1 justify-end mt-0.5">
+                  <span className="text-[10px] text-navy-400">confianza</span>
+                  <span className={cn("text-[11px] font-bold",
+                    (mov.confianza ?? 0) >= 0.9 ? "text-emerald-600" : "text-amber-600")}>
+                    {Math.round((mov.confianza ?? 0) * 100)}%
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+// ─── page principal ───────────────────────────────────────────────────────────
+export default function FinancePage() {
+  const [tab, setTab] = useState<Tab>("resumen");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalTipo, setModalTipo] = useState<"ingreso" | "egreso">("ingreso");
+
+  const openModal = (tipo: "ingreso" | "egreso") => {
+    setModalTipo(tipo);
+    setModalOpen(true);
+  };
+
+  const pendientesConciliacion = MOCK_CONCILIACIONES.filter(c => c.estado_conc === "pendiente").length;
+
+  return (
+    <div className="space-y-5 page-enter">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-black text-navy-900 leading-tight">Finanzas</h1>
+          <p className="text-xs text-navy-400 mt-0.5">Gestión financiera del viaje</p>
+        </div>
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" icon={<Download size={13} />} className="hidden sm:flex">
+            Exportar
+          </Button>
+          <Button size="sm" icon={<Plus size={13} />} onClick={() => openModal("ingreso")}>
+            Agregar
+          </Button>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-1 bg-cream-50 border border-cream-200 rounded-2xl p-1 overflow-x-auto">
+        {TABS.map(t => (
+          <button key={t.key} onClick={() => setTab(t.key)}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap relative",
+              tab === t.key
+                ? "bg-white text-navy-800 shadow-sm"
+                : "text-navy-400 hover:text-navy-600"
+            )}>
+            {t.icon}
+            {t.label}
+            {t.key === "conciliacion" && pendientesConciliacion > 0 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-amber-500 text-white text-[9px] font-black flex items-center justify-center">
+                {pendientesConciliacion}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* Contenido */}
+      {tab === "resumen"      && <TabResumen />}
+      {tab === "ingresos"     && <TabIngresos onAdd={() => openModal("ingreso")} />}
+      {tab === "egresos"      && <TabEgresos onAdd={() => openModal("egreso")} />}
+      {tab === "instrumentos" && <TabInstrumentos />}
+      {tab === "conciliacion" && <TabConciliacion />}
+
+      {/* Modal */}
+      <ModalNuevaTransaccion open={modalOpen} onClose={() => setModalOpen(false)} tipo={modalTipo} />
+    </div>
+  );
+}
