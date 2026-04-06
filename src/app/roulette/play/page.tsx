@@ -444,7 +444,7 @@ export default function RoulettePlayPage() {
           </div>
         </div>
         {/* --- RUEDA SVG --- */}
-        <div style={{ background: "radial-gradient(ellipse at center, #1a0e00 0%, #0a0a0a 70%)", padding: "16px 12px", display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <div style={{ background: "radial-gradient(ellipse at center, #1a0e00 0%, #0a0a0a 70%)", padding: "20px 12px 20px", display: "flex", flexDirection: "column", alignItems: "center" }}>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
           <div style={{ position: 'relative', width: 280, height: 280 }}>
             <svg width="280" height="280" viewBox="0 0 240 240" style={{ overflow: 'visible' }}>
@@ -535,7 +535,7 @@ export default function RoulettePlayPage() {
         </div>{/* fin zona rueda */}
 
         {/* --- FICHAS HORIZONTALES --- */}
-        <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", gap: "8px", padding: "10px 16px 6px", background: DARK }}>
+        <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", gap: "8px", padding: "0 16px 6px", background: DARK }}>
           {CHIP_DEFS.map(chip => {
             const isActive = selectedChip.value === chip.value
             const fontSize = chip.label.length > 2 ? "0.45rem" : "0.6rem"
