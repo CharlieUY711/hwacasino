@@ -126,3 +126,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Error interno' }, { status: 500 })
   }
 }
+

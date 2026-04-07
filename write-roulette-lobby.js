@@ -145,3 +145,4 @@ if (fs.existsSync('src/app/roulette/page.tsx')) {
 fs.writeFileSync('src/app/roulette/page.tsx', content, 'utf8');
 console.log('✅ Lobby de ruleta creado en /roulette/page.tsx');
 console.log('✅ Listo — /roulette = lobby de mesas, /roulette/play = juego');
+

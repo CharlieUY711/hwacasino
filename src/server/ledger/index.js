@@ -10,3 +10,4 @@ export function addEntry(entry) {
 export function getLedger() {
   return ledger;
 }
+

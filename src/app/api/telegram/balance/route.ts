@@ -13,3 +13,4 @@ async function handle(telegram_id: string | null) {
 
 export async function GET(req: NextRequest) { return handle(req.nextUrl.searchParams.get("telegram_id")) }
 export async function POST(req: NextRequest) { const b = await req.json(); return handle(String(b.telegram_id)) }
+

@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getSupabase } from '@/lib/rouletteEngine'
 
 export async function POST(req: NextRequest) {

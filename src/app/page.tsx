@@ -379,3 +379,4 @@ async function handleRegister() {
     </main>
   )
 }
+

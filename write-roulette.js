@@ -204,3 +204,4 @@ export default function RoulettePage() {
 
 fs.writeFileSync('src/app/roulette/page.tsx', content, 'utf8');
 console.log('✅ roulette/page.tsx creado correctamente');
+

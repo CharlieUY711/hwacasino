@@ -19,3 +19,4 @@ export async function POST(req: NextRequest) {
   const { data: updated } = await supabase.from("wallets").select("balance").eq("user_id", p.id).single()
   return NextResponse.json({ ok: true, new_balance: updated?.balance ?? 0 })
 }
+

@@ -44,3 +44,4 @@ export function useWallet() {
   const formatChips = (n: number) => n.toLocaleString('es-UY') + ' CHIPS'
   return { balance, loading, formatChips, username }
 }
+

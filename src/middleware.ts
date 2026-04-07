@@ -44,3 +44,4 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: ['/lobby/:path*', '/roulette/:path*', '/blackjack/:path*'],
 }
+

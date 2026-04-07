@@ -29,3 +29,4 @@ function Stat({ label, value }) {
     </div>
   );
 }
+

@@ -17,3 +17,4 @@ if (content.includes(old)) {
 } else {
   console.log('❌ No se encontró el bloque — revisá el archivo manualmente');
 }
+

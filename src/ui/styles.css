@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.bet-cell {
+  @apply border border-yellow-600 flex items-center justify-center font-black cursor-pointer text-[10px];
+}
+
+.coin {
+  @apply rounded-full flex items-center justify-center font-black cursor-pointer;
+  background: radial-gradient(circle at 30% 30%, #f2ca50 0%, #d4af37 50%, #8b6b00 100%);
+}
+
+.chip-active {
+  @apply scale-110 border-2 border-white;
+}

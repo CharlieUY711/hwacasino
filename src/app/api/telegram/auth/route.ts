@@ -48,3 +48,4 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({ access_token: accessToken, refresh_token: refreshToken });
 }
+

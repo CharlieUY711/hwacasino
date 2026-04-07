@@ -123,6 +123,12 @@ function FloatingChip({ bet, winning }: { bet: Bet; winning: boolean }) {
 }
 
 export default function RoulettePlayPage() {
+
+  async function getBackendSpin() {
+    const res = await fetch('process.env.NEXT_PUBLIC_API_URL/spin')
+    const data = await res.json()
+    return data.number
+  }
   const router = useRouter()
   const { balance, formatChips, username } = useWallet()
   const [userId, setUserId] = useState<string | null>(null)
@@ -198,22 +204,19 @@ export default function RoulettePlayPage() {
     const params = new URLSearchParams(window.location.search)
     const r = params.get('room') ?? 'vip-1'
 
+  // 💎 SALON ESMERALDA UI PRO
+  
+
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) return
-      const channel = supabase.channel(`presence:${r}`, {
-        config: { presence: { key: user.id } },
-      })
-      channel
-        .on('presence', { event: 'sync' }, () => {
-          const count = Object.keys(channel.presenceState()).length
-          setOnlineCount(count)
-        })
+      
+      )
         .subscribe(async (status) => {
           if (status === 'SUBSCRIBED') {
             await channel.track({ user_id: user.id, room: r, online_at: new Date().toISOString() })
           }
         })
-      return () => { supabase.removeChannel(channel) }
+      return () => {  }
     })
   }, [])
 
@@ -221,6 +224,9 @@ export default function RoulettePlayPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const r = params.get('room') ?? 'vip-1'
+
+  // 💎 SALON ESMERALDA UI PRO
+  
     setRoom(r)
 
     const poll = async () => {
@@ -356,7 +362,7 @@ export default function RoulettePlayPage() {
       let winColor: string | null = null
 
       try {
-        const res = await fetch('/api/play/roulette', {
+        const res = await fetch('process.env.NEXT_PUBLIC_API_URL/spin', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1006,6 +1012,15 @@ function SplitOverlay({
     </div>
   )
 }
+
+
+
+
+
+
+
+
+
 
 
 

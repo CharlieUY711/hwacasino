@@ -5,3 +5,4 @@ export async function loginWithEmail(email: string, password: string) {
   if (error) throw new Error(error.message)
   return data
 }
+
