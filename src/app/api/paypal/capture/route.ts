@@ -1,129 +1,119 @@
-// src/app/api/paypal/capture/route.ts
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-const PAYPAL_BASE = process.env.PAYPAL_MODE === 'live'
+const BASE = process.env.PAYPAL_MODE === 'live'
   ? 'https://api-m.paypal.com'
   : 'https://api-m.sandbox.paypal.com'
 
-function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
-}
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
-async function getPayPalToken(): Promise<string> {
-  const clientId     = process.env.PAYPAL_CLIENT_ID!
-  const clientSecret = process.env.PAYPAL_CLIENT_SECRET!
-  const credentials  = Buffer.from(`${clientId}:${clientSecret}`).toString('base64')
-
-  const res = await fetch(`${PAYPAL_BASE}/v1/oauth2/token`, {
+async function getAccessToken() {
+  const res = await fetch(`${BASE}/v1/oauth2/token`, {
     method: 'POST',
     headers: {
-      'Authorization': `Basic ${credentials}`,
-      'Content-Type':  'application/x-www-form-urlencoded',
+      'Authorization': `Basic ${Buffer.from(
+        `${process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`
+      ).toString('base64')}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
     },
     body: 'grant_type=client_credentials',
   })
-
-  if (!res.ok) throw new Error('No se pudo obtener token PayPal')
   const data = await res.json()
-  return data.access_token
+  return data.access_token as string
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   try {
     const { order_id } = await req.json()
+    if (!order_id) return NextResponse.json({ error: 'order_id requerido' }, { status: 400 })
 
-    if (!order_id) {
-      return NextResponse.json({ error: 'Falta order_id' }, { status: 400 })
-    }
-
-    const supabase = getSupabase()
-
-    // Buscar el depósito pendiente
-    const { data: deposit, error: fetchError } = await supabase
-      .from('deposits')
-      .select('*')
-      .eq('paypal_order_id', order_id)
-      .eq('status', 'pending')
-      .single()
-
-    if (fetchError || !deposit) {
-      return NextResponse.json({ error: 'Deposito no encontrado o ya procesado' }, { status: 404 })
-    }
+    const token = await getAccessToken()
 
     // Capturar el pago en PayPal
-    const token      = await getPayPalToken()
-    const captureRes = await fetch(`${PAYPAL_BASE}/v2/checkout/orders/${order_id}/capture`, {
+    const res = await fetch(`${BASE}/v2/checkout/orders/${order_id}/capture`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
-        'Content-Type':  'application/json',
+        'Content-Type': 'application/json',
       },
     })
 
-    if (!captureRes.ok) {
-      const err = await captureRes.json()
-      console.error('PayPal capture error:', err)
-      return NextResponse.json({ error: 'Error capturando pago PayPal' }, { status: 500 })
+    const data = await res.json()
+    if (!res.ok || data.status !== 'COMPLETED') {
+      console.error('[paypal/capture]', data)
+      return NextResponse.json({ error: 'Pago no completado' }, { status: 400 })
     }
 
-    const capture     = await captureRes.json()
-    const captureStatus = capture.status
+    // Extraer datos del pago
+    const unit      = data.purchase_units[0]
+    const capture   = unit.payments.captures[0]
+    const amount    = parseFloat(capture.amount.value)
+    const user_id   = unit.custom_id
+    const paypal_id = capture.id
 
-    if (captureStatus !== 'COMPLETED') {
-      return NextResponse.json(
-        { error: `Pago no completado: ${captureStatus}` },
-        { status: 400 }
-      )
+    // Verificar que no se procesó antes (idempotencia)
+    const { data: existing } = await supabase
+      .from('wallet_transactions')
+      .select('id')
+      .eq('reference_id', paypal_id)
+      .single()
+
+    if (existing) {
+      return NextResponse.json({ error: 'Pago ya procesado' }, { status: 409 })
     }
 
-    // Acreditar Nectar en el wallet — operacion atomica
-    const { error: walletError } = await supabase.rpc('increment_wallet_balance', {
-      p_user_id: deposit.user_id,
-      p_amount:  deposit.nectar_amount,
-    })
+    // Obtener wallet actual
+    const { data: wallet } = await supabase
+      .from('wallets')
+      .select('id, balances')
+      .eq('user_id', user_id)
+      .single()
 
-    if (walletError) {
-      console.error('Wallet credit error:', walletError)
-      // Marcar como error para revision manual
-      await supabase
-        .from('deposits')
-        .update({ status: 'error' })
-        .eq('paypal_order_id', order_id)
-      return NextResponse.json({ error: 'Error acreditando Nectar' }, { status: 500 })
+    if (!wallet) {
+      return NextResponse.json({ error: 'Wallet no encontrada' }, { status: 404 })
     }
 
-    // Registrar transaccion
-    await supabase.from('transactions').insert({
-      user_id:      deposit.user_id,
-      type:         'deposit',
-      amount:       deposit.nectar_amount,
-      direction:    'credit',
-      reference_id: order_id,
-      metadata:     { platform: 'web', amount_usd: deposit.amount_usd, paypal_order_id: order_id },
-    })
+    const currentUSD   = parseFloat(wallet.balances?.USD ?? 0)
+    const newUSD       = currentUSD + amount
+    const newBalances  = { ...wallet.balances, USD: newUSD }
 
-    // Marcar depósito como completado
+    // Actualizar wallet
     await supabase
-      .from('deposits')
-      .update({
-        status:       'completed',
-        completed_at: new Date().toISOString(),
+      .from('wallets')
+      .update({ balances: newBalances, updated_at: new Date().toISOString() })
+      .eq('user_id', user_id)
+
+    // Registrar transacción
+    await supabase
+      .from('wallet_transactions')
+      .insert({
+        user_id,
+        wallet_id:      wallet.id,
+        currency:       'USD',
+        amount,
+        balance_before: currentUSD,
+        balance_after:  newUSD,
+        type:           'deposit',
+        reference_id:   paypal_id,
+        metadata: {
+          method:   'paypal',
+          order_id,
+          paypal_capture_id: paypal_id,
+        },
       })
-      .eq('paypal_order_id', order_id)
 
     return NextResponse.json({
       success:      true,
-      nectar_added: deposit.nectar_amount,
-      amount_usd:   deposit.amount_usd,
+      amount_usd:   amount,
+      new_balance:  newUSD,
+      currency:     'USD',
     })
 
   } catch (err) {
-    console.error('capture error:', err)
+    console.error('[paypal/capture] catch', err)
     return NextResponse.json({ error: 'Error interno' }, { status: 500 })
   }
 }
-
