@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+﻿import { createClient } from '@supabase/supabase-js'
 
 export const ROUND_DURATION_SECONDS = parseInt(
   process.env.ROUND_DURATION_SECONDS ?? '40'

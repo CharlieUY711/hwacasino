@@ -123,12 +123,6 @@ function FloatingChip({ bet, winning }: { bet: Bet; winning: boolean }) {
 }
 
 export default function RoulettePlayPage() {
-
-  async function getBackendSpin() {
-    const res = await fetch('process.env.NEXT_PUBLIC_API_URL/spin')
-    const data = await res.json()
-    return data.number
-  }
   const router = useRouter()
   const { balance, formatChips, username } = useWallet()
   const [userId, setUserId] = useState<string | null>(null)
@@ -204,20 +198,38 @@ export default function RoulettePlayPage() {
     const params = new URLSearchParams(window.location.search)
     const r = params.get('room') ?? 'vip-1'
 
-  // 💎 SALON ESMERALDA UI PRO
-  
+    let presenceChannel: ReturnType<typeof supabase.channel> | null = null
 
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) return
-      
-      )
+
+      presenceChannel = supabase.channel(`presence:${r}`, {
+        config: { presence: { key: user.id } },
+      })
+
+      presenceChannel
+        .on('presence', { event: 'sync' }, () => {
+          if (!presenceChannel) return
+          const count = Object.keys(presenceChannel.presenceState()).length
+          setOnlineCount(count)
+        })
         .subscribe(async (status) => {
-          if (status === 'SUBSCRIBED') {
-            await channel.track({ user_id: user.id, room: r, online_at: new Date().toISOString() })
+          if (status === 'SUBSCRIBED' && presenceChannel) {
+            await presenceChannel.track({
+              user_id:   user.id,
+              room:      r,
+              online_at: new Date().toISOString(),
+            })
           }
         })
-      return () => {  }
     })
+
+    return () => {
+      if (presenceChannel) {
+        supabase.removeChannel(presenceChannel)
+        presenceChannel = null
+      }
+    }
   }, [])
 
   // --- POLLING DE RONDA ---
@@ -225,7 +237,6 @@ export default function RoulettePlayPage() {
     const params = new URLSearchParams(window.location.search)
     const r = params.get('room') ?? 'vip-1'
 
-  // 💎 SALON ESMERALDA UI PRO
   
     setRoom(r)
 
@@ -362,7 +373,7 @@ export default function RoulettePlayPage() {
       let winColor: string | null = null
 
       try {
-        const res = await fetch('process.env.NEXT_PUBLIC_API_URL/spin', {
+        const res = await fetch('/api/play/roulette', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -376,7 +387,7 @@ export default function RoulettePlayPage() {
           setSpinning(false)
           return
         }
-        winNum = data.number
+        winNum = data.result ?? data.number
         winColor = data.color
         netPayout = data.payout
         anyWin = data.won
@@ -392,21 +403,23 @@ export default function RoulettePlayPage() {
       animateWheelTo(winIdx)
 
       setTimeout(() => {
+        // 1. Mostrar resultado — apuestas siguen en el pano
         setResultNumber(winNum)
         setResultColor(winColor)
         setHistory(prev => [winNum!, ...prev].slice(0, 30))
         setTotalPayout(netPayout)
         setTotalWon(anyWin)
         setLastBets(betsSnap)
-        setBets([])
         setSpinning(false)
+        setShowResult(true)
+
+        // 2. Despues de mostrar el pago, limpiar el pano y abrir nueva ronda
         setTimeout(() => {
-          setShowResult(true)
-          setTimeout(() => {
-            setShowResult(false)
-            setResultNumber(null)
-          }, 2000)
-        }, 1000)
+          setShowResult(false)
+          setResultNumber(null)
+          setBets([])        // limpiar DESPUES del pago
+          setHasBetThisRound(false)  // abrir apuestas nuevamente
+        }, 3000)
       }, 6200)
       return
     }
@@ -508,7 +521,7 @@ export default function RoulettePlayPage() {
         <div style={{ padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(212,175,55,0.12)', background: 'rgba(10,10,10,0.95)', position: 'sticky', top: 0, zIndex: 90, gap: '8px' }}>
 
           {/* Volver */}
-          <button onClick={() => router.push('/roulette')} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '0.5rem', letterSpacing: '0.15em', fontFamily: "'Montserrat', sans-serif", display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', flexShrink: 0 }}>
+          <button onClick={() => router.push('/roulette')} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '0.75rem', letterSpacing: '0.15em', fontFamily: "'Montserrat', sans-serif", display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', flexShrink: 0 }}>
             {String.fromCharCode(8592)} Volver
           </button>
           {/* Logo + Titulo */}
@@ -1012,13 +1025,6 @@ function SplitOverlay({
     </div>
   )
 }
-
-
-
-
-
-
-
 
 
 
