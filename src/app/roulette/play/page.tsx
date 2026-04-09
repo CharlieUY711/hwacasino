@@ -138,6 +138,10 @@ export default function RoulettePlayPage() {
   const [activeTab, setActiveTab]       = useState<'hot' | 'cold' | 'history'>('hot')
   const [error, setError]               = useState<string | null>(null)
   const [showResult, setShowResult]     = useState(false)
+  const [showPayout, setShowPayout]     = useState(false)
+  const [phase, setPhase]               = useState<'idle'|'spinning'|'result'|'payout'>('idle')
+
+  const [displayBalance, setDisplayBalance] = useState<number | null>(null) // balance ajustado post-resultado
 
   // --- ESTADO MULTIPLAYER ---
   const [room, setRoom]                       = useState('vip-1')
@@ -203,7 +207,8 @@ export default function RoulettePlayPage() {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) return
 
-      presenceChannel = supabase.channel(`presence:${r}`, {
+      const channelName = `presence:${r}:${Date.now()}`
+    presenceChannel = supabase.channel(channelName, {
         config: { presence: { key: user.id } },
       })
 
@@ -397,13 +402,15 @@ export default function RoulettePlayPage() {
         return
       }
 
-      // Animar la rueda al número ganador
+      // Girar la rueda
+      setPhase('spinning')
       const winIdx = WHEEL_ORDER.indexOf(winNum!)
       setResultNumber(null)
       animateWheelTo(winIdx)
 
       setTimeout(() => {
-        // 1. Mostrar resultado — apuestas siguen en el pano
+        // Rueda para
+        setPhase('result')
         setResultNumber(winNum)
         setResultColor(winColor)
         setHistory(prev => [winNum!, ...prev].slice(0, 30))
@@ -411,15 +418,25 @@ export default function RoulettePlayPage() {
         setTotalWon(anyWin)
         setLastBets(betsSnap)
         setSpinning(false)
-        setShowResult(true)
 
-        // 2. Despues de mostrar el pago, limpiar el pano y abrir nueva ronda
+        // +1s: mostrar Ganado y ajustar balance
         setTimeout(() => {
-          setShowResult(false)
-          setResultNumber(null)
-          setBets([])        // limpiar DESPUES del pago
-          setHasBetThisRound(false)  // abrir apuestas nuevamente
-        }, 3000)
+          setPhase('payout')
+          setShowPayout(true)
+          setShowResult(true)
+          const betTotal = betsSnap.reduce((s, b) => s + b.amount, 0)
+          setDisplayBalance(prev => (prev !== null ? prev : 0) - betTotal + (netPayout ?? 0))
+
+          // +3s: limpiar — volver a idle
+          setTimeout(() => {
+            setBets([])
+            setLastBets([])
+            setShowResult(false)
+            setShowPayout(false)
+            setPhase('idle')
+            setTimeout(() => { setResultNumber(null); setResultColor(null) }, 300)
+          }, 3000)
+        }, 1000)
       }, 6200)
       return
     }
@@ -455,8 +472,8 @@ export default function RoulettePlayPage() {
 
   // Estado del boton APOSTAR
   const canBet = isSolo
-    ? bets.length > 0 && !spinning
-    : roundStatus === 'betting' && !hasBetThisRound && bets.length > 0 && !spinning
+    ? bets.length > 0 && phase === 'idle'
+    : roundStatus === 'betting' && !hasBetThisRound && bets.length > 0 && phase === 'idle'
   const btnLabel = spinning ? '...'
     : waitingForResult ? 'ESPERANDO'
     : hasBetThisRound  ? 'APOSTASTE'
@@ -467,6 +484,11 @@ export default function RoulettePlayPage() {
 
   // Color del countdown
   const countdownColor = secondsRemaining <= 10 ? '#f87171' : GOLD
+
+  // Sincronizar displayBalance con balance del servidor (Realtime)
+  useEffect(() => {
+    if (!showPayout) setDisplayBalance(balance)
+  }, [balance, showPayout])
 
   return (
     <>
@@ -518,33 +540,51 @@ export default function RoulettePlayPage() {
 
 
         {/* --- HEADER --- */}
-        <div style={{ padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(212,175,55,0.12)', background: 'rgba(10,10,10,0.95)', position: 'sticky', top: 0, zIndex: 90, gap: '8px' }}>
+        <div style={{ padding: '6px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(212,175,55,0.12)', background: 'rgba(10,10,10,0.95)', position: 'sticky', top: 0, zIndex: 90, gap: '8px' }}>
 
           {/* Volver */}
-          <button onClick={() => router.push('/roulette')} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '0.75rem', letterSpacing: '0.15em', fontFamily: "'Montserrat', sans-serif", display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', flexShrink: 0 }}>
-            {String.fromCharCode(8592)} Volver
+          <button onClick={() => router.push('/roulette')} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1rem', letterSpacing: '0.1em', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', flexShrink: 0 }}>
+            ← Volver
           </button>
           {/* Logo + Titulo */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-            <img src='/logo-dorado.jpg' alt='HWA' style={{ height: '22px', width: 'auto' }} />
-            <span style={{ fontSize: '0.5rem', letterSpacing: '0.25em', color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>RULETA</span>
+            <img src='/logo-dorado.jpg' alt='HWA' style={{ height: '20px', width: 'auto' }} />
+            <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1rem', letterSpacing: '0.15em', color: GOLD }}>Roulette Sophie</span>
           </div>
 
           {/* Usuario + Balance */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginLeft: 'auto' }}>
-            {showResult && resultNumber !== null ? (
-              <span style={{ fontSize: '0.5rem', color: totalWon ? GOLD : '#f87171', fontWeight: 700, letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
-                {resultNumber} · {totalWon ? '+' + totalPayout!.toLocaleString('es-UY') : '-' + bets.reduce((s,b)=>s+b.amount,0).toLocaleString('es-UY')} <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic' }}>N</span>
+
+            {/* Etiqueta: Apuesta (rojo) mientras apuesta/gira, Ganado (verde/gris) 1s despues de parar */}
+            {showPayout ? (
+              <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1rem', color: totalWon ? '#4ade80' : 'rgba(255,255,255,0.3)', whiteSpace: 'nowrap', transition: 'color 0.4s' }}>
+                Ganado: {(totalWon ? totalPayout! : 0).toLocaleString('es-UY')}
+                <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic' }}> N</span>
               </span>
-            ) : totalBet > 0 ? (
-              <span style={{ fontSize: '0.5rem', color: '#f87171', fontWeight: 700, letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>Apuesta: {totalBet.toLocaleString('es-UY')} <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic' }}>N</span></span>
+            ) : (totalBet > 0 || (hasBetThisRound && lastBets.length > 0)) ? (
+              <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1rem', color: '#f87171', whiteSpace: 'nowrap' }}>
+                Apuesta: {hasBetThisRound ? lastBets.reduce((s,b)=>s+b.amount,0).toLocaleString('es-UY') : totalBet.toLocaleString('es-UY')}
+                <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic' }}> N</span>
+              </span>
             ) : null}
-            <span style={{ fontSize: '0.5rem', color: 'rgba(255,255,255,0.7)', fontWeight: 700, letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>{username}</span>
-            <span style={{ fontSize: '0.5rem', color: GOLD, fontWeight: 700, letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>{balance.toLocaleString('es-UY')} <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic' }}>N</span></span>
+
+            <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1rem', color: 'rgba(255,255,255,0.5)', whiteSpace: 'nowrap' }}>{username}</span>
+
+            {/* Balance: descontado mientras apuesta/gira, ajustado 1s despues de resultado */}
+            <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1rem', color: GOLD, whiteSpace: 'nowrap', transition: 'all 0.5s' }}>
+              {Math.max(0, showPayout
+                ? (displayBalance ?? balance)
+                : balance - (hasBetThisRound
+                    ? lastBets.reduce((s,b)=>s+b.amount,0)
+                    : totalBet)
+              ).toLocaleString('es-UY')}
+              <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic' }}> N</span>
+            </span>
+
           </div>
         </div>
         {/* --- RUEDA SVG --- */}
-        <div style={{ background: "radial-gradient(ellipse at center, #1a0e00 0%, #0a0a0a 70%)", padding: "20px 12px 20px", display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <div style={{ background: "radial-gradient(ellipse at center, #1a0e00 0%, #0a0a0a 70%)", padding: "20px 12px 8px", display: "flex", flexDirection: "column", alignItems: "center" }}>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
           <div style={{ position: 'relative', width: 280, height: 280 }}>
             <svg width="280" height="280" viewBox="0 0 240 240" style={{ overflow: 'visible' }}>
@@ -590,21 +630,31 @@ export default function RoulettePlayPage() {
                   const angle = ((i / 37) * 360 - 360/37/2) * Math.PI / 180
                   return (
                     <line key={`sep-${i}`}
-                      x1={120 + 55 * Math.cos(angle)} y1={120 + 55 * Math.sin(angle)}
+                      x1={120 + 2 * Math.cos(angle)} y1={120 + 2 * Math.sin(angle)}
                       x2={120 + 108 * Math.cos(angle)} y2={120 + 108 * Math.sin(angle)}
-                      stroke="rgba(212,175,55,0.5)" strokeWidth="0.8" />
+                      stroke="rgba(212,175,55,0.6)" strokeWidth="0.8" />
                   )
                 })}
               </g>
+              {/* Media esfera central — dorada en reposo, color resultado al girar */}
+              <defs>
+                <radialGradient id="centerGrad" cx="38%" cy="32%" r="65%">
+                  <stop offset="0%" stopColor={resultNumber !== null && !spinning ? "#fff" : "#f5d060"} stopOpacity="0.9"/>
+                  <stop offset="50%" stopColor={resultNumber !== null && !spinning ? colorHex(resultColor ?? "black") : GOLD}/>
+                  <stop offset="100%" stopColor={resultNumber !== null && !spinning ? colorHex(resultColor ?? "black") : "#7a5a10"}/>
+                </radialGradient>
+              </defs>
+              <circle cx="120" cy="120" r="18" fill="url(#centerGrad)" stroke={GOLD} strokeWidth="1.2"/>
+              
+              {resultNumber !== null && !spinning && (
+                <text x="120" y="120" textAnchor="middle" dominantBaseline="central"
+                  fill="#fff" fontSize="26" fontWeight="700" fontFamily="Cormorant Garamond, serif">
+                  {resultNumber}
+                </text>
+              )}
               <polygon points="120,16 117.5,6 122.5,6" fill={GOLD} filter="url(#shadow)" />
               <circle cx="120" cy="16" r="2" fill="#0d0d0d" />
             </svg>
-
-            {resultNumber !== null && !spinning && (
-              <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 56, height: 56, borderRadius: '50%', background: colorHex(resultColor!), border: `2px solid ${GOLD}`, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}>
-                <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.8rem', color: '#fff', fontWeight: 700 }}>{resultNumber}</span>
-              </div>
-            )}
           </div>
 
           {/* COUNTDOWN + INFO DE RONDA */}
@@ -635,14 +685,13 @@ export default function RoulettePlayPage() {
         </div>{/* fin zona rueda */}
 
         {/* --- FICHAS HORIZONTALES --- */}
-        <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", gap: "8px", padding: "0 16px 6px", background: DARK }}>
+        <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", gap: "8px", padding: "0 16px 4px", background: DARK }}>
           {CHIP_DEFS.map(chip => {
             const isActive = selectedChip.value === chip.value
-            const fontSize = chip.label.length > 2 ? "0.45rem" : "0.6rem"
             return (
               <button key={chip.value} className={`chip-btn${isActive ? " active" : ""}`}
                 onClick={() => setSelectedChip(chip)}
-                style={{ width: 34, height: 34, borderRadius: "50%", background: isActive ? `radial-gradient(circle at 35% 35%, #f5d060, ${GOLD} 50%, #a07820)` : `radial-gradient(circle at 35% 35%, #e8c540, ${GOLD} 55%, #8a6510)`, border: `2px dashed ${isActive ? "#fff" : CHIP_BORDER}`, color: chip.color, fontFamily: "Montserrat, sans-serif", fontWeight: 900, fontSize, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: isActive ? `0 0 10px rgba(212,175,55,0.8)` : `0 2px 6px rgba(0,0,0,0.6)`, cursor: "pointer" }}>
+                style={{ width: 34, height: 34, borderRadius: "50%", background: isActive ? `radial-gradient(circle at 35% 35%, #f5d060, ${GOLD} 50%, #a07820)` : `radial-gradient(circle at 35% 35%, #e8c540, ${GOLD} 55%, #8a6510)`, border: `2px dashed ${isActive ? "#fff" : CHIP_BORDER}`, color: chip.color, fontFamily: "Montserrat, sans-serif", fontWeight: 900, fontSize: "0.6rem", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: isActive ? `0 0 10px rgba(212,175,55,0.8)` : `0 2px 6px rgba(0,0,0,0.6)`, cursor: "pointer" }}>
                 {chip.label}
               </button>
             )
@@ -650,16 +699,35 @@ export default function RoulettePlayPage() {
         </div>
 
         {/* --- BOTONERA: ACCIONES + GIRAR (encima del paño) --- */}
-        <div style={{ display: 'flex', gap: '4px', alignItems: 'stretch', padding: '0 16px 8px' }}>
-          {error && <p style={{ textAlign: 'center', color: '#f87171', fontSize: '0.55rem', letterSpacing: '0.1em' }}>{error}</p>}
+        <div style={{ display: 'flex', gap: '4px', alignItems: 'stretch', padding: '4px 16px 4px' }}>
+
           {[
-            { label: 'LMP', action: clearBets  },
-            { label: 'BRR', action: removeLast },
-            { label: 'DBL', action: doubleBets },
-            { label: 'RPT', action: repeatBets },
+            { label: 'Limpiar', action: clearBets  },
+            { label: 'Borrar',  action: removeLast },
+            { label: 'Doblar',  action: doubleBets },
+            { label: 'Repetir', action: repeatBets },
           ].map(btn => (
             <button key={btn.label} className="action-btn" onClick={btn.action}
-              style={{ flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '3px', padding: '6px 2px', color: 'rgba(255,255,255,0.5)', fontFamily: "'Montserrat', sans-serif", fontWeight: 700, fontSize: '0.38rem', letterSpacing: '0.1em', cursor: 'pointer', opacity: hasBetThisRound ? 0.4 : 1 }}>
+              style={{
+                flex: 1,
+                background: hasBetThisRound
+                  ? 'rgba(120,20,20,0.3)'
+                  : 'linear-gradient(180deg, #c0392b 0%, #922b21 50%, #7b241c 100%)',
+                border: '1px solid rgba(255,255,255,0.15)',
+                borderBottom: hasBetThisRound ? '1px solid rgba(255,255,255,0.08)' : '3px solid #5c1a14',
+                borderRadius: '4px',
+                padding: '6px 2px',
+                color: hasBetThisRound ? 'rgba(255,255,255,0.3)' : '#fff',
+                fontFamily: "'Montserrat', sans-serif",
+                fontWeight: 700,
+                fontSize: '0.42rem',
+                letterSpacing: '0.04em',
+                cursor: hasBetThisRound ? 'not-allowed' : 'pointer',
+                opacity: hasBetThisRound ? 0.5 : 1,
+                textShadow: hasBetThisRound ? 'none' : '0 1px 2px rgba(0,0,0,0.6)',
+                boxShadow: hasBetThisRound ? 'none' : '0 2px 4px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15)',
+                transition: 'all 0.15s ease',
+              }}>
               {btn.label}
             </button>
           ))}
@@ -667,7 +735,27 @@ export default function RoulettePlayPage() {
             className={`apostar-btn${(waitingForResult || hasBetThisRound) ? ' waiting' : ''}`}
             onClick={placeBets}
             disabled={!canBet}
-            style={{ flex: '0 0 90px', border: '1px solid rgba(212,175,55,0.3)', borderRadius: '4px', color: (waitingForResult || hasBetThisRound) ? 'rgba(212,175,55,0.6)' : '#1a0e00', fontFamily: "'Montserrat', sans-serif", fontWeight: 900, letterSpacing: '0.1em', boxShadow: canBet ? '0 0 30px rgba(212,175,55,0.35)' : 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1px', padding: '4px 0' }}>
+            style={{
+              flex: '0 0 90px',
+              background: !canBet
+                ? 'linear-gradient(180deg, #555 0%, #333 50%, #222 100%)'
+                : waitingForResult || hasBetThisRound
+                  ? 'rgba(80,60,0,0.3)'
+                  : 'linear-gradient(180deg, #f5d060 0%, #d4af37 50%, #a07820 100%)',
+              border: !canBet ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(212,175,55,0.4)',
+              borderBottom: !canBet ? '3px solid #111' : '3px solid #7a5a10',
+              borderRadius: '4px',
+              color: !canBet ? 'rgba(255,255,255,0.3)' : waitingForResult || hasBetThisRound ? 'rgba(212,175,55,0.4)' : '#1a0e00',
+              fontFamily: "'Montserrat', sans-serif",
+              fontWeight: 900,
+              letterSpacing: '0.08em',
+              boxShadow: !canBet ? '0 2px 4px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)' : '0 2px 6px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.3), 0 0 20px rgba(212,175,55,0.2)',
+              textShadow: canBet ? '0 1px 2px rgba(0,0,0,0.3)' : 'none',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              gap: '1px', padding: '4px 0',
+              cursor: canBet ? 'pointer' : 'not-allowed',
+              transition: 'all 0.2s ease',
+            }}>
             <span style={{ fontSize: '0.55rem' }}>{btnLabel}</span>
             {!isSolo && onlineCount >= 2 && (
               <span style={{ fontSize: '0.38rem', opacity: 0.7 }}>👥 {onlineCount}</span>
@@ -677,7 +765,7 @@ export default function RoulettePlayPage() {
 
 
         {/* === MESA DE APUESTAS === */}
-        <div style={{ margin: '0 16px 16px', overflowX: 'auto' }}>
+        <div style={{ margin: '0 16px 6px', overflowX: 'auto' }}>
           <div
             ref={tableRef}
             style={{
@@ -824,13 +912,13 @@ export default function RoulettePlayPage() {
         </div>
 
         {/* --- HISTÓRICOS + CALIENTES/FRÍOS debajo del paño --- */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "5px", padding: "8px 16px 16px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "5px", padding: "2px 16px 10px" }}>
 
           {/* LÍNEA 1: HISTORIAL — todo el ancho */}
           <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "3px", flexWrap: "nowrap", overflow: "hidden" }}>
             <span style={{ fontSize: "0.55rem", marginRight: "3px", flexShrink: 0 }}>📋</span>
             {history.slice(0, 20).map((n, i) => (
-              <div key={i} className="number-badge" style={{ background: colorHex(getColor(n)), border: "1px solid rgba(255,255,255,0.1)", width: "20px", height: "20px", fontSize: "0.38rem", flexShrink: 0, opacity: 1 - i * 0.04 }}>
+              <div key={i} className="number-badge" style={{ background: colorHex(getColor(n)), border: "1px solid rgba(255,255,255,0.1)", width: "22px", height: "22px", fontSize: "0.45rem", flexShrink: 0, opacity: 1 - i * 0.04 }}>
                 <span style={{ color: "#fff", fontWeight: 700 }}>{n}</span>
               </div>
             ))}
