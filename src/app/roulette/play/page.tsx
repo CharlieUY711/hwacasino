@@ -543,23 +543,28 @@ export default function RoulettePlayPage() {
 
 
         {/* --- HEADER --- */}
-        <div style={{ background: 'rgba(10,10,10,0.95)', position: 'sticky', top: 0, zIndex: 90, borderBottom: '1px solid rgba(212,175,55,0.08)', padding: '6px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <span style={{ fontSize: '0.75rem', color: GOLD, fontWeight: 600, letterSpacing: '0.06em', flexShrink: 0 }}>SOPHIE</span>
-          <button onClick={() => setShowPayment(true)} style={{ background: 'none', border: 'none', fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', fontWeight: 600, cursor: 'pointer', flexShrink: 0, padding: 0 }}>Caja</button>
-          <button onClick={() => setActiveCurrency(c => c === 'CHIPS' ? 'USD' : 'CHIPS')} style={{ background: 'none', border: 'none', fontSize: '0.75rem', color: GOLD, fontWeight: 700, cursor: 'pointer', flexShrink: 0, padding: 0 }}>
-            {activeCurrency === 'CHIPS' ? 'Chip-$' : 'USD'} {balance.toLocaleString('es-UY')}
-          </button>
-          <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.45)', marginLeft: 'auto', flexShrink: 0 }}>{username}</span>
+        <div style={{ background: 'rgba(10,10,10,0.95)', position: 'sticky', top: 0, zIndex: 90, borderBottom: '1px solid rgba(212,175,55,0.08)', padding: '5px 16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* Logo + Nombre */}
+          <img src='/logo-dorado.jpg' alt='HWA' style={{ height: '18px', width: 'auto', flexShrink: 0 }} />
+          <span style={{ fontSize: '0.72rem', color: GOLD, fontWeight: 600, letterSpacing: '0.06em', flexShrink: 0 }}>SOPHIE</span>
+          {/* Caja */}
+          <button onClick={() => setShowPayment(true)} style={{ background: 'linear-gradient(180deg,#2d7a4f 0%,#1e5c38 100%)', border: 'none', borderRadius: 4, padding: '4px 12px', fontSize: '0.72rem', color: '#fff', fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}>Caja</button>
+          {/* Selector moneda */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+            <button onClick={() => setActiveCurrency('CHIPS')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.72rem', fontWeight: 700, color: activeCurrency === 'CHIPS' ? GOLD : 'rgba(255,255,255,0.3)' }}>
+              Chip-$ {activeCurrency === 'CHIPS' ? balance.toLocaleString('es-UY') : (balances['CHIPS'] ?? 0).toLocaleString('es-UY')}
+            </button>
+            <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.65rem' }}>|</span>
+            <button onClick={() => setActiveCurrency('USD')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.72rem', fontWeight: 700, color: activeCurrency === 'USD' ? GOLD : 'rgba(255,255,255,0.3)' }}>
+              USD {activeCurrency === 'USD' ? balance.toLocaleString('es-UY') : (balances['USD'] ?? 0).toLocaleString('es-UY')}
+            </button>
+          </div>
+          {/* Usuario */}
+          <span style={{ display: 'flex', alignItems: 'center', gap: '4px', marginLeft: 'auto', flexShrink: 0 }}>
+            <svg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.4)' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><circle cx='12' cy='8' r='4'/><path d='M4 20c0-4 3.6-7 8-7s8 3 8 7'/></svg>
+            <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.5)' }}>{username}</span>
+          </span>
         </div>
-        {/* --- RUEDA SVG --- */}
-        <div style={{ background: "radial-gradient(ellipse at center, #1a0e00 0%, #0a0a0a 70%)", padding: "0px 12px 8px", display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <div style={{ position: 'relative', width: 280, height: 280 }}>
-            <svg width="280" height="280" viewBox="0 0 240 240" style={{ overflow: 'visible' }}>
-              <defs>
-                <radialGradient id="wheelGlow" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="rgba(212,175,55,0.1)" />
-                  <stop offset="100%" stopColor="rgba(0,0,0,0)" />
                 </radialGradient>
                 <filter id="shadow">
                   <feDropShadow dx="0" dy="4" stdDeviation="12" floodColor="rgba(0,0,0,0.8)" />
