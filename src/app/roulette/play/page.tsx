@@ -553,19 +553,6 @@ export default function RoulettePlayPage() {
           </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: 'auto', flexShrink: 0 }}>
           <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.45)', fontWeight: 600, marginLeft: 'auto', flexShrink: 0 }}>{username}</span>
-        </div>
-        {/* --- RUEDA SVG --- */}
-        <div style={{ background: "radial-gradient(ellipse at center, #1a0e00 0%, #0a0a0a 70%)", padding: "20px 12px 8px", display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <div style={{ position: 'relative', width: 280, height: 280 }}>
-            <svg width="280" height="280" viewBox="0 0 240 240" style={{ overflow: 'visible' }}>
-              <defs>
-                <radialGradient id="wheelGlow" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="rgba(212,175,55,0.1)" />
-                  <stop offset="100%" stopColor="rgba(0,0,0,0)" />
-                </radialGradient>
-                <filter id="shadow">
-                  <feDropShadow dx="0" dy="4" stdDeviation="12" floodColor="rgba(0,0,0,0.8)" />
                 </filter>
               </defs>
               <circle cx="120" cy="120" r="118" fill="#1a1200" stroke={GOLD} strokeWidth="2.5" />
