@@ -1,5 +1,4 @@
 'use client'
-import PaymentModal from '@/components/PaymentModal'
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
@@ -125,7 +124,7 @@ function FloatingChip({ bet, winning }: { bet: Bet; winning: boolean }) {
 
 export default function RoulettePlayPage() {
   const router = useRouter()
-  const { balance, balances, formatChips, username } = useWallet()
+  const { balance, formatChips, username } = useWallet()
   const [userId, setUserId] = useState<string | null>(null)
   const [selectedChip, setSelectedChip] = useState(CHIP_DEFS[0])
   const [bets, setBets] = useState<Bet[]>([])
@@ -140,7 +139,6 @@ export default function RoulettePlayPage() {
   const [error, setError]               = useState<string | null>(null)
   const [showResult, setShowResult]     = useState(false)
   const [showPayout, setShowPayout]     = useState(false)
-  const [showPayment, setShowPayment]   = useState(false)
   const [phase, setPhase]               = useState<'idle'|'spinning'|'result'|'payout'>('idle')
 
   const [displayBalance, setDisplayBalance] = useState<number | null>(null) // balance ajustado post-resultado
@@ -538,21 +536,52 @@ export default function RoulettePlayPage() {
         .countdown-urgent { animation:countdownPulse 0.8s ease-in-out infinite; }
       `}</style>
 
-      <main style={{ minHeight: '100dvh', background: DARK, fontFamily: "'Inter', sans-serif", maxWidth: '480px', margin: '0 auto', paddingBottom: '80px' }}>
-
+      <main style={{ minHeight: '100dvh', background: DARK, fontFamily: "'Montserrat', sans-serif", maxWidth: '480px', margin: '0 auto', paddingBottom: '80px' }}>
 
 
         {/* --- HEADER --- */}
-        <div style={{ background: 'rgba(10,10,10,0.95)', position: 'sticky', top: 0, zIndex: 90, borderBottom: '1px solid rgba(212,175,55,0.12)', padding: '6px 16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <button onClick={() => router.push('/roulette')} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.35)', cursor: 'pointer', fontSize: '1rem', padding: 0, flexShrink: 0 }}>←</button>
-          <img src='/logo-dorado.jpg' alt='HWA' style={{ height: '16px', width: 'auto', flexShrink: 0 }} />
-          <span style={{ fontSize: '0.7rem', color: GOLD, fontWeight: 600, letterSpacing: '0.08em', flexShrink: 0 }}>ROULETTE SOPHIE</span>
-          <button onClick={() => setShowPayment(true)} style={{ background: 'linear-gradient(180deg,#4ade80 0%,#16a34a 50%,#15803d 100%)', border: 'none', borderBottom: '2px solid #166534', borderRadius: 4, padding: '5px 10px', fontSize: '0.7rem', color: '#fff', fontWeight: 700, cursor: 'pointer', flex: 2, maxWidth: 160, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
-            <span>Caja</span>
-            <span style={{ opacity: 0.9 }}>Chip-$ {balance.toLocaleString('es-UY')}</span>
+        <div style={{ padding: '6px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(212,175,55,0.12)', background: 'rgba(10,10,10,0.95)', position: 'sticky', top: 0, zIndex: 90, gap: '8px' }}>
+
+          {/* Volver */}
+          <button onClick={() => router.push('/roulette')} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1rem', letterSpacing: '0.1em', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', flexShrink: 0 }}>
+            ← Volver
           </button>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: 'auto', flexShrink: 0 }}>
-          <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.45)', fontWeight: 600, marginLeft: 'auto', flexShrink: 0 }}>{username}</span>
+          {/* Logo + Titulo */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+            <img src='/logo-dorado.jpg' alt='HWA' style={{ height: '20px', width: 'auto' }} />
+            <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1rem', letterSpacing: '0.15em', color: GOLD }}>Roulette Sophie</span>
+          </div>
+
+          {/* Usuario + Balance */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginLeft: 'auto' }}>
+
+            {/* Etiqueta: Apuesta (rojo) mientras apuesta/gira, Ganado (verde/gris) 1s despues de parar */}
+            {showPayout ? (
+              <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1rem', color: totalWon ? '#4ade80' : 'rgba(255,255,255,0.3)', whiteSpace: 'nowrap', transition: 'color 0.4s' }}>
+                Ganado: {(totalWon ? totalPayout! : 0).toLocaleString('es-UY')}
+                <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic' }}> N</span>
+              </span>
+            ) : (totalBet > 0 || (hasBetThisRound && lastBets.length > 0)) ? (
+              <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1rem', color: '#f87171', whiteSpace: 'nowrap' }}>
+                Apuesta: {hasBetThisRound ? lastBets.reduce((s,b)=>s+b.amount,0).toLocaleString('es-UY') : totalBet.toLocaleString('es-UY')}
+                <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic' }}> N</span>
+              </span>
+            ) : null}
+
+            <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1rem', color: 'rgba(255,255,255,0.5)', whiteSpace: 'nowrap' }}>{username}</span>
+
+            {/* Balance: descontado mientras apuesta/gira, ajustado 1s despues de resultado */}
+            <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1rem', color: GOLD, whiteSpace: 'nowrap', transition: 'all 0.5s' }}>
+              {Math.max(0, showPayout
+                ? (displayBalance ?? balance)
+                : balance - (hasBetThisRound
+                    ? lastBets.reduce((s,b)=>s+b.amount,0)
+                    : totalBet)
+              ).toLocaleString('es-UY')}
+              <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic' }}> N</span>
+            </span>
+
+          </div>
         </div>
         {/* --- RUEDA SVG --- */}
         <div style={{ background: "radial-gradient(ellipse at center, #1a0e00 0%, #0a0a0a 70%)", padding: "20px 12px 8px", display: "flex", flexDirection: "column", alignItems: "center" }}>
@@ -636,7 +665,7 @@ export default function RoulettePlayPage() {
                 {!isSolo && (roundStatus === 'betting' ? 'CIERRA EN' : roundStatus === 'spinning' ? 'GIRANDO' : 'NUEVA RONDA')}
               </p>
               {roundStatus === 'betting' && !isSolo && (
-                <p className={secondsRemaining <= 10 ? 'countdown-urgent' : ''} style={{ fontSize: '1.4rem', color: countdownColor, fontWeight: 700, fontFamily: "'Inter', sans-serif" }}>
+                <p className={secondsRemaining <= 10 ? 'countdown-urgent' : ''} style={{ fontSize: '1.4rem', color: countdownColor, fontWeight: 700, fontFamily: "'Cormorant Garamond', serif" }}>
                   {secondsRemaining} s
                 </p>
               )}
@@ -689,7 +718,7 @@ export default function RoulettePlayPage() {
                 borderRadius: '4px',
                 padding: '6px 2px',
                 color: hasBetThisRound ? 'rgba(255,255,255,0.3)' : '#fff',
-                fontFamily: "'Inter', sans-serif",
+                fontFamily: "'Montserrat', sans-serif",
                 fontWeight: 700,
                 fontSize: '0.42rem',
                 letterSpacing: '0.04em',
@@ -717,7 +746,7 @@ export default function RoulettePlayPage() {
               borderBottom: !canBet ? '3px solid #111' : '3px solid #7a5a10',
               borderRadius: '4px',
               color: !canBet ? 'rgba(255,255,255,0.3)' : waitingForResult || hasBetThisRound ? 'rgba(212,175,55,0.4)' : '#1a0e00',
-              fontFamily: "'Inter', sans-serif",
+              fontFamily: "'Montserrat', sans-serif",
               fontWeight: 900,
               letterSpacing: '0.08em',
               boxShadow: !canBet ? '0 2px 4px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)' : '0 2px 6px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.3), 0 0 20px rgba(212,175,55,0.2)',
@@ -918,14 +947,6 @@ export default function RoulettePlayPage() {
         </div>
 
       </main>
-
-      <PaymentModal
-        open={showPayment}
-        onClose={() => setShowPayment(false)}
-        userId={userId}
-        username={username}
-        balances={balances}
-      />
     </>
   )
 }
