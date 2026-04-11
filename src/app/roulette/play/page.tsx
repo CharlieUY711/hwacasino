@@ -319,11 +319,11 @@ export default function RoulettePlayPage() {
     if (!tableRef.current) return { x: 0, y: 0 }
     const rect = tableRef.current.getBoundingClientRect()
     return { x: e.clientX - rect.left, y: e.clientY - rect.top }
-    if (roundStatus !== 'betting' || hasBetThisRound || phase !== 'idle') return
+    return { x: e.clientX - rect.left, y: e.clientY - rect.top }
 
   // --- AGREGAR APUESTA ---
   function addBet(type: BetType, value: string, e: React.MouseEvent) {
-    if (roundStatus !== 'betting' || hasBetThisRound) return
+    if (roundStatus !== 'betting' || hasBetThisRound || phase !== 'idle') return
     const { x, y } = getRelativePos(e)
     const id = `${type}:${value}`
     setBets(prev => {
@@ -352,8 +352,8 @@ export default function RoulettePlayPage() {
     })
   }
 
-  function clearBets()  { if (!hasBetThisRound) setBets([]) }
-  function repeatBets() { if (!hasBetThisRound && lastBets.length > 0) setBets(lastBets) }
+  function doubleBets() { if (!hasBetThisRound && phase === 'idle') setBets(prev => prev.map(b => ({ ...b, amount: b.amount * 2 }))) }
+  function repeatBets() { if (!hasBetThisRound && phase === 'idle' && lastBets.length > 0) setBets(lastBets) }
   function doubleBets() { if (!hasBetThisRound) setBets(prev => prev.map(b => ({ ...b, amount: b.amount * 2 }))) }
 
   const totalBet = bets.reduce((sum, b) => sum + b.amount, 0)
