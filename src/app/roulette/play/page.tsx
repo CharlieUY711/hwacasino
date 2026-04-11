@@ -552,20 +552,7 @@ export default function RoulettePlayPage() {
             <span style={{ opacity: 0.9 }}>Chip-$ {balance.toLocaleString('es-UY')}</span>
           </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: 'auto', flexShrink: 0 }}>
-            <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.45)' }}>{username}</span>
-            {showPayout ? (
-              <span style={{ fontSize: '0.7rem', color: totalWon ? '#4ade80' : 'rgba(255,255,255,0.3)', transition: 'color 0.4s' }}>
-                {totalWon ? "+" : ""}{(totalWon ? totalPayout! : 0).toLocaleString('es-UY')}
-              </span>
-            ) : (totalBet > 0 || (hasBetThisRound && lastBets.length > 0)) ? (
-              <span style={{ fontSize: '0.7rem', color: '#f87171' }}>
-                -{(hasBetThisRound ? lastBets.reduce((s,b)=>s+b.amount,0) : totalBet).toLocaleString('es-UY')}
-              </span>
-            ) : null}
-            <span style={{ fontSize: '0.7rem', color: GOLD, fontWeight: 600, transition: 'all 0.5s' }}>
-              Chip-$ {Math.max(0, showPayout ? (displayBalance ?? balance) : balance - (hasBetThisRound ? lastBets.reduce((s,b)=>s+b.amount,0) : totalBet)).toLocaleString('es-UY')}
-            </span>
-          </div>
+          <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.45)', fontWeight: 600, marginLeft: 'auto', flexShrink: 0 }}>{username}</span>
         </div>
         {/* --- RUEDA SVG --- */}
         <div style={{ background: "radial-gradient(ellipse at center, #1a0e00 0%, #0a0a0a 70%)", padding: "20px 12px 8px", display: "flex", flexDirection: "column", alignItems: "center" }}>
