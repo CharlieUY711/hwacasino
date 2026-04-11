@@ -554,7 +554,7 @@ export default function RoulettePlayPage() {
             <button onClick={() => setActiveCurrency('USD')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.68rem', fontWeight: 700, color: activeCurrency === 'USD' ? GOLD : 'rgba(255,255,255,0.3)' }}>USD</button>
             <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.68rem', margin: '0 1px' }}>/</span>
             <button onClick={() => setActiveCurrency('CHIPS')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.68rem', fontWeight: 700, color: activeCurrency === 'CHIPS' ? GOLD : 'rgba(255,255,255,0.3)' }}>Chip-$</button>
-            <span style={{ fontSize: '0.68rem', color: GOLD, fontWeight: 700 }}>:{" "}{balance.toLocaleString('es-UY')}</span>
+            <span style={{ fontSize: '0.68rem', color: GOLD, fontWeight: 700 }}>:{" "}{(phase === 'idle' ? Math.max(0, balance - totalBet) : displayBalance ?? balance).toLocaleString('es-UY')}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <button onClick={() => router.push('/dashboard')} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', padding: 0 }}>
