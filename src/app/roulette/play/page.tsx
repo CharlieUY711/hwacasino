@@ -561,6 +561,12 @@ export default function RoulettePlayPage() {
                 <span>▼</span>
               </span>
             </button>
+              <span>Caja</span>
+              <span style={{ display: 'flex', flexDirection: 'column', lineHeight: 1, fontSize: '0.5rem', opacity: 0.7 }}>
+                <span>▲</span>
+                <span>▼</span>
+              </span>
+            </button>
           </div>
           {/* Moneda + valor — flex 1 centrado */}
           <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 0 }}>
