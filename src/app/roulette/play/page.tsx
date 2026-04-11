@@ -547,7 +547,7 @@ export default function RoulettePlayPage() {
               <img src='/logo-dorado.jpg' alt='HWA' style={{ height: '18px', width: 'auto' }} />
               <span style={{ fontSize: '0.7rem', color: GOLD, fontWeight: 600, letterSpacing: '0.08em' }}>SOPHIE</span>
             </div>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><svg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.5)' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><circle cx='12' cy='8' r='4'/><path d='M4 20c0-4 3.6-7 8-7s8 3 8 7'/></svg><span style={{ fontSize: '0.7rem', color: '#fff', fontWeight: 600 }}>{username}</span></span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><svg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.5)' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><circle cx='12' cy='8' r='4'/><path d='M4 20c0-4 3.6-7 8-7s8 3 8 7'/></svg><span style={{ fontSize: '0.7rem', color: '#fff', fontWeight: 600 }}>{username}</span></span>
           </div>
           {/* Fila inferior: flecha a la izquierda */}
           <div style={{ padding: '2px 16px 3px' }}>
@@ -670,7 +670,7 @@ export default function RoulettePlayPage() {
         </div>
 
         {/* --- BOTONERA: ACCIONES + GIRAR (encima del paño) --- */}
-        <div style={{ display: 'flex', gap: '6px', alignItems: 'stretch', padding: '4px 16px 4px' }}>
+        <div style={{ display: 'flex', gap: '4px', alignItems: 'stretch', padding: '4px 16px 4px' }}>
 
           {[
             { label: 'Limpiar', action: clearBets  },
@@ -762,7 +762,7 @@ export default function RoulettePlayPage() {
             ))}
 
             {/* FILA: 0 + GRID + 2:1 */}
-            <div style={{ display: 'flex', gap: '6px' }}>
+            <div style={{ display: 'flex', gap: '4px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                 <div
                   className={`bet-cell${(roundStatus !== 'betting' || hasBetThisRound) ? ' locked' : ''}${getBetOn('number:0') > 0 && resultNumber !== null && !showResult && resultNumber === 0 ? ' win-cell' : ''}`}
@@ -773,7 +773,7 @@ export default function RoulettePlayPage() {
                     border: `1px solid ${resultNumber === 0 && !showResult ? GOLD : 'rgba(212,175,55,0.3)'}`,
                     boxShadow: resultNumber === 0 && !showResult ? `0 0 10px rgba(212,175,55,0.5)` : 'none',
                     borderRadius: '4px 0 0 4px',
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px',
                   }}
                 >
                   <span style={{ color: '#4ade80', fontWeight: 700, fontSize: '1rem' }}>0</span>
