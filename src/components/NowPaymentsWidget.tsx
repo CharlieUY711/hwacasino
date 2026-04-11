@@ -4,7 +4,7 @@ import { useNowPayments } from '@/hooks/useNowPayments'
 
 const GOLD = '#D4AF37'
 
-const AMOUNTS = [1, 5, 10, 25, 50, 100, 250, 500, 1000]
+const AMOUNTS = [25, 50, 100, 250, 500, 1000]
 
 const CURRENCIES = [
   { id: 'usdttrc20', label: 'USDT TRC20', icon: '₮' },
