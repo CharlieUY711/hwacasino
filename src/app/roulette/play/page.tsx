@@ -265,7 +265,7 @@ export default function RoulettePlayPage() {
           setShowResult(false)
           setResultNumber(null)
           setWaitingForResult(false)
-          setBets([])
+          if (!isSolo) setBets([])
         }
 
         // Ronda entrando en spinning — animar rueda (una sola vez por ronda)
