@@ -125,6 +125,7 @@ function FloatingChip({ bet, winning }: { bet: Bet; winning: boolean }) {
 
 export default function RoulettePlayPage() {
   const router = useRouter()
+  const [activeCurrency, setActiveCurrency] = useState<'CHIPS'|'USD'>('CHIPS')
   const { balance, balances, formatChips, username } = useWallet(activeCurrency)
   const [userId, setUserId] = useState<string | null>(null)
   const [selectedChip, setSelectedChip] = useState(CHIP_DEFS[0])
@@ -140,7 +141,7 @@ export default function RoulettePlayPage() {
   const [error, setError]               = useState<string | null>(null)
   const [showResult, setShowResult]     = useState(false)
   const [showPayment, setShowPayment] = useState(false)
-  const [activeCurrency, setActiveCurrency] = useState<'CHIPS'|'USD'>('CHIPS')
+
   const [showPayout, setShowPayout]     = useState(false)
   const [phase, setPhase]               = useState<'idle'|'spinning'|'result'|'payout'>('idle')
 
