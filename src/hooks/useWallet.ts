@@ -2,9 +2,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 
-export type Currency = 'NECTAR' | 'USD' | 'UYU' | 'BTC' | 'ETH' | 'USDT'
+export type Currency = 'CHIPS' | 'USD' | 'UYU' | 'BTC' | 'ETH' | 'USDT'
 
-export function useWallet(currency: Currency = 'NECTAR') {
+export function useWallet(currency: Currency = 'CHIPS') {
   const [balance, setBalance]   = useState<number>(0)
   const [balances, setBalances] = useState<Record<string, number>>({})
   const [username, setUsername] = useState<string>('')
@@ -33,7 +33,7 @@ export function useWallet(currency: Currency = 'NECTAR') {
         .single()
 
       if (!cancelled) {
-        const b = wallet?.balances ?? { NECTAR: 0 }
+        const b = wallet?.balances ?? { CHIPS: 0 }
         setBalances(b)
         setBalance(Number(b[currency] ?? 0))
         setUsername(
@@ -82,7 +82,7 @@ export function useWallet(currency: Currency = 'NECTAR') {
   }, [currency])
 
   const formatBalance = (n: number = balance, cur: Currency = currency) => {
-    if (cur === 'NECTAR') return n.toLocaleString('es-UY') + ' N'
+    if (cur === 'CHIPS') return n.toLocaleString('es-UY') + ' N'
     if (cur === 'BTC' || cur === 'ETH') return n.toFixed(8) + ' ' + cur
     return n.toLocaleString('es-UY', { minimumFractionDigits: 2 }) + ' ' + cur
   }

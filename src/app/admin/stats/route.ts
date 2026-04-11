@@ -111,14 +111,14 @@ export async function GET(req: NextRequest) {
     const houseProfitToday = totalBetToday - totalPayoutToday
 
     // ── Stats agregadas ───────────────────────────────────────────
-    const totalNectarInPlay = wallets?.reduce((sum, w) => sum + (w.balance ?? 0), 0) ?? 0
+    const totalChipsInPlay = wallets?.reduce((sum, w) => sum + (w.balance ?? 0), 0) ?? 0
     const telegramUsers = users.filter(u => u.telegram_id).length
     const webUsers = users.length - telegramUsers
 
     const stats = {
       totalUsers: users.length,
-      activeNow: 0, // conectar a Supabase Presence si se necesita
-      totalNectarInPlay,
+      activeNow: 0, // cochips a Supabase Presence si se necesita
+      totalChipsInPlay,
       depositsToday: depositsToday.reduce((sum, d) => sum + (d.amount_usd ?? 0), 0),
       depositsTodayUsd: depositsToday.length,
       pendingDeposits,

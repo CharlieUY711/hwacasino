@@ -36,10 +36,10 @@ export async function POST(req: NextRequest) {
   }
 
   if (action === 'complete') {
-    // Acreditar Nectar via RPC atomica
+    // Acreditar Chips via RPC atomica
     const { error: rpcError } = await supabase.rpc('increment_wallet_balance', {
       p_user_id: deposit.user_id,
-      p_amount: deposit.nectar_amount,
+      p_amount: deposit.chip_amount,
     })
 
     if (rpcError) {
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
     await supabase.from('transactions').insert({
       user_id: deposit.user_id,
       type: 'deposit',
-      amount: deposit.nectar_amount,
+      amount: deposit.chip_amount,
       direction: 'credit',
       reference_id: deposit.paypal_order_id,
       metadata: { source: 'admin_manual', deposit_id: depositId },
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
       .update({ status: 'completed', completed_at: new Date().toISOString() })
       .eq('id', depositId)
 
-    return NextResponse.json({ ok: true, action: 'completed', nectar: deposit.nectar_amount })
+    return NextResponse.json({ ok: true, action: 'completed', chips: deposit.chip_amount })
   }
 
   if (action === 'cancel') {

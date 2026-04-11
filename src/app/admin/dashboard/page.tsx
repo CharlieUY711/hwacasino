@@ -12,7 +12,7 @@ const GOLD_TEXT = '#78350f'
 interface AdminStats {
   totalUsers: number
   activeNow: number
-  totalNectarInPlay: number
+  totalChipsInPlay: number
   depositsToday: number
   depositsTodayUsd: number
   pendingDeposits: number
@@ -37,7 +37,7 @@ interface DepositRow {
   user_id: string
   username: string
   amount_usd: number
-  nectar_amount: number
+  chip_amount: number
   paypal_order_id: string
   status: string
   created_at: string
@@ -279,7 +279,7 @@ export default function AdminDashboard() {
           {activePanel === 'overview' && stats && (
             <>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '24px' }}>
-                <MetricCard label="NECTAR EN JUEGO" value={stats.totalNectarInPlay.toLocaleString('es-UY')} delta={`${stats.activeNow} jugadores ahora`} gold />
+                <MetricCard label="CHIPS EN JUEGO" value={stats.totalChipsInPlay.toLocaleString('es-UY')} delta={`${stats.activeNow} jugadores ahora`} gold />
                 <MetricCard label="USUARIOS ACTIVOS" value={stats.totalUsers.toString()} delta={`${stats.activeNow} en mesa ahora`} />
                 <MetricCard label="DEP\u00d3SITOS HOY (USD)" value={`$${stats.depositsToday}`} delta={`${stats.depositsTodayUsd} operaciones`} />
                 <MetricCard label="GANANCIA CASA HOY" value={stats.houseProfitToday.toLocaleString('es-UY')} delta="Nectar neto" gold />
@@ -387,7 +387,7 @@ export default function AdminDashboard() {
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
                   <thead>
                     <tr style={{ color: 'rgba(255,255,255,0.3)', fontSize: '10px', letterSpacing: '0.8px' }}>
-                      {['USUARIO', 'USD', 'NECTAR', 'ORDER ID', 'ESTADO', 'FECHA', 'ACCIONES'].map(h => (
+                      {['USUARIO', 'USD', 'CHIPS', 'ORDER ID', 'ESTADO', 'FECHA', 'ACCIONES'].map(h => (
                         <th key={h} style={{ padding: '8px 12px', textAlign: 'left', borderBottom: '1px solid rgba(212,175,55,0.1)' }}>{h}</th>
                       ))}
                     </tr>
@@ -397,7 +397,7 @@ export default function AdminDashboard() {
                       <tr key={d.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
                         <td style={{ padding: '10px 12px', color: 'rgba(255,255,255,0.85)', fontWeight: 500 }}>{d.username}</td>
                         <td style={{ padding: '10px 12px' }}>${d.amount_usd?.toFixed(2)}</td>
-                        <td style={{ padding: '10px 12px', color: GOLD, fontWeight: 500 }}>{d.nectar_amount?.toLocaleString('es-UY')}</td>
+                        <td style={{ padding: '10px 12px', color: GOLD, fontWeight: 500 }}>{d.chip_amount?.toLocaleString('es-UY')}</td>
                         <td style={{ padding: '10px 12px', fontFamily: 'monospace', fontSize: '10px', color: 'rgba(255,255,255,0.35)' }}>
                           {d.paypal_order_id?.substring(0, 12)}...
                         </td>
@@ -480,13 +480,13 @@ export default function AdminDashboard() {
             <>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '24px' }}>
                 <MetricCard label="RONDAS HOY" value={stats.roundsToday.toString()} />
-                <MetricCard label="NECTAR APOSTADO HOY" value={stats.houseProfitToday.toLocaleString('es-UY')} gold />
+                <MetricCard label="CHIPS APOSTADOS HOY" value={stats.houseProfitToday.toLocaleString('es-UY')} gold />
                 <MetricCard label="GANANCIA CASA" value={stats.houseProfitToday.toLocaleString('es-UY')} gold />
                 <MetricCard label="HOUSE EDGE EFECTIVO" value="4.2%" delta="te\u00f3rico 2.7%" />
               </div>
               <div style={{ ...card, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '200px', flexDirection: 'column', gap: '12px' }}>
                 <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.35)' }}>Stats detalladas de rondas disponibles aqu\u00ed</div>
-                <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.2)' }}>Conectar con roulette_rounds + round_bets para historial completo</div>
+                <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.2)' }}>Cochips con roulette_rounds + round_bets para historial completo</div>
               </div>
             </>
           )}
@@ -496,7 +496,7 @@ export default function AdminDashboard() {
             <div style={card}>
               <div style={{ fontSize: '13px', fontWeight: 500, color: GOLD, marginBottom: '16px' }}>Historial de transacciones</div>
               <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.35)', textAlign: 'center', padding: '40px' }}>
-                Conectar con tabla transactions de Supabase para historial completo.
+                Cochips con tabla transactions de Supabase para historial completo.
                 <br /><br />
                 Columnas: id, user_id, type, amount, direction, reference_id, metadata, created_at
               </div>
@@ -510,7 +510,7 @@ export default function AdminDashboard() {
                 <div style={{ fontSize: '13px', fontWeight: 500, color: GOLD, marginBottom: '20px' }}>Configuraci\u00f3n de plataforma</div>
                 {[
                   { label: 'ROUND_DURATION_SECONDS', defaultValue: '40', type: 'number' },
-                  { label: 'Bono bienvenida (Nectar)', defaultValue: '1000', type: 'number' },
+                  { label: 'Bono bienvenida (Chips)', defaultValue: '1000', type: 'number' },
                   { label: 'M\u00ednimo dep\u00f3sito (USD)', defaultValue: '10', type: 'number' },
                   { label: 'M\u00e1ximo dep\u00f3sito (USD)', defaultValue: '1000', type: 'number' },
                 ].map(f => (
