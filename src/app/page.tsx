@@ -94,7 +94,7 @@ export default function Home() {
     <div style={{ minHeight: '100dvh', background: DARK, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px 16px', fontFamily: 'Inter, sans-serif' }}>
 
       <div style={{ marginBottom: 32, textAlign: 'center' }}>
-        <img src="/logo-dorado.jpg" alt="HWA" style={{ height: 256, width: 'auto', borderRadius: 16 }} />
+        <img src="/logo-dorado.jpg" alt="HWA" style={{ height: 128, width: 'auto', borderRadius: 14 }} />
         <div style={{ marginTop: 12, fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', letterSpacing: '0.25em' }}>PRIVATE MEMBERS ONLY</div>
       </div>
 
