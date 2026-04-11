@@ -39,14 +39,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ received: true, status: payment_status })
     }
 
-    // Extraer user_id del order_id: "hwa-{user_id}-{timestamp}"
-    const parts = order_id?.split('-') ?? []
-    // order_id format: hwa-{uuid-con-guiones}-{timestamp}
-    // uuid tiene 5 partes separadas por -, así que:
-    // parts[0] = "hwa"
-    // parts[1..5] = uuid
-    // parts[6] = timestamp
-    const user_id = parts.slice(1, 6).join('-')
+    // Extraer user_id del order_description: "HWA Casino — Depósito USD X — uid:USER_ID"
+    const desc = data.order_description ?? ''
+    const uidMatch = desc.match(/uid:([a-f0-9\-]{36})/)
+    const user_id = uidMatch ? uidMatch[1] : null
 
     if (!user_id) {
       console.error('[nowpayments/webhook] user_id no encontrado en order_id:', order_id)
