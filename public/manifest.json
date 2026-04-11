@@ -2,7 +2,7 @@
   "name": "HWA Casino",
   "short_name": "HWA",
   "description": "HWA Casino — Private Members Only",
-  "start_url": "/",
+  "start_url": "/roulette/play?room=vip-1",
   "display": "standalone",
   "background_color": "#0a0a0a",
   "theme_color": "#0a0a0a",
