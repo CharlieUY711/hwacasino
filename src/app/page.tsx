@@ -21,9 +21,16 @@ export default function Home() {
   const [error, setError]       = useState('')
 
   async function handleCode() {
-    if (!code.trim() || !email.trim()) { setError('Completá el código y el email'); return }
+    if (!email.trim()) { setError('Ingresá tu email'); return }
     setLoading(true); setError('')
     try {
+      // Sin codigo — login directo
+      if (!code.trim()) {
+        setStep('login')
+        setLoading(false)
+        return
+      }
+      // Con codigo — validar y decidir login o registro
       const valid = await validateInviteCode(code.trim().toUpperCase())
       if (!valid) { setError('Código inválido o ya utilizado'); setLoading(false); return }
       const res = await fetch('/api/auth/check-email', {
