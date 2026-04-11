@@ -8,6 +8,7 @@ export type NowPaymentStatus =
   | 'finished'      // Acreditado
   | 'failed'
   | 'expired'
+  | 'confirmed'
   | 'error'
 
 export interface NowPaymentInvoice {
