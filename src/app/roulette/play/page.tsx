@@ -554,7 +554,13 @@ export default function RoulettePlayPage() {
           </div>
           {/* Centro: boton Caja — flex 2 centrado */}
           <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-            <button onClick={() => setShowPayment(true)} style={{ background: 'linear-gradient(180deg,#2d7a4f 0%,#1e5c38 100%)', border: 'none', borderRadius: 4, padding: '4px 24px', fontSize: '0.68rem', color: '#fff', fontWeight: 400, cursor: 'pointer' }}>Caja</button>
+            <button onClick={() => setShowPayment(true)} style={{ background: 'linear-gradient(180deg,#2d7a4f 0%,#1e5c38 100%)', border: 'none', borderRadius: 4, padding: '4px 10px', fontSize: '0.68rem', color: '#fff', fontWeight: 400, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', minWidth: '80px' }}>
+              <span>Caja</span>
+              <span style={{ display: 'flex', flexDirection: 'column', lineHeight: 1, fontSize: '0.5rem', opacity: 0.7 }}>
+                <span>▲</span>
+                <span>▼</span>
+              </span>
+            </button>
           </div>
           {/* Moneda + valor — flex 1 centrado */}
           <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 0 }}>
