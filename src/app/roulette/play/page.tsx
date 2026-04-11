@@ -319,7 +319,7 @@ export default function RoulettePlayPage() {
     if (!tableRef.current) return { x: 0, y: 0 }
     const rect = tableRef.current.getBoundingClientRect()
     return { x: e.clientX - rect.left, y: e.clientY - rect.top }
-  }
+    if (roundStatus !== 'betting' || hasBetThisRound || phase !== 'idle') return
 
   // --- AGREGAR APUESTA ---
   function addBet(type: BetType, value: string, e: React.MouseEvent) {
