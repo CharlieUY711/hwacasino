@@ -543,53 +543,49 @@ export default function RoulettePlayPage() {
 
 
         {/* --- HEADER --- */}
-        <div style={{ background: 'rgba(10,10,10,0.95)', position: 'sticky', top: 0, zIndex: 90, borderBottom: '1px solid rgba(212,175,55,0.12)' }}>
-
-          {/* Fila 1: usuario + balance */}
-          <div style={{ padding: '5px 16px 3px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', fontWeight: 500 }}>{username}</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              {showPayout ? (
-                <span style={{ fontSize: '0.72rem', color: totalWon ? '#4ade80' : 'rgba(255,255,255,0.3)', transition: 'color 0.4s' }}>
-                  Ganado: Chip-$ {(totalWon ? totalPayout! : 0).toLocaleString('es-UY')}
-                </span>
-              ) : (totalBet > 0 || (hasBetThisRound && lastBets.length > 0)) ? (
-                <span style={{ fontSize: '0.72rem', color: '#f87171' }}>
-                  Apuesta: Chip-$ {hasBetThisRound ? lastBets.reduce((s,b)=>s+b.amount,0).toLocaleString('es-UY') : totalBet.toLocaleString('es-UY')}
-                </span>
-              ) : null}
-              <span style={{ fontSize: '0.72rem', color: GOLD, fontWeight: 600, transition: 'all 0.5s' }}>
-                Chip-$ {Math.max(0, showPayout
-                  ? (displayBalance ?? balance)
-                  : balance - (hasBetThisRound
-                      ? lastBets.reduce((s,b)=>s+b.amount,0)
-                      : totalBet)
-                ).toLocaleString('es-UY')}
-              </span>
+        <div style={{ background: 'rgba(10,10,10,0.95)', position: 'sticky', top: 0, zIndex: 90 }}>
+          {/* Fila principal */}
+          <div style={{ padding: '6px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+            {/* Izquierda: logo + nombre */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1 }}>
+              <img src='/logo-dorado.jpg' alt='HWA' style={{ height: '18px', width: 'auto' }} />
+              <span style={{ fontSize: '0.72rem', color: GOLD, fontWeight: 600, letterSpacing: '0.08em' }}>ROULETTE SOPHIE</span>
             </div>
-          </div>
-
-          {/* Fila 2: flecha + nombre ruleta + caja */}
-          <div style={{ padding: '2px 16px 5px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <button onClick={() => router.push('/roulette')} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '1rem', padding: 0, lineHeight: 1 }}>
-              ←
-            </button>
-            <span style={{ fontSize: '0.72rem', color: GOLD, fontWeight: 600, letterSpacing: '0.1em' }}>ROULETTE SOPHIE</span>
-            <button onClick={() => setShowPayment(true)} style={{ background: 'linear-gradient(180deg,#4ade80 0%,#16a34a 50%,#15803d 100%)', border: 'none', borderBottom: '2px solid #166534', borderRadius: 4, padding: '4px 16px', fontSize: '0.72rem', color: '#fff', fontWeight: 700, cursor: 'pointer' }}>
+            {/* Centro: boton Caja doble ancho */}
+            <button onClick={() => setShowPayment(true)} style={{ background: 'linear-gradient(180deg,#4ade80 0%,#16a34a 50%,#15803d 100%)', border: 'none', borderBottom: '2px solid #166534', borderRadius: 4, padding: '6px 32px', fontSize: '0.72rem', color: '#fff', fontWeight: 700, cursor: 'pointer', flex: 2, maxWidth: 140 }}>
               Caja
             </button>
+            {/* Derecha: usuario + balance */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', flex: 1 }}>
+              <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.45)', fontWeight: 500 }}>{username}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                {showPayout ? (
+                  <span style={{ fontSize: '0.65rem', color: totalWon ? '#4ade80' : 'rgba(255,255,255,0.3)', transition: 'color 0.4s' }}>
+                    {totalWon ? "+" : ""}{(totalWon ? totalPayout! : 0).toLocaleString('es-UY')}
+                  </span>
+                ) : (totalBet > 0 || (hasBetThisRound && lastBets.length > 0)) ? (
+                  <span style={{ fontSize: '0.65rem', color: '#f87171' }}>
+                    -{hasBetThisRound ? lastBets.reduce((s,b)=>s+b.amount,0).toLocaleString('es-UY') : totalBet.toLocaleString('es-UY')}
+                  </span>
+                ) : null}
+                <span style={{ fontSize: '0.72rem', color: GOLD, fontWeight: 600, transition: 'all 0.5s' }}>
+                  Chip-$ {Math.max(0, showPayout
+                    ? (displayBalance ?? balance)
+                    : balance - (hasBetThisRound
+                        ? lastBets.reduce((s,b)=>s+b.amount,0)
+                        : totalBet)
+                  ).toLocaleString('es-UY')}
+                </span>
+              </div>
+            </div>
           </div>
-
+          {/* Linea divisoria + flecha abajo izquierda */}
+          <div style={{ borderTop: '1px solid rgba(212,175,55,0.12)', padding: '2px 16px 3px' }}>
+            <button onClick={() => router.push('/roulette')} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.35)', cursor: 'pointer', fontSize: '0.9rem', padding: 0, lineHeight: 1 }}>
+              ←
+            </button>
+          </div>
         </div>
-        {/* --- RUEDA SVG --- */}
-        <div style={{ background: "radial-gradient(ellipse at center, #1a0e00 0%, #0a0a0a 70%)", padding: "20px 12px 8px", display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <div style={{ position: 'relative', width: 280, height: 280 }}>
-            <svg width="280" height="280" viewBox="0 0 240 240" style={{ overflow: 'visible' }}>
-              <defs>
-                <radialGradient id="wheelGlow" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="rgba(212,175,55,0.1)" />
-                  <stop offset="100%" stopColor="rgba(0,0,0,0)" />
                 </radialGradient>
                 <filter id="shadow">
                   <feDropShadow dx="0" dy="4" stdDeviation="12" floodColor="rgba(0,0,0,0.8)" />
