@@ -19,6 +19,7 @@ export default function Home() {
   const [username, setUsername] = useState('')
   const [loading, setLoading]   = useState(false)
   const [error, setError]       = useState('')
+  const [showPass, setShowPass]   = useState(false)
 
   async function handleCode() {
     if (!email.trim()) { setError('Ingresá tu email'); return }
@@ -108,7 +109,10 @@ export default function Home() {
         {step === 'login' && (<>
           <div><div style={{ fontSize: '1rem', color: GOLD, fontWeight: 600, marginBottom: 4 }}>Bienvenido de vuelta</div>
           <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)' }}>{email}</div></div>
-          <input style={inputStyle} placeholder="Contraseña" type="password" value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleLogin()} autoComplete="current-password" />
+          <div style={{ position: 'relative' }}>
+            <input style={{...inputStyle, paddingRight: '44px'}} placeholder="Contraseña" type={showPass ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleLogin()} autoComplete="current-password" />
+            <button onClick={() => setShowPass(p => !p)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.35)', fontSize: '1rem', padding: 0 }}>{showPass ? '🙈' : '👁'}</button>
+          </div>
           {error && <div style={{ fontSize: '0.75rem', color: '#f87171', textAlign: 'center' }}>{error}</div>}
           <button style={btnStyle} onClick={handleLogin} disabled={loading}>{loading ? 'Ingresando...' : 'INGRESAR'}</button>
           <button onClick={() => { setStep('code'); setError(''); setPassword('') }} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: '0.72rem', cursor: 'pointer', textAlign: 'center' }}>← Volver</button>
@@ -118,7 +122,10 @@ export default function Home() {
           <div><div style={{ fontSize: '1rem', color: GOLD, fontWeight: 600, marginBottom: 4 }}>Crear cuenta</div>
           <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)' }}>{email}</div></div>
           <input style={inputStyle} placeholder="Nombre de usuario" value={username} onChange={e => setUsername(e.target.value)} autoCapitalize="none" spellCheck={false} />
-          <input style={inputStyle} placeholder="Contraseña" type="password" value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleRegister()} autoComplete="new-password" />
+          <div style={{ position: 'relative' }}>
+            <input style={{...inputStyle, paddingRight: '44px'}} placeholder="Contraseña" type={showPass ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleRegister()} autoComplete="new-password" />
+            <button onClick={() => setShowPass(p => !p)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.35)', fontSize: '1rem', padding: 0 }}>{showPass ? '🙈' : '👁'}</button>
+          </div>
           {error && <div style={{ fontSize: '0.75rem', color: '#f87171', textAlign: 'center' }}>{error}</div>}
           <button style={btnStyle} onClick={handleRegister} disabled={loading}>{loading ? 'Creando cuenta...' : 'CREAR CUENTA'}</button>
           <button onClick={() => { setStep('code'); setError(''); setPassword(''); setUsername('') }} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: '0.72rem', cursor: 'pointer', textAlign: 'center' }}>← Volver</button>
