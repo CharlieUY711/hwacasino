@@ -552,14 +552,14 @@ export default function RoulettePlayPage() {
           <button onClick={() => setShowPayment(true)} style={{ background: 'linear-gradient(180deg,#2d7a4f 0%,#1e5c38 100%)', border: 'none', borderRadius: 4, padding: '4px 12px', fontSize: '0.72rem', color: '#fff', fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}>Caja</button>
           {/* Selector moneda */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-            <button onClick={() => setActiveCurrency('CHIPS')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.72rem', fontWeight: 700, color: activeCurrency === 'CHIPS' ? GOLD : 'rgba(255,255,255,0.3)' }}>
-              Chip-$ {activeCurrency === 'CHIPS' ? balance.toLocaleString('es-UY') : (balances['CHIPS'] ?? 0).toLocaleString('es-UY')}
-            </button>
-            <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.65rem' }}>|</span>
-            <button onClick={() => setActiveCurrency('USD')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.72rem', fontWeight: 700, color: activeCurrency === 'USD' ? GOLD : 'rgba(255,255,255,0.3)' }}>
-              USD {activeCurrency === 'USD' ? balance.toLocaleString('es-UY') : (balances['USD'] ?? 0).toLocaleString('es-UY')}
-            </button>
+            <button onClick={() => setActiveCurrency('CHIPS')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.72rem', fontWeight: 700, color: activeCurrency === 'CHIPS' ? GOLD : 'rgba(255,255,255,0.3)' }}>Chip-$</button>
+            <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.65rem' }}>/</span>
+            <button onClick={() => setActiveCurrency('USD')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.72rem', fontWeight: 700, color: activeCurrency === 'USD' ? GOLD : 'rgba(255,255,255,0.3)' }}>USD</button>
+            <span style={{ fontSize: '0.72rem', color: GOLD, fontWeight: 700, marginLeft: '4px' }}>{balance.toLocaleString('es-UY')}</span>
           </div>
+
+
+
           {/* Usuario */}
           <span style={{ display: 'flex', alignItems: 'center', gap: '4px', marginLeft: 'auto', flexShrink: 0 }}>
             <svg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.4)' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><circle cx='12' cy='8' r='4'/><path d='M4 20c0-4 3.6-7 8-7s8 3 8 7'/></svg>
