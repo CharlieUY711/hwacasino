@@ -803,7 +803,7 @@ export default function RoulettePlayPage() {
                 showResult={showResult}
                 bets={bets}
                 lastBets={lastBets}
-                locked={roundStatus !== 'betting' || hasBetThisRound}
+                locked={roundStatus !== 'betting' || hasBetThisRound || phase !== 'idle'}
               />
 
               {/* Columnas 2:1 */}
