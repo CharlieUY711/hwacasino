@@ -552,7 +552,7 @@ export default function RoulettePlayPage() {
             <button onClick={() => setShowPayment(true)} style={{ width: '180px', height: '25px', background: 'linear-gradient(180deg,#2d7a4f 0%,#1e5c38 50%,#154d2e 100%)', border: 'none', borderBottom: '2px solid #0d3320', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 8px', cursor: 'pointer', flexShrink: 0 }}><span style={{ fontSize: '0.65rem', color: '#fff', fontWeight: 700 }}>Caja</span><span style={{ fontSize: '0.6rem', color: '#fff', opacity: 0.9 }}>Chip-$ {balance.toLocaleString('es-UY')}</span></button>
             <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><svg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.5)' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><circle cx='12' cy='8' r='4'/><path d='M4 20c0-4 3.6-7 8-7s8 3 8 7'/></svg><span style={{ fontSize: '0.7rem', color: '#fff', fontWeight: 600 }}>{username}</span></span>
           </div>
-          <div style={{ padding: '2px 16px 3px' }}>
+          <div style={{ padding: '1px 16px 1px' }}>
             <button onClick={() => router.push('/roulette')} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.35)', cursor: 'pointer', fontSize: '0.9rem', padding: 0 }}>←</button>
           </div>
         </div>
