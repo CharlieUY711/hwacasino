@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   icons: {
     icon: '/favicon.jpg',
   },
+  manifest: '/manifest.json',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
