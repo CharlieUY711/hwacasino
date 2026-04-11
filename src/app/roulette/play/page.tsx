@@ -546,7 +546,7 @@ export default function RoulettePlayPage() {
 
           {/* Volver */}
           <button onClick={() => router.push('/roulette')} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontFamily: "'Inter', sans-serif", fontStyle: 'normal', fontSize: '1rem', letterSpacing: '0.1em', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', flexShrink: 0 }}>
-            ← Volver
+            ←
           </button>
           {/* Logo + Titulo */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
@@ -560,7 +560,7 @@ export default function RoulettePlayPage() {
           </button>
 
           {/* Usuario + Balance */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginLeft: 'auto' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginLeft: '0' }}>
 
             {/* Etiqueta: Apuesta (rojo) mientras apuesta/gira, Ganado (verde/gris) 1s despues de parar */}
             {showPayout ? (
