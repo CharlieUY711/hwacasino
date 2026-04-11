@@ -538,24 +538,24 @@ export default function RoulettePlayPage() {
         .countdown-urgent { animation:countdownPulse 0.8s ease-in-out infinite; }
       `}</style>
 
-      <main style={{ minHeight: '100dvh', background: DARK, fontFamily: "'Montserrat', sans-serif", maxWidth: '480px', margin: '0 auto', paddingBottom: '80px' }}>
+      <main style={{ minHeight: '100dvh', background: DARK, fontFamily: "'Inter', sans-serif", maxWidth: '480px', margin: '0 auto', paddingBottom: '80px' }}>
 
 
         {/* --- HEADER --- */}
         <div style={{ padding: '6px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(212,175,55,0.12)', background: 'rgba(10,10,10,0.95)', position: 'sticky', top: 0, zIndex: 90, gap: '8px' }}>
 
           {/* Volver */}
-          <button onClick={() => router.push('/roulette')} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1rem', letterSpacing: '0.1em', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', flexShrink: 0 }}>
+          <button onClick={() => router.push('/roulette')} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontFamily: "'Inter', sans-serif", fontStyle: 'normal', fontSize: '1rem', letterSpacing: '0.1em', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', flexShrink: 0 }}>
             ← Volver
           </button>
           {/* Logo + Titulo */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
             <img src='/logo-dorado.jpg' alt='HWA' style={{ height: '20px', width: 'auto' }} />
-            <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1rem', letterSpacing: '0.15em', color: GOLD }}>Roulette Sophie</span>
+            <span style={{ fontFamily: "'Inter', sans-serif", fontStyle: 'normal', fontSize: '1rem', letterSpacing: '0.15em', color: GOLD }}>Roulette Sophie</span>
           </div>
 
           {/* Boton CAJA */}
-          <button onClick={() => setShowPayment(true)} style={{ background: 'linear-gradient(180deg,#4ade80 0%,#16a34a 50%,#15803d 100%)', border: 'none', borderBottom: '2px solid #166534', borderRadius: 4, padding: '6px 28px', fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '0.85rem', color: '#fff', fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}>
+          <button onClick={() => setShowPayment(true)} style={{ background: 'linear-gradient(180deg,#4ade80 0%,#16a34a 50%,#15803d 100%)', border: 'none', borderBottom: '2px solid #166534', borderRadius: 4, padding: '6px 28px', fontFamily: "'Inter', sans-serif", fontStyle: 'normal', fontSize: '0.85rem', color: '#fff', fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}>
             Caja
           </button>
 
@@ -564,28 +564,28 @@ export default function RoulettePlayPage() {
 
             {/* Etiqueta: Apuesta (rojo) mientras apuesta/gira, Ganado (verde/gris) 1s despues de parar */}
             {showPayout ? (
-              <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1rem', color: totalWon ? '#4ade80' : 'rgba(255,255,255,0.3)', whiteSpace: 'nowrap', transition: 'color 0.4s' }}>
+              <span style={{ fontFamily: "'Inter', sans-serif", fontStyle: 'normal', fontSize: '1rem', color: totalWon ? '#4ade80' : 'rgba(255,255,255,0.3)', whiteSpace: 'nowrap', transition: 'color 0.4s' }}>
                 Chip-$ Ganado: {(totalWon ? totalPayout! : 0).toLocaleString('es-UY')}
-                <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic' }}> N</span>
+                <span style={{ fontFamily: "'Inter', sans-serif", fontStyle: 'normal' }}> N</span>
               </span>
             ) : (totalBet > 0 || (hasBetThisRound && lastBets.length > 0)) ? (
-              <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1rem', color: '#f87171', whiteSpace: 'nowrap' }}>
+              <span style={{ fontFamily: "'Inter', sans-serif", fontStyle: 'normal', fontSize: '1rem', color: '#f87171', whiteSpace: 'nowrap' }}>
                 Chip-$ Apuesta: {hasBetThisRound ? lastBets.reduce((s,b)=>s+b.amount,0).toLocaleString('es-UY') : totalBet.toLocaleString('es-UY')}
-                <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic' }}> N</span>
+                <span style={{ fontFamily: "'Inter', sans-serif", fontStyle: 'normal' }}> N</span>
               </span>
             ) : null}
 
-            <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1rem', color: 'rgba(255,255,255,0.5)', whiteSpace: 'nowrap' }}>{username}</span>
+            <span style={{ fontFamily: "'Inter', sans-serif", fontStyle: 'normal', fontSize: '1rem', color: 'rgba(255,255,255,0.5)', whiteSpace: 'nowrap' }}>{username}</span>
 
             {/* Balance: descontado mientras apuesta/gira, ajustado 1s despues de resultado */}
-            <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1rem', color: GOLD, whiteSpace: 'nowrap', transition: 'all 0.5s' }}>
+            <span style={{ fontFamily: "'Inter', sans-serif", fontStyle: 'normal', fontSize: '1rem', color: GOLD, whiteSpace: 'nowrap', transition: 'all 0.5s' }}>
               {Math.max(0, showPayout
                 ? (displayBalance ?? balance)
                 : balance - (hasBetThisRound
                     ? lastBets.reduce((s,b)=>s+b.amount,0)
                     : totalBet)
               ).toLocaleString('es-UY')}
-              <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic' }}> N</span>
+              <span style={{ fontFamily: "'Inter', sans-serif", fontStyle: 'normal' }}> N</span>
             </span>
 
           </div>
@@ -672,7 +672,7 @@ export default function RoulettePlayPage() {
                 {!isSolo && (roundStatus === 'betting' ? 'CIERRA EN' : roundStatus === 'spinning' ? 'GIRANDO' : 'NUEVA RONDA')}
               </p>
               {roundStatus === 'betting' && !isSolo && (
-                <p className={secondsRemaining <= 10 ? 'countdown-urgent' : ''} style={{ fontSize: '1.4rem', color: countdownColor, fontWeight: 700, fontFamily: "'Cormorant Garamond', serif" }}>
+                <p className={secondsRemaining <= 10 ? 'countdown-urgent' : ''} style={{ fontSize: '1.4rem', color: countdownColor, fontWeight: 700, fontFamily: "'Inter', sans-serif" }}>
                   {secondsRemaining} s
                 </p>
               )}
@@ -725,7 +725,7 @@ export default function RoulettePlayPage() {
                 borderRadius: '4px',
                 padding: '6px 2px',
                 color: hasBetThisRound ? 'rgba(255,255,255,0.3)' : '#fff',
-                fontFamily: "'Montserrat', sans-serif",
+                fontFamily: "'Inter', sans-serif",
                 fontWeight: 700,
                 fontSize: '0.42rem',
                 letterSpacing: '0.04em',
@@ -753,7 +753,7 @@ export default function RoulettePlayPage() {
               borderBottom: !canBet ? '3px solid #111' : '3px solid #7a5a10',
               borderRadius: '4px',
               color: !canBet ? 'rgba(255,255,255,0.3)' : waitingForResult || hasBetThisRound ? 'rgba(212,175,55,0.4)' : '#1a0e00',
-              fontFamily: "'Montserrat', sans-serif",
+              fontFamily: "'Inter', sans-serif",
               fontWeight: 900,
               letterSpacing: '0.08em',
               boxShadow: !canBet ? '0 2px 4px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)' : '0 2px 6px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.3), 0 0 20px rgba(212,175,55,0.2)',

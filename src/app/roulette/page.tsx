@@ -85,11 +85,11 @@ export default function RouletteLobbyPage() {
         .join-btn:hover { opacity: 0.88; transform: scale(1.02); }
       `}</style>
 
-      <main style={{ minHeight: '100dvh', background: DARK, fontFamily: "'Montserrat', sans-serif", maxWidth: '480px', margin: '0 auto', paddingBottom: '40px' }}>
+      <main style={{ minHeight: '100dvh', background: DARK, fontFamily: "'Inter', sans-serif", maxWidth: '480px', margin: '0 auto', paddingBottom: '40px' }}>
 
         <div style={{ padding: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(212,175,55,0.1)' }}>
-          <button onClick={() => router.push('/lobby')} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '0.6rem', letterSpacing: '0.25em', fontFamily: "'Montserrat', sans-serif" }}>{'\u2190'} LOBBY</button>
-          <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.2rem', color: GOLD, fontStyle: 'italic', letterSpacing: '0.1em' }}>Roulette</p>
+          <button onClick={() => router.push('/lobby')} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '0.6rem', letterSpacing: '0.25em', fontFamily: "'Inter', sans-serif" }}>{'\u2190'} LOBBY</button>
+          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.2rem', color: GOLD, fontStyle: 'normal', letterSpacing: '0.1em' }}>Roulette</p>
           <p style={{ fontSize: '0.65rem', color: GOLD, fontWeight: 700 }}>{formatChips(balance)}</p>
         </div>
 
@@ -98,7 +98,7 @@ export default function RouletteLobbyPage() {
           <div style={{ display: 'inline-block', padding: '4px 12px', border: '1px solid rgba(212,175,55,0.3)', borderRadius: '2px', marginBottom: '12px' }}>
             <span style={{ fontSize: '0.45rem', letterSpacing: '0.3em', color: GOLD, textTransform: 'uppercase' }}>Private Lounge Access</span>
           </div>
-          <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '3rem', color: GOLD, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>ROULETTE</h1>
+          <h1 style={{ fontFamily: "'Inter', sans-serif", fontSize: '3rem', color: GOLD, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px' }}>ROULETTE</h1>
           <p style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.08em', lineHeight: 1.7 }}>
             Tres salas exclusivas. Una sola rueda por ronda. Todos los jugadores comparten el mismo resultado.
           </p>
@@ -115,7 +115,7 @@ export default function RouletteLobbyPage() {
           </div>
           <div style={{ background: '#111', border: '1px solid rgba(212,175,55,0.1)', borderRadius: '6px', padding: '16px' }}>
             <p style={{ fontSize: '0.45rem', letterSpacing: '0.25em', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', marginBottom: '6px' }}>Salas Activas</p>
-            <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2rem', color: '#fff', fontWeight: 300 }}>3 <span style={{ fontSize: '0.5rem', color: GOLD, letterSpacing: '0.2em' }}>LIVE</span></p>
+            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '2rem', color: '#fff', fontWeight: 300 }}>3 <span style={{ fontSize: '0.5rem', color: GOLD, letterSpacing: '0.2em' }}>LIVE</span></p>
           </div>
         </div>
 
@@ -129,7 +129,7 @@ export default function RouletteLobbyPage() {
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                   <div>
-                    <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.5rem', color: table.vip ? GOLD : '#fff', fontWeight: table.vip ? 600 : 300, marginBottom: '4px' }}>{table.name}</h2>
+                    <h2 style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.5rem', color: table.vip ? GOLD : '#fff', fontWeight: table.vip ? 600 : 300, marginBottom: '4px' }}>{table.name}</h2>
                     <p style={{ fontSize: '0.45rem', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase' }}>{table.sub}</p>
                   </div>
                   <div style={{ textAlign: 'right' }}>
@@ -144,7 +144,7 @@ export default function RouletteLobbyPage() {
                   </div>
                   <button className="join-btn"
                     onClick={() => router.push(`/roulette/play?room=${table.id}`)}
-                    style={{ background: table.vip ? GOLD : 'rgba(212,175,55,0.12)', border: `1px solid ${table.vip ? GOLD : 'rgba(212,175,55,0.3)'}`, borderRadius: '3px', padding: '10px 20px', fontFamily: "'Montserrat', sans-serif", fontWeight: 700, fontSize: '0.55rem', letterSpacing: '0.25em', color: table.vip ? '#000' : GOLD, textTransform: 'uppercase', cursor: 'pointer' }}>
+                    style={{ background: table.vip ? GOLD : 'rgba(212,175,55,0.12)', border: `1px solid ${table.vip ? GOLD : 'rgba(212,175,55,0.3)'}`, borderRadius: '3px', padding: '10px 20px', fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: '0.55rem', letterSpacing: '0.25em', color: table.vip ? '#000' : GOLD, textTransform: 'uppercase', cursor: 'pointer' }}>
                     JUGAR
                   </button>
                 </div>

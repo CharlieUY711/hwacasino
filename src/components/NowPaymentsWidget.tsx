@@ -44,19 +44,19 @@ export function NowPaymentsWidget({ userId }: { userId: string | null }) {
         {/* Status badge */}
         <div style={{ textAlign: 'center' }}>
           {status === 'finished' ? (
-            <div style={{ color: '#4ade80', fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1.2rem' }}>
+            <div style={{ color: '#4ade80', fontFamily: "'Inter', sans-serif", fontStyle: 'normal', fontSize: '1.2rem' }}>
               ✓ Depósito acreditado — Chip-$ {invoice.estimated_usd.toLocaleString('es-UY')}
             </div>
           ) : status === 'confirming' ? (
-            <div style={{ color: GOLD, fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1rem' }}>
+            <div style={{ color: GOLD, fontFamily: "'Inter', sans-serif", fontStyle: 'normal', fontSize: '1rem' }}>
               ⏳ Confirmando en la red...
             </div>
           ) : status === 'expired' || status === 'failed' ? (
-            <div style={{ color: '#f87171', fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1rem' }}>
+            <div style={{ color: '#f87171', fontFamily: "'Inter', sans-serif", fontStyle: 'normal', fontSize: '1rem' }}>
               ✕ {status === 'expired' ? 'Expirado' : 'Fallido'} — intentá de nuevo
             </div>
           ) : (
-            <div style={{ color: 'rgba(255,255,255,0.6)', fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '0.9rem' }}>
+            <div style={{ color: 'rgba(255,255,255,0.6)', fontFamily: "'Inter', sans-serif", fontStyle: 'normal', fontSize: '0.9rem' }}>
               Esperando depósito...
             </div>
           )}
@@ -69,7 +69,7 @@ export function NowPaymentsWidget({ userId }: { userId: string | null }) {
               <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.55rem', letterSpacing: '0.15em', marginBottom: 6 }}>
                 ENVIÁ EXACTAMENTE
               </div>
-              <div style={{ color: GOLD, fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1.4rem' }}>
+              <div style={{ color: GOLD, fontFamily: "'Inter', sans-serif", fontStyle: 'normal', fontSize: '1.4rem' }}>
                 {invoice.pay_amount} {invoice.pay_currency.toUpperCase()}
               </div>
               <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.55rem', marginTop: 4 }}>
@@ -91,7 +91,7 @@ export function NowPaymentsWidget({ userId }: { userId: string | null }) {
                   background: copied ? 'rgba(74,222,128,0.1)' : 'rgba(212,175,55,0.1)',
                   border: `1px solid ${copied ? '#4ade80' : 'rgba(212,175,55,0.3)'}`,
                   borderRadius: 4, color: copied ? '#4ade80' : GOLD,
-                  fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '0.9rem',
+                  fontFamily: "'Inter', sans-serif", fontStyle: 'normal', fontSize: '0.9rem',
                   cursor: 'pointer',
                 }}
               >
@@ -112,7 +112,7 @@ export function NowPaymentsWidget({ userId }: { userId: string | null }) {
             style={{
               padding: '10px', background: 'rgba(212,175,55,0.1)',
               border: '1px solid rgba(212,175,55,0.3)', borderRadius: 4,
-              color: GOLD, fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic',
+              color: GOLD, fontFamily: "'Inter', sans-serif", fontStyle: 'normal',
               fontSize: '1rem', cursor: 'pointer',
             }}
           >
@@ -142,7 +142,7 @@ export function NowPaymentsWidget({ userId }: { userId: string | null }) {
                 background: currency === c.id ? 'rgba(212,175,55,0.15)' : 'rgba(255,255,255,0.04)',
                 border: `1px solid ${currency === c.id ? 'rgba(212,175,55,0.5)' : 'rgba(255,255,255,0.1)'}`,
                 color: currency === c.id ? GOLD : 'rgba(255,255,255,0.5)',
-                fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '0.85rem',
+                fontFamily: "'Inter', sans-serif", fontStyle: 'normal', fontSize: '0.85rem',
               }}
             >
               {c.icon} {c.label}
@@ -166,7 +166,7 @@ export function NowPaymentsWidget({ userId }: { userId: string | null }) {
                 background: amount === a && !custom ? 'rgba(212,175,55,0.15)' : 'rgba(255,255,255,0.04)',
                 border: `1px solid ${amount === a && !custom ? 'rgba(212,175,55,0.5)' : 'rgba(255,255,255,0.1)'}`,
                 color: amount === a && !custom ? GOLD : 'rgba(255,255,255,0.5)',
-                fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '0.9rem',
+                fontFamily: "'Inter', sans-serif", fontStyle: 'normal', fontSize: '0.9rem',
               }}
             >
               ${a}
@@ -185,7 +185,7 @@ export function NowPaymentsWidget({ userId }: { userId: string | null }) {
             background: 'rgba(255,255,255,0.04)',
             border: `1px solid ${custom ? 'rgba(212,175,55,0.5)' : 'rgba(255,255,255,0.1)'}`,
             borderRadius: 4, color: '#fff',
-            fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1rem',
+            fontFamily: "'Inter', sans-serif", fontStyle: 'normal', fontSize: '1rem',
             outline: 'none', boxSizing: 'border-box',
           }}
         />
@@ -193,7 +193,7 @@ export function NowPaymentsWidget({ userId }: { userId: string | null }) {
 
       {/* Error */}
       {error && (
-        <div style={{ color: '#f87171', fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '0.9rem', textAlign: 'center' }}>
+        <div style={{ color: '#f87171', fontFamily: "'Inter', sans-serif", fontStyle: 'normal', fontSize: '0.9rem', textAlign: 'center' }}>
           {error}
         </div>
       )}
@@ -211,7 +211,7 @@ export function NowPaymentsWidget({ userId }: { userId: string | null }) {
           borderBottom: status === 'creating' ? '1px solid rgba(212,175,55,0.2)' : '3px solid #7a5a10',
           borderRadius: 4,
           color: status === 'creating' || !finalAmount || finalAmount < 1 ? 'rgba(212,175,55,0.4)' : '#1a0e00',
-          fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic',
+          fontFamily: "'Inter', sans-serif", fontStyle: 'normal',
           fontSize: '1.1rem', fontWeight: 700,
           cursor: status === 'creating' || !finalAmount || finalAmount < 1 ? 'not-allowed' : 'pointer',
           transition: 'all 0.2s',

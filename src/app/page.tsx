@@ -150,7 +150,7 @@ async function handleRegister() {
 
   // Tipografía base unificada — usada en todos los campos y botones
   const baseFont: React.CSSProperties = {
-    fontFamily: "'Montserrat', sans-serif",
+    fontFamily: "'Inter', sans-serif",
     fontWeight: 300,
     fontSize: '0.75rem',
     letterSpacing: '0.1em',
@@ -184,7 +184,7 @@ async function handleRegister() {
 
   const goldLinkStyle: React.CSSProperties = {
     background: 'transparent', border: 'none', boxShadow: 'none', padding: '0',
-    fontFamily: "'Montserrat', sans-serif", fontWeight: 700, fontSize: '0.93rem',
+    fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: '0.93rem',
     letterSpacing: '0.35em', color: GOLD, textTransform: 'uppercase' as const,
     cursor: 'pointer', outline: 'none', transition: 'opacity 0.25s ease',
   }
@@ -212,7 +212,7 @@ async function handleRegister() {
           <Image src="/logo-dorado.jpg" alt="HWA Casino" width={140} height={140} style={{ objectFit: 'contain' }} priority />
         </div>
 
-        <p className="animate-fade-in-up delay-400" style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 200, fontSize: '0.6rem', letterSpacing: '0.55em', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', marginBottom: '40px' }}>
+        <p className="animate-fade-in-up delay-400" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 200, fontSize: '0.6rem', letterSpacing: '0.55em', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', marginBottom: '40px' }}>
           Private Members Only
         </p>
 
@@ -292,14 +292,14 @@ async function handleRegister() {
                         width: '100%', height: '1.43rem',
                         background: 'transparent', border: 'none', outline: 'none',
                         textAlign: 'center', caretColor: 'transparent',
-                        fontFamily: "'Montserrat', sans-serif",
+                        fontFamily: "'Inter', sans-serif",
                         fontWeight: 300, fontSize: '1.1rem',
                         color: displayChar ? color : 'transparent',
                         padding: 0, margin: 0,
                       }}
                     />
                   ) : (
-                    <span style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 400, fontSize: '1.1rem', color, lineHeight: 1.3, minHeight: '1.43rem', textAlign: 'center', display: 'block', width: '100%' }}>
+                    <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400, fontSize: '1.1rem', color, lineHeight: 1.3, minHeight: '1.43rem', textAlign: 'center', display: 'block', width: '100%' }}>
                       {displayChar}
                     </span>
                   )}

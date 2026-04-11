@@ -159,7 +159,7 @@ export default function LobbyPage() {
         }
       `}</style>
 
-      <main style={{ minHeight: '100dvh', background: DARK, fontFamily: "'Montserrat', sans-serif", paddingBottom: '80px', maxWidth: '480px', margin: '0 auto', position: 'relative' }}>
+      <main style={{ minHeight: '100dvh', background: DARK, fontFamily: "'Inter', sans-serif", paddingBottom: '80px', maxWidth: '480px', margin: '0 auto', position: 'relative' }}>
 
         {/* ── HEADER ── */}
         <div className="fade-up fade-up-1" style={{ padding: '20px 20px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(212,175,55,0.1)' }}>
@@ -171,7 +171,7 @@ export default function LobbyPage() {
             />
             <div>
               <p style={{ fontSize: '0.5rem', letterSpacing: '0.25em', color: 'rgba(255,255,255,0.3)', fontWeight: 300, textTransform: 'uppercase' }}>VIP MEMBER PROFILE</p>
-              <p style={{ fontSize: '1rem', letterSpacing: '0.15em', color: '#fff', fontWeight: 600, fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic' }}>{username}</p>
+              <p style={{ fontSize: '1rem', letterSpacing: '0.15em', color: '#fff', fontWeight: 600, fontFamily: "'Inter', sans-serif", fontStyle: 'normal' }}>{username}</p>
             </div>
           </div>
           <div style={{ textAlign: 'right' }}>
@@ -189,13 +189,13 @@ export default function LobbyPage() {
             <span style={{ display: 'inline-block', width: '16px', height: '1px', background: GOLD }} />
             EXCLUSIVE ACCESS
           </p>
-          <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '3.2rem', lineHeight: 0.95, color: '#fff', fontWeight: 300, marginBottom: '24px' }}>
-            HWA <span style={{ color: GOLD, fontStyle: 'italic', fontWeight: 700 }}>CASINO</span><br />EXPERIENCE
+          <h1 style={{ fontFamily: "'Inter', sans-serif", fontSize: '3.2rem', lineHeight: 0.95, color: '#fff', fontWeight: 300, marginBottom: '24px' }}>
+            HWA <span style={{ color: GOLD, fontStyle: 'normal', fontWeight: 700 }}>CASINO</span><br />EXPERIENCE
           </h1>
           <button
             onClick={() => setActiveNav('tables')}
             className="play-btn"
-            style={{ background: GOLD, border: 'none', borderRadius: '2px', padding: '14px 28px', fontFamily: "'Montserrat', sans-serif", fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.3em', color: '#000', textTransform: 'uppercase', cursor: 'pointer' }}>
+            style={{ background: GOLD, border: 'none', borderRadius: '2px', padding: '14px 28px', fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.3em', color: '#000', textTransform: 'uppercase', cursor: 'pointer' }}>
             ENTER PRIVATE SUITE
           </button>
         </div>
@@ -226,7 +226,7 @@ export default function LobbyPage() {
           <div className="game-card" onClick={() => router.push('/roulette')} style={{ background: GAMES[0].gradient, border: '1px solid rgba(212,175,55,0.1)', borderRadius: '4px', padding: '28px 20px 20px', marginBottom: '12px', position: 'relative', overflow: 'hidden', minHeight: '160px' }}>
             <div style={{ position: 'absolute', right: '-20px', top: '-20px', fontSize: '7rem', opacity: 0.06, transform: 'rotate(-15deg)' }}>🎡</div>
             <p style={{ fontSize: '0.45rem', letterSpacing: '0.3em', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', marginBottom: '6px' }}>{GAMES[0].sub}</p>
-            <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2rem', color: '#fff', fontWeight: 300, letterSpacing: '0.1em', marginBottom: '20px' }}>{GAMES[0].label}</h2>
+            <h2 style={{ fontFamily: "'Inter', sans-serif", fontSize: '2rem', color: '#fff', fontWeight: 300, letterSpacing: '0.1em', marginBottom: '20px' }}>{GAMES[0].label}</h2>
             <button className="play-btn" onClick={(e) => { e.stopPropagation(); router.push('/roulette') }} style={{ background: 'rgba(212,175,55,0.12)', border: `1px solid rgba(212,175,55,0.3)`, borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', position: 'absolute', bottom: '20px', right: '20px' }}>
               <span style={{ color: GOLD, fontSize: '0.9rem', marginLeft: '2px' }}>▶</span>
             </button>
@@ -243,7 +243,7 @@ export default function LobbyPage() {
                 style={{ background: game.gradient, border: '1px solid rgba(212,175,55,0.1)', borderRadius: '4px', padding: '20px 14px 14px', position: 'relative', overflow: 'hidden', minHeight: '130px' }}
               >
                 <div style={{ position: 'absolute', right: '-10px', top: '-10px', fontSize: '4.5rem', opacity: 0.07, transform: 'rotate(-10deg)' }}>{game.emoji}</div>
-                <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.3rem', color: '#fff', fontWeight: 400, letterSpacing: '0.05em', marginBottom: '4px' }}>{game.label}</h2>
+                <h2 style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.3rem', color: '#fff', fontWeight: 400, letterSpacing: '0.05em', marginBottom: '4px' }}>{game.label}</h2>
                 {game.tag && <p style={{ fontSize: '0.42rem', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase' }}>{game.tag}</p>}
               </div>
             ))}
@@ -252,7 +252,7 @@ export default function LobbyPage() {
           {/* Dice — large */}
           <div className="game-card" style={{ background: GAMES[3].gradient, border: '1px solid rgba(212,175,55,0.1)', borderRadius: '4px', padding: '24px 20px', position: 'relative', overflow: 'hidden', minHeight: '130px' }}>
             <div style={{ position: 'absolute', right: '-10px', bottom: '-10px', fontSize: '6rem', opacity: 0.08, transform: 'rotate(15deg)' }}>🎲</div>
-            <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.8rem', color: '#fff', fontWeight: 300, letterSpacing: '0.1em', marginBottom: '6px' }}>{GAMES[3].label}</h2>
+            <h2 style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.8rem', color: '#fff', fontWeight: 300, letterSpacing: '0.1em', marginBottom: '6px' }}>{GAMES[3].label}</h2>
             <p style={{ fontSize: '0.55rem', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.3)', maxWidth: '55%', lineHeight: 1.6 }}>{GAMES[3].sub}</p>
             <button className="play-btn" style={{ background: 'rgba(212,175,55,0.12)', border: `1px solid rgba(212,175,55,0.25)`, borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', position: 'absolute', bottom: '20px', right: '20px' }}>
               <span style={{ color: GOLD, fontSize: '1rem' }}>⊞</span>
@@ -262,7 +262,7 @@ export default function LobbyPage() {
 
         {/* ── CONCIERGE SERVICES ── */}
         <div className="fade-up fade-up-4" style={{ padding: '0 20px', marginBottom: '32px' }}>
-          <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.4rem', color: '#fff', fontWeight: 300, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '16px' }}>Concierge Services</h3>
+          <h3 style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.4rem', color: '#fff', fontWeight: 300, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '16px' }}>Concierge Services</h3>
 
           {[
             { icon: '◎', title: 'Personal Host', desc: 'Available for instant withdrawal assistance.', action: 'CHAT', color: GOLD },
@@ -276,14 +276,14 @@ export default function LobbyPage() {
                 <p style={{ fontSize: '0.7rem', fontWeight: 600, color: '#fff', letterSpacing: '0.05em', marginBottom: '3px' }}>{item.title}</p>
                 <p style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.3)', letterSpacing: '0.05em', lineHeight: 1.5 }}>{item.desc}</p>
               </div>
-              <button style={{ background: 'transparent', border: 'none', fontFamily: "'Montserrat', sans-serif", fontWeight: 700, fontSize: '0.6rem', letterSpacing: '0.25em', color: item.color, cursor: 'pointer' }}>{item.action}</button>
+              <button style={{ background: 'transparent', border: 'none', fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: '0.6rem', letterSpacing: '0.25em', color: item.color, cursor: 'pointer' }}>{item.action}</button>
             </div>
           ))}
         </div>
 
         {/* ── LOGOUT ── */}
         <div style={{ textAlign: 'center', padding: '0 20px 16px' }}>
-          <button onClick={handleLogout} style={{ background: 'transparent', border: 'none', fontFamily: "'Montserrat', sans-serif", fontWeight: 300, fontSize: '0.5rem', letterSpacing: '0.3em', color: 'rgba(255,255,255,0.15)', cursor: 'pointer', textTransform: 'uppercase' }}>
+          <button onClick={handleLogout} style={{ background: 'transparent', border: 'none', fontFamily: "'Inter', sans-serif", fontWeight: 300, fontSize: '0.5rem', letterSpacing: '0.3em', color: 'rgba(255,255,255,0.15)', cursor: 'pointer', textTransform: 'uppercase' }}>
             CERRAR SESIÓN
           </button>
         </div>
@@ -300,7 +300,7 @@ export default function LobbyPage() {
               key={item.id}
               className="nav-item"
               onClick={() => setActiveNav(item.id)}
-              style={{ background: 'transparent', border: 'none', color: activeNav === item.id ? GOLD : 'rgba(255,255,255,0.25)', fontFamily: "'Montserrat', sans-serif" }}>
+              style={{ background: 'transparent', border: 'none', color: activeNav === item.id ? GOLD : 'rgba(255,255,255,0.25)', fontFamily: "'Inter', sans-serif" }}>
               <span style={{ fontSize: '1rem' }}>{item.icon}</span>
               <span style={{ fontSize: '0.38rem', letterSpacing: '0.15em', fontWeight: activeNav === item.id ? 600 : 300 }}>{item.label}</span>
             </button>

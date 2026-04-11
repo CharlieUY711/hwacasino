@@ -131,7 +131,7 @@ export default function PaymentModal({ open, onClose, userId, username, balances
     flex: 1,
     padding: '12px 4px',
     fontSize: '0.65rem',
-    fontFamily: "'Montserrat', sans-serif",
+    fontFamily: "'Inter', sans-serif",
     fontWeight: 700,
     letterSpacing: '0.1em',
     border: 'none',
@@ -150,7 +150,7 @@ export default function PaymentModal({ open, onClose, userId, username, balances
     borderRadius: 6,
     color: '#fff',
     fontSize: '0.85rem',
-    fontFamily: "'Montserrat', sans-serif",
+    fontFamily: "'Inter', sans-serif",
     outline: 'none',
     boxSizing: 'border-box',
   }
@@ -164,7 +164,7 @@ export default function PaymentModal({ open, onClose, userId, username, balances
     borderRadius: 6,
     color: '#1a0e00',
     fontSize: '0.7rem',
-    fontFamily: "'Montserrat', sans-serif",
+    fontFamily: "'Inter', sans-serif",
     fontWeight: 900,
     letterSpacing: '0.15em',
     cursor: 'pointer',
@@ -193,8 +193,8 @@ export default function PaymentModal({ open, onClose, userId, username, balances
 
         {/* Título */}
         <div style={{ padding: '8px 20px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(212,175,55,0.1)' }}>
-          <div><span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1.3rem', color: GOLD }}>Caja</span>{username && <span style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', marginLeft: 8 }}>{username}</span>}</div>
-          <div style={{ display: 'flex', gap: 16, fontSize: '0.55rem', fontFamily: "'Montserrat', sans-serif" }}>
+          <div><span style={{ fontFamily: "'Inter', sans-serif", fontStyle: 'normal', fontSize: '1.3rem', color: GOLD }}>Caja</span>{username && <span style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', marginLeft: 8 }}>{username}</span>}</div>
+          <div style={{ display: 'flex', gap: 16, fontSize: '0.55rem', fontFamily: "'Inter', sans-serif" }}>
             {Object.entries(balances).filter(([,v]) => v > 0).map(([k,v]) => (
               <span key={k} style={{ color: GOLD }}>{v.toLocaleString('es-UY')} {k}</span>
             ))}
@@ -226,7 +226,7 @@ export default function PaymentModal({ open, onClose, userId, username, balances
                       color: selectedPkg.usd === p.usd ? GOLD : 'rgba(255,255,255,0.6)',
                       fontSize: '0.8rem',
                       fontWeight: 700,
-                      fontFamily: "'Montserrat', sans-serif",
+                      fontFamily: "'Inter', sans-serif",
                       cursor: 'pointer',
                     }}>
                     {p.label}
