@@ -20,7 +20,6 @@ export default function Home() {
   const [loading, setLoading]   = useState(false)
   const [error, setError]       = useState('')
   const [showPass, setShowPass]   = useState(false)
-  const [showPass, setShowPass]   = useState(false)
 
   async function handleCode() {
     if (!email.trim()) { setError('Ingresá tu email'); return }
