@@ -547,7 +547,7 @@ export default function RoulettePlayPage() {
               <img src='/logo-dorado.jpg' alt='HWA' style={{ height: '18px', width: 'auto' }} />
               <span style={{ fontSize: '0.7rem', color: GOLD, fontWeight: 600, letterSpacing: '0.08em' }}>SOPHIE</span>
             </div>
-            <span style={{ fontSize: '0.7rem', color: '#fff', fontWeight: 600 }}>{username}</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><svg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.5)' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><circle cx='12' cy='8' r='4'/><path d='M4 20c0-4 3.6-7 8-7s8 3 8 7'/></svg><span style={{ fontSize: '0.7rem', color: '#fff', fontWeight: 600 }}>{username}</span></span>
           </div>
           {/* Fila inferior: flecha a la izquierda */}
           <div style={{ padding: '2px 16px 3px' }}>
