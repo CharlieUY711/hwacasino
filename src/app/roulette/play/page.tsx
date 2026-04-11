@@ -567,6 +567,17 @@ export default function RoulettePlayPage() {
             <span style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.6)' }}>{username}</span>
           </div>
         </div>
+        {/* Sub-header: flecha volver + salir */}
+        <div style={{ padding: '1px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(212,175,55,0.06)' }}>
+          <button onClick={() => router.push('/roulette')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.35)', cursor: 'pointer', fontSize: '0.9rem', padding: 0 }}>←</button>
+          <button onClick={() => supabase.auth.signOut().then(() => router.push('/'))} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+            <svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.3)' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'>
+              <path d='M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4'/>
+              <polyline points='16 17 21 12 16 7'/>
+              <line x1='21' y1='12' x2='9' y2='12'/>
+            </svg>
+          </button>
+        </div>
         <div style={{ background: "radial-gradient(ellipse at center, #1a0e00 0%, #0a0a0a 70%)", padding: "16px 12px 8px", display: "flex", flexDirection: "column", alignItems: "center" }}>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
           <div style={{ position: 'relative', width: 280, height: 280 }}>
