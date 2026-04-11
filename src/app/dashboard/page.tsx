@@ -29,7 +29,6 @@ export default function Dashboard() {
   const [data,     setData]     = useState<any>(null)
   const [loading,  setLoading]  = useState(true)
   const [showPayment, setShowPayment] = useState(false)
-  const [showPayment, setShowPayment] = useState(false)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
