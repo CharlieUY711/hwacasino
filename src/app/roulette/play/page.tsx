@@ -545,9 +545,9 @@ export default function RoulettePlayPage() {
           <div style={{ padding: '6px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(212,175,55,0.12)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <img src='/logo-dorado.jpg' alt='HWA' style={{ height: '18px', width: 'auto' }} />
-              <span style={{ fontSize: '0.7rem', color: GOLD, fontWeight: 600, letterSpacing: '0.08em' }}>ROULETTE SOPHIE</span>
+              <span style={{ fontSize: '0.7rem', color: GOLD, fontWeight: 600, letterSpacing: '0.08em' }}>SOPHIE</span>
             </div>
-            <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.45)', fontWeight: 500 }}>{username}</span>
+            <span style={{ fontSize: '0.7rem', color: '#fff', fontWeight: 600 }}>{username}</span>
           </div>
           {/* Fila inferior: flecha a la izquierda */}
           <div style={{ padding: '2px 16px 3px' }}>
