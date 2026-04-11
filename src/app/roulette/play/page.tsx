@@ -547,7 +547,10 @@ export default function RoulettePlayPage() {
           <button onClick={() => router.push('/roulette')} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.35)', cursor: 'pointer', fontSize: '1rem', padding: 0, flexShrink: 0 }}>←</button>
           <img src='/logo-dorado.jpg' alt='HWA' style={{ height: '16px', width: 'auto', flexShrink: 0 }} />
           <span style={{ fontSize: '0.7rem', color: GOLD, fontWeight: 600, letterSpacing: '0.08em', flexShrink: 0 }}>ROULETTE SOPHIE</span>
-          <button onClick={() => setShowPayment(true)} style={{ background: 'linear-gradient(180deg,#4ade80 0%,#16a34a 50%,#15803d 100%)', border: 'none', borderBottom: '2px solid #166534', borderRadius: 4, padding: '5px 0', fontSize: '0.7rem', color: '#fff', fontWeight: 700, cursor: 'pointer', flex: 2, maxWidth: 120 }}>Caja</button>
+          <button onClick={() => setShowPayment(true)} style={{ background: 'linear-gradient(180deg,#4ade80 0%,#16a34a 50%,#15803d 100%)', border: 'none', borderBottom: '2px solid #166534', borderRadius: 4, padding: '5px 10px', fontSize: '0.7rem', color: '#fff', fontWeight: 700, cursor: 'pointer', flex: 2, maxWidth: 160, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
+            <span>Caja</span>
+            <span style={{ opacity: 0.9 }}>Chip-$ {balance.toLocaleString('es-UY')}</span>
+          </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: 'auto', flexShrink: 0 }}>
             <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.45)' }}>{username}</span>
             {showPayout ? (
