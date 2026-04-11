@@ -163,6 +163,7 @@ export default function Home() {
         </>)}
 
       </div>
+      </div>
 
       <div style={{ marginTop: 24, fontSize: '0.6rem', color: 'rgba(255,255,255,0.15)', letterSpacing: '0.1em', textAlign: 'center' }}>HWA CASINO · ACCESO RESTRINGIDO</div>
     </div>
