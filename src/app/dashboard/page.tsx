@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import PaymentModal from '@/components/PaymentModal'
+import PaymentModal from '@/components/PaymentModal'
 
 const GOLD = '#D4AF37'
 const DARK = '#0a0a0a'
@@ -28,6 +29,7 @@ export default function Dashboard() {
   const [to,       setTo]       = useState(today())
   const [data,     setData]     = useState<any>(null)
   const [loading,  setLoading]  = useState(true)
+  const [showPayment, setShowPayment] = useState(false)
   const [showPayment, setShowPayment] = useState(false)
 
   useEffect(() => {
@@ -153,6 +155,7 @@ export default function Dashboard() {
         </div>
 
       </div>
+      <PaymentModal open={showPayment} onClose={() => setShowPayment(false)} userId={userId} username={username} balances={{}} />
       <PaymentModal open={showPayment} onClose={() => setShowPayment(false)} userId={userId} username={username} balances={{}} />
     </div>
   )
