@@ -16,7 +16,7 @@ type Bet = {
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { user_id, bets } = body as { user_id: string; bets: Bet[] }
+    const { user_id, bets, currency = 'CHIPS' } = body as { user_id: string; bets: Bet[]; currency?: string }
 
     if (!user_id || !Array.isArray(bets) || bets.length === 0) {
       return NextResponse.json({ error: 'Datos invalidos' }, { status: 400 })
@@ -29,8 +29,9 @@ export async function POST(req: Request) {
     }
 
     const { data, error } = await supabase.rpc('play_roulette', {
-      p_user_id: user_id,
-      p_bets:    bets,
+      p_user_id:  user_id,
+      p_bets:     bets,
+      p_currency: currency,
     })
 
     if (error) {
