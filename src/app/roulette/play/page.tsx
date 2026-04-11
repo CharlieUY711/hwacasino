@@ -544,7 +544,7 @@ export default function RoulettePlayPage() {
 
           {/* Volver */}
           <button onClick={() => router.push('/roulette')} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1rem', letterSpacing: '0.1em', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', flexShrink: 0 }}>
-            ← Volver
+            ←
           </button>
           {/* Logo + Titulo */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
