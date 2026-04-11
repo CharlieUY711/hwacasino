@@ -84,8 +84,8 @@ export default function EsmeraldaRoulette() {
       <div className="relative w-[320px] h-[320px]">
         <canvas
           ref={canvasRef}
-          style={{ transform: 
-otate(deg) }}
+          style={{ transform: `rotate(${deg}deg)` }}
+
           className="w-full h-full rounded-full transition-transform duration-[6000ms]"
         />
 
