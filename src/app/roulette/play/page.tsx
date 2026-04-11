@@ -597,7 +597,7 @@ export default function RoulettePlayPage() {
                       <path d={`M ${x1} ${y1} A ${r1} ${r1} 0 0 1 ${x2} ${y2} L ${x3} ${y3} A ${r2} ${r2} 0 0 0 ${x4} ${y4} Z`}
                         fill={fill} stroke="rgba(212,175,55,0.3)" strokeWidth="0.6" />
                       <text x={tx} y={ty} textAnchor="middle" dominantBaseline="middle"
-                        fill="rgba(255,255,255,0.9)" fontSize="9" fontWeight="700"
+                        fill="rgba(255,255,255,0.9)" fontSize={num === 0 ? "11" : "9"} fontWeight="700"
                         fontFamily="Montserrat, sans-serif"
                         transform={`rotate(${angle + 90}, ${tx}, ${ty})`}>{num}</text>
                     </g>
