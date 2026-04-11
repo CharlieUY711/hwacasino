@@ -551,11 +551,11 @@ export default function RoulettePlayPage() {
           {/* Caja */}
           <button onClick={() => setShowPayment(true)} style={{ background: 'linear-gradient(180deg,#2d7a4f 0%,#1e5c38 100%)', border: 'none', borderRadius: 4, padding: '4px 12px', fontSize: '0.72rem', color: '#fff', fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}>Caja</button>
           {/* Selector moneda */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-            <button onClick={() => setActiveCurrency('CHIPS')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.72rem', fontWeight: 700, color: activeCurrency === 'CHIPS' ? GOLD : 'rgba(255,255,255,0.3)' }}>Chip-$</button>
-            <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.65rem' }}>/</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0', flexShrink: 0 }}>
             <button onClick={() => setActiveCurrency('USD')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.72rem', fontWeight: 700, color: activeCurrency === 'USD' ? GOLD : 'rgba(255,255,255,0.3)' }}>USD</button>
-            <span style={{ fontSize: '0.72rem', color: GOLD, fontWeight: 700, marginLeft: '4px' }}>{balance.toLocaleString('es-UY')}</span>
+            <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.65rem', margin: '0 2px' }}>/</span>
+            <button onClick={() => setActiveCurrency('CHIPS')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.72rem', fontWeight: 700, color: activeCurrency === 'CHIPS' ? GOLD : 'rgba(255,255,255,0.3)' }}>Chip-$</button>
+            <span style={{ fontSize: '0.72rem', color: GOLD, fontWeight: 700, marginLeft: '6px' }}>{balance.toLocaleString('es-UY')}</span>
           </div>
 
 
