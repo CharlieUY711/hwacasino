@@ -60,8 +60,11 @@ export default function Home() {
     if (password.length < 6) { setError('La contraseña debe tener al menos 6 caracteres'); return }
     setLoading(true); setError('')
     try {
-      await registerWithEmail(email, password, username)
-      await markInviteUsed(code.trim().toUpperCase())
+      const regData = await registerWithEmail(email, password, username)
+      const inviteResult = await validateInviteCode(code.trim().toUpperCase())
+      if (inviteResult.id && regData.user) {
+        await markInviteUsed(inviteResult.id, regData.user.id)
+      }
       router.push('/roulette')
     } catch (e: any) { setError(e?.message ?? 'Error al registrar') }
     setLoading(false)
