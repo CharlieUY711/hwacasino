@@ -540,47 +540,18 @@ export default function RoulettePlayPage() {
 
 
         {/* --- HEADER --- */}
-        <div style={{ padding: '6px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(212,175,55,0.12)', background: 'rgba(10,10,10,0.95)', position: 'sticky', top: 0, zIndex: 90, gap: '8px' }}>
-
-          {/* Volver */}
-          <button onClick={() => router.push('/roulette')} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1rem', letterSpacing: '0.1em', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', flexShrink: 0 }}>
-            ←
-          </button>
-          {/* Logo + Titulo */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-            <img src='/logo-dorado.jpg' alt='HWA' style={{ height: '20px', width: 'auto' }} />
-            <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1rem', letterSpacing: '0.15em', color: GOLD }}>Roulette Sophie</span>
+        <div style={{ background: 'rgba(10,10,10,0.95)', position: 'sticky', top: 0, zIndex: 90 }}>
+          {/* Fila superior: logo + nombre | usuario */}
+          <div style={{ padding: '6px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(212,175,55,0.12)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <img src='/logo-dorado.jpg' alt='HWA' style={{ height: '18px', width: 'auto' }} />
+              <span style={{ fontSize: '0.7rem', color: GOLD, fontWeight: 600, letterSpacing: '0.08em' }}>ROULETTE SOPHIE</span>
+            </div>
+            <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.45)', fontWeight: 500 }}>{username}</span>
           </div>
-
-          {/* Usuario + Balance */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginLeft: 'auto' }}>
-
-            {/* Etiqueta: Apuesta (rojo) mientras apuesta/gira, Ganado (verde/gris) 1s despues de parar */}
-            {showPayout ? (
-              <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1rem', color: totalWon ? '#4ade80' : 'rgba(255,255,255,0.3)', whiteSpace: 'nowrap', transition: 'color 0.4s' }}>
-                Ganado: {(totalWon ? totalPayout! : 0).toLocaleString('es-UY')}
-                <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic' }}> N</span>
-              </span>
-            ) : (totalBet > 0 || (hasBetThisRound && lastBets.length > 0)) ? (
-              <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1rem', color: '#f87171', whiteSpace: 'nowrap' }}>
-                Apuesta: {hasBetThisRound ? lastBets.reduce((s,b)=>s+b.amount,0).toLocaleString('es-UY') : totalBet.toLocaleString('es-UY')}
-                <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic' }}> N</span>
-              </span>
-            ) : null}
-
-            <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1rem', color: 'rgba(255,255,255,0.5)', whiteSpace: 'nowrap' }}>{username}</span>
-
-            {/* Balance: descontado mientras apuesta/gira, ajustado 1s despues de resultado */}
-            <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1rem', color: GOLD, whiteSpace: 'nowrap', transition: 'all 0.5s' }}>
-              {Math.max(0, showPayout
-                ? (displayBalance ?? balance)
-                : balance - (hasBetThisRound
-                    ? lastBets.reduce((s,b)=>s+b.amount,0)
-                    : totalBet)
-              ).toLocaleString('es-UY')}
-              <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic' }}> N</span>
-            </span>
-
+          {/* Fila inferior: flecha a la izquierda */}
+          <div style={{ padding: '2px 16px 3px' }}>
+            <button onClick={() => router.push('/roulette')} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.35)', cursor: 'pointer', fontSize: '0.9rem', padding: 0 }}>←</button>
           </div>
         </div>
         {/* --- RUEDA SVG --- */}
