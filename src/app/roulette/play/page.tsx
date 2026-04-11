@@ -353,8 +353,8 @@ export default function RoulettePlayPage() {
   }
 
   function clearBets()  { if (!hasBetThisRound) setBets([]) }
-  function repeatBets() { if (!hasBetThisRound && lastBets.length > 0) setBets(lastBets) }
-  function doubleBets() { if (!hasBetThisRound) setBets(prev => prev.map(b => ({ ...b, amount: b.amount * 2 }))) }
+  function repeatBets() { if (!hasBetThisRound && phase === 'idle' && lastBets.length > 0) setBets(lastBets) }
+  function doubleBets() { if (!hasBetThisRound && phase === 'idle') setBets(prev => prev.map(b => ({ ...b, amount: b.amount * 2 }))) }
 
   const totalBet = bets.reduce((sum, b) => sum + b.amount, 0)
 
