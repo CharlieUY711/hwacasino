@@ -919,6 +919,13 @@ export default function RoulettePlayPage() {
 
         </div>
 
+      <PaymentModal
+        open={showPayment}
+        onClose={() => setShowPayment(false)}
+        userId={userId}
+        username={username}
+        balances={{}}
+      />
       </main>
     </>
   )
