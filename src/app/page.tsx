@@ -118,10 +118,12 @@ export default function Home() {
 
         {/* ── BIENVENIDA ── */}
         {step === 'welcome' && (<>
+        {step === 'welcome' && (<>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '2rem', marginBottom: 8 }}>🎰</div>
-            <div style={{ fontSize: '1rem', color: GOLD, fontWeight: 600, marginBottom: 8 }}>¡Código válido!</div>
-            <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.6 }}>{bonusLabel}</div>
+            <div style={{ fontSize: '1rem', color: GOLD, fontWeight: 600, marginBottom: 12 }}>Acceso activado.</div>
+            <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.8, marginBottom: 8 }}>Accediste a una experiencia exclusiva de casino en modo entretenimiento.</div>
+            {reward > 0 && <div style={{ fontSize: '0.85rem', color: GOLD, fontWeight: 600, marginBottom: 6 }}>Tu código te ha otorgado {reward.toLocaleString('es-UY')} Chip-$ de bienvenida</div>}
+            <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)' }}>Sin dinero real.</div>
           </div>
           <button style={btnStyle} onClick={() => { setStep('register'); setError('') }}>CREAR MI CUENTA</button>
           <button style={linkStyle} onClick={() => { setStep('code'); setError('') }}>← Volver</button>
