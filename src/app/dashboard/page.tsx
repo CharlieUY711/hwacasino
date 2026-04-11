@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
+import PaymentModal from '@/components/PaymentModal'
 
 const GOLD = '#D4AF37'
 const DARK = '#0a0a0a'
@@ -27,6 +28,7 @@ export default function Dashboard() {
   const [to,       setTo]       = useState(today())
   const [data,     setData]     = useState<any>(null)
   const [loading,  setLoading]  = useState(true)
+  const [showPayment, setShowPayment] = useState(false)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -72,9 +74,10 @@ export default function Dashboard() {
         </div>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
           <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)' }}>{username}</span>
-          <button onClick={() => router.push('/roulette')} style={{ background: 'linear-gradient(180deg,#2d7a4f 0%,#1e5c38 100%)', border: 'none', borderRadius: 6, padding: '6px 14px', color: '#fff', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}>
-            Jugar
-          </button>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button onClick={() => setShowPayment(true)} style={{ background: 'linear-gradient(180deg,#2d7a4f 0%,#1e5c38 100%)', border: 'none', borderRadius: 6, padding: '6px 14px', color: '#fff', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}>Caja</button>
+            <button onClick={() => router.push('/roulette')} style={{ background: 'linear-gradient(180deg,#f5d060 0%,#d4af37 100%)', border: 'none', borderRadius: 6, padding: '6px 14px', color: '#1a0e00', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}>Jugar</button>
+          </div>
         </div>
       </div>
 
@@ -150,6 +153,7 @@ export default function Dashboard() {
         </div>
 
       </div>
+      <PaymentModal open={showPayment} onClose={() => setShowPayment(false)} userId={userId} username={username} balances={{}} />
     </div>
   )
 }
