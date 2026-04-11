@@ -1,4 +1,5 @@
 'use client'
+import PaymentModal from '@/components/PaymentModal'
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
@@ -138,6 +139,7 @@ export default function RoulettePlayPage() {
   const [activeTab, setActiveTab]       = useState<'hot' | 'cold' | 'history'>('hot')
   const [error, setError]               = useState<string | null>(null)
   const [showResult, setShowResult]     = useState(false)
+  const [showPayment, setShowPayment] = useState(false)
   const [showPayout, setShowPayout]     = useState(false)
   const [phase, setPhase]               = useState<'idle'|'spinning'|'result'|'payout'>('idle')
 
