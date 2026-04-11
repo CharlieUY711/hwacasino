@@ -52,8 +52,8 @@ export default function RouletteWheel({ rotation }) {
     <div className="relative w-[320px] h-[320px]">
       <canvas
   ref={canvasRef}
-  style={{ transform: 
-rotate(${deg}deg) }}
+  style={{ transform: `rotate(${deg}deg)` }}
+
   className="rounded-full transition-transform duration-[6000ms]"
 />
       <div className="absolute top-0 left-1/2 -translate-x-1/2">
