@@ -140,6 +140,7 @@ export default function RoulettePlayPage() {
   const [error, setError]               = useState<string | null>(null)
   const [showResult, setShowResult]     = useState(false)
   const [showPayment, setShowPayment] = useState(false)
+  const [activeCurrency, setActiveCurrency] = useState<'CHIPS'|'USD'>('CHIPS')
   const [showPayout, setShowPayout]     = useState(false)
   const [phase, setPhase]               = useState<'idle'|'spinning'|'result'|'payout'>('idle')
 
