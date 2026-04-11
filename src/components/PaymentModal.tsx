@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
+import { NowPaymentsWidget } from '@/components/NowPaymentsWidget'
 
 const GOLD = '#D4AF37'
 const DARK = '#0a0a0a'
@@ -12,7 +13,7 @@ const PACKAGES = [
   { usd: 100, label: '$100' },
 ]
 
-type Tab = 'paypal' | 'usdt' | 'withdraw'
+type Tab = 'paypal' | 'crypto' | 'usdt' | 'withdraw'
 
 interface Props {
   open: boolean
@@ -203,6 +204,7 @@ export default function PaymentModal({ open, onClose, userId, username, balances
         {/* Tabs */}
         <div style={{ display: 'flex', borderBottom: '1px solid rgba(212,175,55,0.1)' }}>
           <button style={tabStyle('paypal')} onClick={() => { setTab('paypal'); setStatus('idle'); setMessage('') }}>PAYPAL</button>
+          <button style={tabStyle('crypto')} onClick={() => { setTab('crypto'); setStatus('idle'); setMessage('') }}>CRYPTO</button>
           <button style={tabStyle('usdt')} onClick={() => { setTab('usdt'); setStatus('idle'); setMessage('') }}>USDT</button>
           <button style={tabStyle('withdraw')} onClick={() => { setTab('withdraw'); setStatus('idle'); setMessage('') }}>RETIRAR</button>
         </div>
@@ -243,6 +245,11 @@ export default function PaymentModal({ open, onClose, userId, username, balances
                 • Podés jugar con USD o convertirlo
               </p>
             </>
+          )}
+
+          {/* ── CRYPTO (NOWPayments) ── */}
+          {tab === 'crypto' && (
+            <NowPaymentsWidget userId={userId} />
           )}
 
           {/* ── USDT ── */}
