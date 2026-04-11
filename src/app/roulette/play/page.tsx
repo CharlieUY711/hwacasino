@@ -545,32 +545,18 @@ export default function RoulettePlayPage() {
 
         {/* --- HEADER --- */}
         <div style={{ background: 'rgba(10,10,10,0.95)', position: 'sticky', top: 0, zIndex: 90, borderBottom: '1px solid rgba(212,175,55,0.2)', padding: '7px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          {/* Flecha volver */}
-          <button onClick={() => router.push('/roulette')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.35)', cursor: 'pointer', fontSize: '0.9rem', padding: 0, marginRight: '6px', flexShrink: 0 }}>←</button>
-          {/* Logo + Nombre — flex 1 */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1 }}>
+          <button onClick={() => router.push('/roulette')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.35)', cursor: 'pointer', fontSize: '0.9rem', padding: 0, flexShrink: 0 }}>←</button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <img src='/logo-dorado.jpg' alt='HWA' style={{ height: '18px', width: 'auto' }} />
             <span style={{ fontSize: '0.68rem', color: GOLD, fontWeight: 500 }}>SOPHIE</span>
           </div>
-          {/* Centro: boton Caja — flex 2 centrado */}
-          <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-            <button onClick={() => setShowPayment(true)} style={{ background: 'linear-gradient(180deg,#2d7a4f 0%,#1e5c38 100%)', border: 'none', borderRadius: 4, padding: '4px 10px', fontSize: '0.68rem', color: '#fff', fontWeight: 400, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', minWidth: '80px' }}>
-              <span>Caja</span>
-              <span style={{ display: 'flex', flexDirection: 'column', lineHeight: 1, fontSize: '0.5rem', opacity: 0.7 }}>
-                <span>▲</span>
-                <span>▼</span>
-              </span>
-            </button>
-          </div>
-          {/* Moneda + valor — flex 1 centrado */}
-          <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
             <button onClick={() => setActiveCurrency('USD')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.68rem', fontWeight: 700, color: activeCurrency === 'USD' ? GOLD : 'rgba(255,255,255,0.3)' }}>USD</button>
             <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.68rem', margin: '0 1px' }}>/</span>
             <button onClick={() => setActiveCurrency('CHIPS')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.68rem', fontWeight: 700, color: activeCurrency === 'CHIPS' ? GOLD : 'rgba(255,255,255,0.3)' }}>Chip-$</button>
             <span style={{ fontSize: '0.68rem', color: GOLD, fontWeight: 700 }}>:{" "}{balance.toLocaleString('es-UY')}</span>
           </div>
-          {/* Usuario + salir — flex 1 derecha */}
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <button onClick={() => router.push('/dashboard')} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', padding: 0 }}>
               <svg width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.4)' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><circle cx='12' cy='8' r='4'/><path d='M4 20c0-4 3.6-7 8-7s8 3 8 7'/></svg>
               <span style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.6)' }}>{username}</span>
@@ -944,6 +930,13 @@ export default function RoulettePlayPage() {
             </div>
           </div>
 
+        </div>
+        {/* --- BOTON CAJA ANCHO COMPLETO --- */}
+        <div style={{ padding: '0 16px 8px' }}>
+          <button onClick={() => setShowPayment(true)} style={{ width: '100%', background: 'linear-gradient(180deg,#2d7a4f 0%,#1e5c38 100%)', border: 'none', borderBottom: '2px solid #0d3320', borderRadius: 4, padding: '8px 0', fontSize: '0.72rem', color: '#fff', fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingLeft: '16px', paddingRight: '16px' }}>
+            <span>Caja</span>
+            <span style={{ display: 'flex', flexDirection: 'column', lineHeight: 1, fontSize: '0.5rem', opacity: 0.7 }}><span>▲</span><span>▼</span></span>
+          </button>
         </div>
 
       <PaymentModal
