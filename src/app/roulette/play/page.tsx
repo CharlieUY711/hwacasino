@@ -547,7 +547,7 @@ export default function RoulettePlayPage() {
         <div style={{ background: 'rgba(10,10,10,0.95)', position: 'sticky', top: 0, zIndex: 90, borderBottom: '1px solid rgba(212,175,55,0.2)', padding: '7px 16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
           {/* Logo + Nombre */}
           <img src='/logo-dorado.jpg' alt='HWA' style={{ height: '18px', width: 'auto', flexShrink: 0 }} />
-          <span style={{ fontSize: '0.72rem', color: GOLD, fontWeight: 600, letterSpacing: '0.06em', flexShrink: 0 }}>SOPHIE</span>
+          <span style={{ fontSize: '0.72rem', color: GOLD, fontWeight: 500, flexShrink: 0 }}>SOPHIE</span>
           {/* Caja */}
           <button onClick={() => setShowPayment(true)} style={{ background: 'linear-gradient(180deg,#2d7a4f 0%,#1e5c38 100%)', border: 'none', borderRadius: 4, padding: '4px 12px', fontSize: '0.72rem', color: '#fff', fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}>Caja</button>
           {/* Selector moneda */}
