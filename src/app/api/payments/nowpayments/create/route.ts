@@ -35,10 +35,9 @@ export async function POST(req: Request) {
         price_currency:  'usd',
         pay_currency:    currency,
         order_id:        `hwa-${user_id}-${Date.now()}`,
-        order_description: `HWA Casino — Depósito USD ${amount_usd}`,
+        order_description: `HWA Casino — Depósito USD ${amount_usd} — uid:${user_id}`,
         ipn_callback_url: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://hwacasino.vercel.app'}/api/payments/nowpayments/webhook`,
         // Datos extra que vienen en el webhook
-        case_sensitive_data: JSON.stringify({ user_id, amount_usd }),
       }),
     })
 
