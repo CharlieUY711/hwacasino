@@ -545,38 +545,38 @@ export default function RoulettePlayPage() {
 
         {/* --- HEADER --- */}
         <div style={{ background: 'rgba(10,10,10,0.95)', position: 'sticky', top: 0, zIndex: 90, borderBottom: '1px solid rgba(212,175,55,0.2)', padding: '7px 16px', display: 'flex', alignItems: 'center' }}>
-          {/* Izquierda: logo + nombre — flex 1 */}
+          {/* Flecha volver */}
+          <button onClick={() => router.push('/roulette')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.35)', cursor: 'pointer', fontSize: '0.9rem', padding: 0, marginRight: '6px', flexShrink: 0 }}>←</button>
+          {/* Logo + Nombre — flex 1 */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1 }}>
             <img src='/logo-dorado.jpg' alt='HWA' style={{ height: '18px', width: 'auto' }} />
             <span style={{ fontSize: '0.68rem', color: GOLD, fontWeight: 500 }}>SOPHIE</span>
           </div>
-          {/* Centro: boton Caja doble ancho — flex 2 centrado */}
+          {/* Centro: boton Caja — flex 2 centrado */}
           <div style={{ flex: 2, display: 'flex', justifyContent: 'center' }}>
             <button onClick={() => setShowPayment(true)} style={{ background: 'linear-gradient(180deg,#2d7a4f 0%,#1e5c38 100%)', border: 'none', borderRadius: 4, padding: '4px 24px', fontSize: '0.68rem', color: '#fff', fontWeight: 400, cursor: 'pointer' }}>Caja</button>
           </div>
-          {/* 3/4: moneda + valor — flex 1 centrado */}
+          {/* Moneda + valor — flex 1 centrado */}
           <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 0 }}>
             <button onClick={() => setActiveCurrency('USD')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.68rem', fontWeight: 700, color: activeCurrency === 'USD' ? GOLD : 'rgba(255,255,255,0.3)' }}>USD</button>
             <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.68rem', margin: '0 1px' }}>/</span>
             <button onClick={() => setActiveCurrency('CHIPS')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.68rem', fontWeight: 700, color: activeCurrency === 'CHIPS' ? GOLD : 'rgba(255,255,255,0.3)' }}>Chip-$</button>
             <span style={{ fontSize: '0.68rem', color: GOLD, fontWeight: 700 }}>:{" "}{balance.toLocaleString('es-UY')}</span>
           </div>
-          {/* Derecha: usuario — flex 1 */}
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
-            <svg width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.4)' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><circle cx='12' cy='8' r='4'/><path d='M4 20c0-4 3.6-7 8-7s8 3 8 7'/></svg>
-            <span style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.6)' }}>{username}</span>
+          {/* Usuario + salir — flex 1 derecha */}
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px' }}>
+            <button onClick={() => router.push('/dashboard')} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', padding: 0 }}>
+              <svg width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.4)' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><circle cx='12' cy='8' r='4'/><path d='M4 20c0-4 3.6-7 8-7s8 3 8 7'/></svg>
+              <span style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.6)' }}>{username}</span>
+            </button>
+            <button onClick={() => supabase.auth.signOut().then(() => router.push('/'))} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+              <svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.3)' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'>
+                <path d='M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4'/>
+                <polyline points='16 17 21 12 16 7'/>
+                <line x1='21' y1='12' x2='9' y2='12'/>
+              </svg>
+            </button>
           </div>
-        </div>
-        {/* Sub-header: flecha volver + salir */}
-        <div style={{ padding: '1px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(212,175,55,0.06)' }}>
-          <button onClick={() => router.push('/roulette')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.35)', cursor: 'pointer', fontSize: '0.9rem', padding: 0 }}>←</button>
-          <button onClick={() => supabase.auth.signOut().then(() => router.push('/'))} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
-            <svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.3)' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'>
-              <path d='M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4'/>
-              <polyline points='16 17 21 12 16 7'/>
-              <line x1='21' y1='12' x2='9' y2='12'/>
-            </svg>
-          </button>
         </div>
         <div style={{ background: "radial-gradient(ellipse at center, #1a0e00 0%, #0a0a0a 70%)", padding: "16px 12px 8px", display: "flex", flexDirection: "column", alignItems: "center" }}>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
