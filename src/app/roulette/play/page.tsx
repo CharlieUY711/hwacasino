@@ -544,7 +544,7 @@ export default function RoulettePlayPage() {
 
 
         {/* --- HEADER --- */}
-        <div style={{ background: 'rgba(10,10,10,0.95)', position: 'sticky', top: 0, zIndex: 90, borderBottom: '1px solid rgba(212,175,55,0.2)', padding: '7px 16px', display: 'flex', alignItems: 'center' }}>
+        <div style={{ background: 'rgba(10,10,10,0.95)', position: 'sticky', top: 0, zIndex: 90, borderBottom: '1px solid rgba(212,175,55,0.2)', padding: '7px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           {/* Flecha volver */}
           <button onClick={() => router.push('/roulette')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.35)', cursor: 'pointer', fontSize: '0.9rem', padding: 0, marginRight: '6px', flexShrink: 0 }}>←</button>
           {/* Logo + Nombre — flex 1 */}
@@ -553,7 +553,7 @@ export default function RoulettePlayPage() {
             <span style={{ fontSize: '0.68rem', color: GOLD, fontWeight: 500 }}>SOPHIE</span>
           </div>
           {/* Centro: boton Caja — flex 2 centrado */}
-          <div style={{ flex: 2, display: 'flex', justifyContent: 'center' }}>
+          <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
             <button onClick={() => setShowPayment(true)} style={{ background: 'linear-gradient(180deg,#2d7a4f 0%,#1e5c38 100%)', border: 'none', borderRadius: 4, padding: '4px 24px', fontSize: '0.68rem', color: '#fff', fontWeight: 400, cursor: 'pointer' }}>Caja</button>
           </div>
           {/* Moneda + valor — flex 1 centrado */}
