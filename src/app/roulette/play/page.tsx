@@ -557,7 +557,7 @@ export default function RoulettePlayPage() {
           </div>
         </div>
         {/* --- RUEDA SVG --- */}
-        <div style={{ background: "radial-gradient(ellipse at center, #1a0e00 0%, #0a0a0a 70%)", padding: "20px 12px 8px", display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <div style={{ background: "radial-gradient(ellipse at center, #1a0e00 0%, #0a0a0a 70%)", padding: "6px 12px 8px", display: "flex", flexDirection: "column", alignItems: "center" }}>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
           <div style={{ position: 'relative', width: 280, height: 280 }}>
             <svg width="280" height="280" viewBox="0 0 240 240" style={{ overflow: 'visible' }}>
