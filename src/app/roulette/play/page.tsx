@@ -544,7 +544,7 @@ export default function RoulettePlayPage() {
 
 
         {/* --- HEADER --- */}
-        <div style={{ background: 'rgba(10,10,10,0.95)', position: 'sticky', top: 0, zIndex: 90, borderBottom: '1px solid rgba(212,175,55,0.08)', padding: '5px 16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ background: 'rgba(10,10,10,0.95)', position: 'sticky', top: 0, zIndex: 90, borderBottom: '1px solid rgba(212,175,55,0.2)', padding: '7px 16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
           {/* Logo + Nombre */}
           <img src='/logo-dorado.jpg' alt='HWA' style={{ height: '18px', width: 'auto', flexShrink: 0 }} />
           <span style={{ fontSize: '0.72rem', color: GOLD, fontWeight: 600, letterSpacing: '0.06em', flexShrink: 0 }}>SOPHIE</span>
@@ -566,7 +566,7 @@ export default function RoulettePlayPage() {
             <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.5)' }}>{username}</span>
           </span>
         </div>
-        <div style={{ background: "radial-gradient(ellipse at center, #1a0e00 0%, #0a0a0a 70%)", padding: "0px 12px 8px", display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <div style={{ background: "radial-gradient(ellipse at center, #1a0e00 0%, #0a0a0a 70%)", padding: "8px 12px 8px", display: "flex", flexDirection: "column", alignItems: "center" }}>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
           <div style={{ position: 'relative', width: 280, height: 280 }}>
             <svg width="280" height="280" viewBox="0 0 240 240" style={{ overflow: 'visible' }}>
