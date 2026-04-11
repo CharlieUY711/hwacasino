@@ -118,7 +118,6 @@ export default function Home() {
 
         {/* ── BIENVENIDA ── */}
         {step === 'welcome' && (<>
-        {step === 'welcome' && (<>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: '1rem', color: GOLD, fontWeight: 600, marginBottom: 12 }}>Acceso activado.</div>
             <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.8, marginBottom: 8 }}>Accediste a una experiencia exclusiva de casino en modo entretenimiento.</div>
