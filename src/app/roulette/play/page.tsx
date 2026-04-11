@@ -543,22 +543,13 @@ export default function RoulettePlayPage() {
 
 
         {/* --- HEADER --- */}
-        <div style={{ background: 'rgba(10,10,10,0.95)', position: 'sticky', top: 0, zIndex: 90 }}>
-          {/* Fila superior: logo + nombre | usuario */}
-          <div style={{ padding: '3px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(212,175,55,0.12)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <img src='/logo-dorado.jpg' alt='HWA' style={{ height: '18px', width: 'auto' }} />
-              <span style={{ fontSize: '0.7rem', color: GOLD, fontWeight: 600, letterSpacing: '0.08em' }}>SOPHIE</span>
-            </div>
-            <button onClick={() => setActiveCurrency(c => c === 'CHIPS' ? 'USD' : 'CHIPS')} style={{ background: 'transparent', border: '1px solid rgba(212,175,55,0.3)', borderRadius: 4, padding: '3px 8px', fontSize: '0.65rem', color: GOLD, fontWeight: 600, cursor: 'pointer', flexShrink: 0 }}>
-              {activeCurrency === 'CHIPS' ? 'Chip-$' : 'USD'}
-            </button>
-            <button onClick={() => setShowPayment(true)} style={{ width: '180px', height: '25px', background: 'linear-gradient(180deg,#2d7a4f 0%,#1e5c38 50%,#154d2e 100%)', border: 'none', borderBottom: '2px solid #0d3320', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 8px', cursor: 'pointer', flexShrink: 0 }}><span style={{ fontSize: '0.65rem', color: '#fff', fontWeight: 700 }}>Caja</span><span style={{ fontSize: '0.6rem', color: '#fff', opacity: 0.9 }}>Chip-$ {balance.toLocaleString('es-UY')}</span></button>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><svg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.5)' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><circle cx='12' cy='8' r='4'/><path d='M4 20c0-4 3.6-7 8-7s8 3 8 7'/></svg><span style={{ fontSize: '0.7rem', color: '#fff', fontWeight: 600 }}>{username}</span></span>
-          </div>
-          <div style={{ padding: '0 16px 0' }}>
-            <button onClick={() => router.push('/roulette')} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.35)', cursor: 'pointer', fontSize: '0.9rem', padding: 0 }}>←</button>
-          </div>
+        <div style={{ background: 'rgba(10,10,10,0.95)', position: 'sticky', top: 0, zIndex: 90, borderBottom: '1px solid rgba(212,175,55,0.08)', padding: '6px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <span style={{ fontSize: '0.75rem', color: GOLD, fontWeight: 600, letterSpacing: '0.06em', flexShrink: 0 }}>SOPHIE</span>
+          <button onClick={() => setShowPayment(true)} style={{ background: 'none', border: 'none', fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', fontWeight: 600, cursor: 'pointer', flexShrink: 0, padding: 0 }}>Caja</button>
+          <button onClick={() => setActiveCurrency(c => c === 'CHIPS' ? 'USD' : 'CHIPS')} style={{ background: 'none', border: 'none', fontSize: '0.75rem', color: GOLD, fontWeight: 700, cursor: 'pointer', flexShrink: 0, padding: 0 }}>
+            {activeCurrency === 'CHIPS' ? 'Chip-$' : 'USD'} {balance.toLocaleString('es-UY')}
+          </button>
+          <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.45)', marginLeft: 'auto', flexShrink: 0 }}>{username}</span>
         </div>
         {/* --- RUEDA SVG --- */}
         <div style={{ background: "radial-gradient(ellipse at center, #1a0e00 0%, #0a0a0a 70%)", padding: "0px 12px 8px", display: "flex", flexDirection: "column", alignItems: "center" }}>
