@@ -50,7 +50,7 @@ export default function Home() {
     setLoading(true); setError('')
     try {
       await loginWithEmail(email, password)
-      router.push('/roulette')
+      router.push('/roulette/play?room=vip-1')
     } catch { setError('Email o contraseña incorrectos') }
     setLoading(false)
   }
@@ -65,7 +65,7 @@ export default function Home() {
       if (inviteResult.id && regData.user) {
         await markInviteUsed(inviteResult.id, regData.user.id)
       }
-      router.push('/roulette')
+      router.push('/roulette/play?room=vip-1')
     } catch (e: any) { setError(e?.message ?? 'Error al registrar') }
     setLoading(false)
   }
