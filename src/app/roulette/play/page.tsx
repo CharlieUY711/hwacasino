@@ -566,7 +566,7 @@ export default function RoulettePlayPage() {
             <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.5)' }}>{username}</span>
           </span>
         </div>
-        <div style={{ background: "radial-gradient(ellipse at center, #1a0e00 0%, #0a0a0a 70%)", padding: "8px 12px 8px", display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <div style={{ background: "radial-gradient(ellipse at center, #1a0e00 0%, #0a0a0a 70%)", padding: "16px 12px 8px", display: "flex", flexDirection: "column", alignItems: "center" }}>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
           <div style={{ position: 'relative', width: 280, height: 280 }}>
             <svg width="280" height="280" viewBox="0 0 240 240" style={{ overflow: 'visible' }}>
