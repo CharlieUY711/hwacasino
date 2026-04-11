@@ -894,6 +894,18 @@ export default function RoulettePlayPage() {
               })}
               <div />
             </div>
+            {/* OVERLAY RESULTADO */}
+            {phase === 'payout' && resultNumber !== null && (
+              <div style={{ position: 'absolute', inset: 0, background: 'rgba(5,40,20,0.82)', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 30, backdropFilter: 'blur(2px)' }}>
+                <div style={{ fontSize: '3.5rem', fontWeight: 700, color: resultColor === 'red' ? '#f87171' : resultColor === 'green' ? '#4ade80' : '#fff', fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>{resultNumber}</div>
+                <div style={{ fontSize: '0.65rem', color: GOLD, letterSpacing: '0.2em', marginTop: 4 }}>{resultColor === 'red' ? 'ROJO' : resultColor === 'green' ? 'VERDE' : 'NEGRO'}</div>
+                {totalWon
+                  ? <div style={{ marginTop: 12, fontSize: '1rem', color: '#4ade80', fontWeight: 700 }}>+ {totalPayout?.toLocaleString('es-UY')} Chip-$</div>
+                  : <div style={{ marginTop: 12, fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)' }}>Sin premio</div>
+                }
+              </div>
+            )}
+            {/* FIN OVERLAY */
           </div>
         </div>
 
