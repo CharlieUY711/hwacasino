@@ -543,37 +543,25 @@ export default function RoulettePlayPage() {
 
 
         {/* --- HEADER --- */}
-        <div style={{ background: 'rgba(10,10,10,0.95)', position: 'sticky', top: 0, zIndex: 90 }}>
-          {/* Fila principal: logo+nombre | caja | usuario+balance */}
-          <div style={{ padding: '6px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1 }}>
-              <img src='/logo-dorado.jpg' alt='HWA' style={{ height: '18px', width: 'auto' }} />
-              <span style={{ fontSize: '0.72rem', color: GOLD, fontWeight: 600, letterSpacing: '0.08em' }}>ROULETTE SOPHIE</span>
-            </div>
-            <button onClick={() => setShowPayment(true)} style={{ background: 'linear-gradient(180deg,#4ade80 0%,#16a34a 50%,#15803d 100%)', border: 'none', borderBottom: '2px solid #166534', borderRadius: 4, padding: '6px 0', fontSize: '0.72rem', color: '#fff', fontWeight: 700, cursor: 'pointer', flex: 2, maxWidth: 140 }}>
-              Caja
-            </button>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', flex: 1 }}>
-              <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.45)' }}>{username}</span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                {showPayout ? (
-                  <span style={{ fontSize: '0.65rem', color: totalWon ? '#4ade80' : 'rgba(255,255,255,0.3)', transition: 'color 0.4s' }}>
-                    {totalWon ? "+" : ""}{(totalWon ? totalPayout! : 0).toLocaleString('es-UY')}
-                  </span>
-                ) : (totalBet > 0 || (hasBetThisRound && lastBets.length > 0)) ? (
-                  <span style={{ fontSize: '0.65rem', color: '#f87171' }}>
-                    -{(hasBetThisRound ? lastBets.reduce((s,b)=>s+b.amount,0) : totalBet).toLocaleString('es-UY')}
-                  </span>
-                ) : null}
-                <span style={{ fontSize: '0.72rem', color: GOLD, fontWeight: 600, transition: 'all 0.5s' }}>
-                  Chip-$ {Math.max(0, showPayout ? (displayBalance ?? balance) : balance - (hasBetThisRound ? lastBets.reduce((s,b)=>s+b.amount,0) : totalBet)).toLocaleString('es-UY')}
-                </span>
-              </div>
-            </div>
-          </div>
-          {/* Linea divisoria + flecha */}
-          <div style={{ borderTop: '1px solid rgba(212,175,55,0.12)', padding: '2px 16px 3px' }}>
-            <button onClick={() => router.push('/roulette')} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.35)', cursor: 'pointer', fontSize: '0.9rem', padding: 0, lineHeight: 1 }}>←</button>
+        <div style={{ background: 'rgba(10,10,10,0.95)', position: 'sticky', top: 0, zIndex: 90, borderBottom: '1px solid rgba(212,175,55,0.12)', padding: '6px 16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <button onClick={() => router.push('/roulette')} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.35)', cursor: 'pointer', fontSize: '1rem', padding: 0, flexShrink: 0 }}>←</button>
+          <img src='/logo-dorado.jpg' alt='HWA' style={{ height: '16px', width: 'auto', flexShrink: 0 }} />
+          <span style={{ fontSize: '0.7rem', color: GOLD, fontWeight: 600, letterSpacing: '0.08em', flexShrink: 0 }}>ROULETTE SOPHIE</span>
+          <button onClick={() => setShowPayment(true)} style={{ background: 'linear-gradient(180deg,#4ade80 0%,#16a34a 50%,#15803d 100%)', border: 'none', borderBottom: '2px solid #166534', borderRadius: 4, padding: '5px 0', fontSize: '0.7rem', color: '#fff', fontWeight: 700, cursor: 'pointer', flex: 2, maxWidth: 120 }}>Caja</button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: 'auto', flexShrink: 0 }}>
+            <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.45)' }}>{username}</span>
+            {showPayout ? (
+              <span style={{ fontSize: '0.7rem', color: totalWon ? '#4ade80' : 'rgba(255,255,255,0.3)', transition: 'color 0.4s' }}>
+                {totalWon ? "+" : ""}{(totalWon ? totalPayout! : 0).toLocaleString('es-UY')}
+              </span>
+            ) : (totalBet > 0 || (hasBetThisRound && lastBets.length > 0)) ? (
+              <span style={{ fontSize: '0.7rem', color: '#f87171' }}>
+                -{(hasBetThisRound ? lastBets.reduce((s,b)=>s+b.amount,0) : totalBet).toLocaleString('es-UY')}
+              </span>
+            ) : null}
+            <span style={{ fontSize: '0.7rem', color: GOLD, fontWeight: 600, transition: 'all 0.5s' }}>
+              Chip-$ {Math.max(0, showPayout ? (displayBalance ?? balance) : balance - (hasBetThisRound ? lastBets.reduce((s,b)=>s+b.amount,0) : totalBet)).toLocaleString('es-UY')}
+            </span>
           </div>
         </div>
         {/* --- RUEDA SVG --- */}
