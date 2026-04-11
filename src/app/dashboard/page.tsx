@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import PaymentModal from '@/components/PaymentModal'
-import PaymentModal from '@/components/PaymentModal'
 
 const GOLD = '#D4AF37'
 const DARK = '#0a0a0a'
