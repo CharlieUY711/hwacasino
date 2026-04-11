@@ -1,4 +1,5 @@
 'use client'
+import PaymentModal from '@/components/PaymentModal'
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
@@ -124,7 +125,7 @@ function FloatingChip({ bet, winning }: { bet: Bet; winning: boolean }) {
 
 export default function RoulettePlayPage() {
   const router = useRouter()
-  const { balance, formatChips, username } = useWallet()
+  const { balance, balances, formatChips, username } = useWallet()
   const [userId, setUserId] = useState<string | null>(null)
   const [selectedChip, setSelectedChip] = useState(CHIP_DEFS[0])
   const [bets, setBets] = useState<Bet[]>([])
@@ -139,6 +140,7 @@ export default function RoulettePlayPage() {
   const [error, setError]               = useState<string | null>(null)
   const [showResult, setShowResult]     = useState(false)
   const [showPayout, setShowPayout]     = useState(false)
+  const [showPayment, setShowPayment]   = useState(false)
   const [phase, setPhase]               = useState<'idle'|'spinning'|'result'|'payout'>('idle')
 
   const [displayBalance, setDisplayBalance] = useState<number | null>(null) // balance ajustado post-resultado
@@ -552,18 +554,23 @@ export default function RoulettePlayPage() {
             <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1rem', letterSpacing: '0.15em', color: GOLD }}>Roulette Sophie</span>
           </div>
 
+          {/* Boton CAJA */}
+          <button onClick={() => setShowPayment(true)} style={{ background: 'linear-gradient(180deg,#4ade80 0%,#16a34a 50%,#15803d 100%)', border: 'none', borderBottom: '2px solid #166534', borderRadius: 4, padding: '6px 28px', fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '0.85rem', color: '#fff', fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}>
+            Caja
+          </button>
+
           {/* Usuario + Balance */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginLeft: 'auto' }}>
 
             {/* Etiqueta: Apuesta (rojo) mientras apuesta/gira, Ganado (verde/gris) 1s despues de parar */}
             {showPayout ? (
               <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1rem', color: totalWon ? '#4ade80' : 'rgba(255,255,255,0.3)', whiteSpace: 'nowrap', transition: 'color 0.4s' }}>
-                Ganado: {(totalWon ? totalPayout! : 0).toLocaleString('es-UY')}
+                Chip-$ Ganado: {(totalWon ? totalPayout! : 0).toLocaleString('es-UY')}
                 <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic' }}> N</span>
               </span>
             ) : (totalBet > 0 || (hasBetThisRound && lastBets.length > 0)) ? (
               <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1rem', color: '#f87171', whiteSpace: 'nowrap' }}>
-                Apuesta: {hasBetThisRound ? lastBets.reduce((s,b)=>s+b.amount,0).toLocaleString('es-UY') : totalBet.toLocaleString('es-UY')}
+                Chip-$ Apuesta: {hasBetThisRound ? lastBets.reduce((s,b)=>s+b.amount,0).toLocaleString('es-UY') : totalBet.toLocaleString('es-UY')}
                 <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic' }}> N</span>
               </span>
             ) : null}
@@ -947,6 +954,14 @@ export default function RoulettePlayPage() {
         </div>
 
       </main>
+
+      <PaymentModal
+        open={showPayment}
+        onClose={() => setShowPayment(false)}
+        userId={userId}
+        username={username}
+        balances={balances}
+      />
     </>
   )
 }

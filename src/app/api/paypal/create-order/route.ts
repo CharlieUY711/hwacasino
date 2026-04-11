@@ -54,8 +54,8 @@ export async function POST(req: Request) {
 
     const order = await res.json()
     if (!res.ok) {
-      console.error('[paypal/create-order]', order)
-      return NextResponse.json({ error: 'Error creando orden PayPal' }, { status: 500 })
+      console.error('[paypal/create-order]', JSON.stringify(order))
+      return NextResponse.json({ error: 'Error creando orden PayPal', detail: order }, { status: 500 })
     }
 
     return NextResponse.json({ order_id: order.id })

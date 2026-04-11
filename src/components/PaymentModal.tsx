@@ -18,10 +18,11 @@ interface Props {
   open: boolean
   onClose: () => void
   userId: string | null
+  username?: string
   balances: Record<string, number>
 }
 
-export default function PaymentModal({ open, onClose, userId, balances }: Props) {
+export default function PaymentModal({ open, onClose, userId, username, balances }: Props) {
   const [tab, setTab]             = useState<Tab>('paypal')
   const [selectedPkg, setPkg]     = useState(PACKAGES[1])
   const [sdkReady, setSdkReady]   = useState(false)
@@ -191,7 +192,7 @@ export default function PaymentModal({ open, onClose, userId, balances }: Props)
 
         {/* Título */}
         <div style={{ padding: '8px 20px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(212,175,55,0.1)' }}>
-          <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1.3rem', color: GOLD }}>Caja</span>
+          <div><span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1.3rem', color: GOLD }}>Caja</span>{username && <span style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', marginLeft: 8 }}>{username}</span>}</div>
           <div style={{ display: 'flex', gap: 16, fontSize: '0.55rem', fontFamily: "'Montserrat', sans-serif" }}>
             {Object.entries(balances).filter(([,v]) => v > 0).map(([k,v]) => (
               <span key={k} style={{ color: GOLD }}>{v.toLocaleString('es-UY')} {k}</span>
