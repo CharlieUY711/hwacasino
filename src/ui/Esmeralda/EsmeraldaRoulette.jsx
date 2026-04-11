@@ -102,7 +102,7 @@ otate(deg) }}
       </button>
 
       <div className="mt-4 text-xl">
-        {winning !== null ? Resultado:  : '—'}
+        {winning !== null ? "Resultado: " + winning : '—'}
       </div>
 
     </div>
