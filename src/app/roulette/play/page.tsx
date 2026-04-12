@@ -951,6 +951,14 @@ export default function RoulettePlayPage() {
           </button>
         </div>
 
+      {/* BLOQUEO GLOBAL durante spinning/result/payout */}
+      {phase !== 'idle' && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 999, cursor: 'not-allowed' }} 
+          onClick={e => e.stopPropagation()}
+          onTouchStart={e => e.stopPropagation()}
+          onTouchEnd={e => e.stopPropagation()}
+        />
+      )}
       <PaymentModal
         open={showPayment}
         onClose={() => setShowPayment(false)}
