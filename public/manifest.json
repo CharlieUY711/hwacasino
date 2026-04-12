@@ -2,13 +2,13 @@
   "name": "HWA Casino",
   "short_name": "HWA",
   "description": "HWA Casino — Private Members Only",
-  "start_url": "/roulette/play?room=vip-1",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0a0a",
   "theme_color": "#0a0a0a",
   "orientation": "portrait",
   "icons": [
-    { "src": "/logo-dorado.jpg", "sizes": "192x192", "type": "image/jpeg", "purpose": "any maskable" },
-    { "src": "/logo-dorado.jpg", "sizes": "512x512", "type": "image/jpeg", "purpose": "any maskable" }
+    { "src": "/logo-hwa.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/logo-hwa.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ]
 }

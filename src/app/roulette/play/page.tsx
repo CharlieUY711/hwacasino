@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 import PaymentModal from '@/components/PaymentModal'
 
 import { useState, useEffect, useRef } from 'react'
@@ -547,7 +547,7 @@ export default function RoulettePlayPage() {
         <div style={{ background: 'rgba(10,10,10,0.95)', position: 'sticky', top: 0, zIndex: 90, borderBottom: '1px solid rgba(212,175,55,0.2)', padding: '7px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <button onClick={() => { if (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone) { router.push('/dashboard') } else { router.push('/roulette') } }} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.35)', cursor: 'pointer', fontSize: '0.9rem', padding: 0, flexShrink: 0 }}>←</button>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <img src='/logo-dorado.jpg' alt='HWA' style={{ height: '18px', width: 'auto' }} />
+            <img src='/logo-hwa.png' alt='HWA' style={{ height: '18px', width: 'auto' }} />
             <span style={{ fontSize: '0.68rem', color: GOLD, fontWeight: 500 }}>SOPHIE</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>

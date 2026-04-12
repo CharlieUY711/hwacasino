@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: 'HWA Casino',
   description: 'Private Members Only',
   icons: {
-    icon: '/favicon.jpg',
+    icon: '/logo-hwa.png',
   },
   manifest: '/manifest.json',
 }
