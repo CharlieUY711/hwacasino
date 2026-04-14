@@ -92,3 +92,4 @@ export function useWallet(currency: Currency = 'CHIPS') {
 
   return { balance, balances, loading, formatBalance, formatChips, username, currency }
 }
+

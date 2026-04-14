@@ -34,3 +34,4 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'Error interno' }, { status: 500 })
   }
 }
+

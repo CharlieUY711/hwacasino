@@ -76,3 +76,4 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ ok: true, bets_placed: placedBets.length })
 }
+

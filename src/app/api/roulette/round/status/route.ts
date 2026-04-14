@@ -82,3 +82,4 @@ export async function GET(req: NextRequest) {
     winning_index: round.winning_index ?? null,
   })
 }
+

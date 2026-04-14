@@ -174,7 +174,7 @@ export default function PaymentModal({ open, onClose, userId, username, balances
     <div style={{
       position: 'fixed', inset: 0, zIndex: 999,
       background: 'rgba(0,0,0,0.85)',
-      display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+      display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-start',
     }} onClick={onClose}>
       <div style={{
         width: '100%', maxWidth: 480,
@@ -187,7 +187,7 @@ export default function PaymentModal({ open, onClose, userId, username, balances
       }} onClick={e => e.stopPropagation()}>
 
         {/* Handle */}
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 4px' }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-start', padding: '12px 0 4px' }}>
           <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.15)' }} />
         </div>
 
@@ -319,3 +319,4 @@ export default function PaymentModal({ open, onClose, userId, username, balances
     </div>
   )
 }
+

@@ -15,7 +15,7 @@ export default function ChipMarker({ amount, size = 18, winning = false }) {
         border: `1.5px solid ${winning ? GOLD : CHIP_BORDER}`,
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
         boxShadow: winning
           ? `0 0 8px ${GOLD}`
           : '0 2px 6px rgba(0,0,0,0.6)',

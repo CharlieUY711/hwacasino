@@ -73,7 +73,7 @@ export default function Home() {
     background: 'rgba(255,255,255,0.05)',
     border: '1px solid rgba(212,175,55,0.2)',
     borderRadius: 8, color: '#fff',
-    fontSize: '0.95rem', fontFamily: 'Inter, sans-serif',
+    fontSize: '0.95rem', fontFamily: 'Inter, sans-serif', overflowY: 'auto', WebkitOverflowScrolling: 'touch', overflowY: 'auto', WebkitOverflowScrolling: 'touch', overflowY: 'auto', WebkitOverflowScrolling: 'touch', overflowY: 'auto', WebkitOverflowScrolling: 'touch',
     outline: 'none', boxSizing: 'border-box',
   }
 
@@ -83,7 +83,7 @@ export default function Home() {
     border: 'none',
     borderBottom: loading ? '1px solid rgba(212,175,55,0.2)' : '3px solid #7a5a10',
     borderRadius: 8, color: loading ? 'rgba(212,175,55,0.4)' : '#1a0e00',
-    fontSize: '0.85rem', fontFamily: 'Inter, sans-serif',
+    fontSize: '0.85rem', fontFamily: 'Inter, sans-serif', overflowY: 'auto', WebkitOverflowScrolling: 'touch', overflowY: 'auto', WebkitOverflowScrolling: 'touch', overflowY: 'auto', WebkitOverflowScrolling: 'touch', overflowY: 'auto', WebkitOverflowScrolling: 'touch',
     fontWeight: 700, letterSpacing: '0.1em',
     cursor: loading ? 'not-allowed' : 'pointer', transition: 'all 0.2s',
   }
@@ -95,7 +95,7 @@ export default function Home() {
   }
 
   return (
-    <div style={{ minHeight: '100dvh', background: DARK, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px 16px', fontFamily: 'Inter, sans-serif' }}>
+    <div style={{ minHeight: '100vh', background: DARK, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', padding: '24px 16px', fontFamily: 'Inter, sans-serif', overflowY: 'auto', WebkitOverflowScrolling: 'touch', overflowY: 'auto', WebkitOverflowScrolling: 'touch', overflowY: 'auto', WebkitOverflowScrolling: 'touch', overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
 
       <div style={{ marginBottom: 32, textAlign: 'center' }}>
         <img src="/logo-hwa.png" alt="HWA" style={{ height: 128, width: 'auto', borderRadius: 14 }} />
@@ -138,7 +138,7 @@ export default function Home() {
           <input style={inputStyle} placeholder="Nombre de usuario" value={username} onChange={e => setUsername(e.target.value)} autoCapitalize="none" spellCheck={false} />
           <div style={{ position: 'relative' }}>
             <input style={{...inputStyle, paddingRight: '44px'}} placeholder="Contraseña" type={showPass ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleRegister()} autoComplete="new-password" />
-            <button onClick={() => setShowPass(p => !p)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.35)', fontSize: '1rem', padding: 0 }}>{showPass ? '🙈' : '👁'}</button>
+            <button onClick={() => setShowPass(p => !p)} style={{ position: 'absolute', right: 12, top: '50%', top: 12, background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.35)', fontSize: '1rem', padding: 0 }}>{showPass ? '🙈' : '👁'}</button>
           </div>
           {error && <div style={{ fontSize: '0.75rem', color: '#f87171', textAlign: 'center' }}>{error}</div>}
           <button style={{...btnStyle, touchAction: 'manipulation'}} onClick={handleRegister} disabled={loading}>{loading ? 'Creando cuenta...' : 'REGISTRARME'}</button>
@@ -154,7 +154,7 @@ export default function Home() {
           <input style={inputStyle} placeholder="Email" type="email" value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" />
           <div style={{ position: 'relative' }}>
             <input style={{...inputStyle, paddingRight: '44px'}} placeholder="Contraseña" type={showPass ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleLogin()} autoComplete="current-password" />
-            <button onClick={() => setShowPass(p => !p)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.35)', fontSize: '1rem', padding: 0 }}>{showPass ? '🙈' : '👁'}</button>
+            <button onClick={() => setShowPass(p => !p)} style={{ position: 'absolute', right: 12, top: '50%', top: 12, background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.35)', fontSize: '1rem', padding: 0 }}>{showPass ? '🙈' : '👁'}</button>
           </div>
           {error && <div style={{ fontSize: '0.75rem', color: '#f87171', textAlign: 'center' }}>{error}</div>}
           <button style={{...btnStyle, touchAction: 'manipulation'}} onClick={handleLogin} disabled={loading}>{loading ? 'Ingresando...' : 'INGRESAR'}</button>
@@ -167,3 +167,7 @@ export default function Home() {
     </div>
   )
 }
+
+
+
+

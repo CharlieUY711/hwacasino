@@ -68,7 +68,7 @@ export default function RouletteLobbyPage() {
   }, [router])
 
   if (loading) return (
-    <main style={{ minHeight: '100dvh', background: DARK, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <main style={{ minHeight: '100vh', background: DARK, display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
       <p style={{ color: 'rgba(212,175,55,0.3)', fontFamily: 'serif', letterSpacing: '0.5em', fontSize: '0.65rem' }}>LOADING...</p>
     </main>
   )
@@ -85,7 +85,7 @@ export default function RouletteLobbyPage() {
         .join-btn:hover { opacity: 0.88; transform: scale(1.02); }
       `}</style>
 
-      <main style={{ minHeight: '100dvh', background: DARK, fontFamily: "'Inter', sans-serif", maxWidth: '480px', margin: '0 auto', paddingBottom: '40px' }}>
+      <main style={{ minHeight: '100vh', background: DARK, fontFamily: "'Inter', sans-serif", maxWidth: '480px', margin: '0 auto', paddingBottom: '40px' }}>
 
         <div style={{ padding: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(212,175,55,0.1)' }}>
           <button onClick={() => router.push('/lobby')} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '0.6rem', letterSpacing: '0.25em', fontFamily: "'Inter', sans-serif" }}>{'\u2190'} LOBBY</button>
@@ -109,7 +109,7 @@ export default function RouletteLobbyPage() {
             <p style={{ fontSize: '0.45rem', letterSpacing: '0.25em', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', marginBottom: '10px' }}>Hot Numbers</p>
             <div style={{ display: 'flex', gap: '6px' }}>
               {HOT_NUMBERS.map(n => (
-                <div key={n} style={{ width: 26, height: 26, borderRadius: '4px', background: getColor(n), border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', color: '#fff', fontWeight: 700 }}>{n}</div>
+                <div key={n} style={{ width: 26, height: 26, borderRadius: '4px', background: getColor(n), border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', fontSize: '0.6rem', color: '#fff', fontWeight: 700 }}>{n}</div>
               ))}
             </div>
           </div>
@@ -157,5 +157,8 @@ export default function RouletteLobbyPage() {
     </>
   )
 }
+
+
+
 
 

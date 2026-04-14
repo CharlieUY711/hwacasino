@@ -22,7 +22,7 @@ export function CircularCountdownOverlay({ seconds, status, t }) {
         inset: 0,
         display: show ? 'flex' : 'none',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
         pointerEvents: 'none',
         borderRadius: '50%',
         background:

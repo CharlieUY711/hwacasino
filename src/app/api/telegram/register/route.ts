@@ -55,3 +55,4 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ user_id: userId, username, balance: bonusAmount, created: true })
 }
 
+

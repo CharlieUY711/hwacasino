@@ -95,7 +95,7 @@ export default function LobbyPage() {
   }
 
   if (loading) return (
-    <main style={{ minHeight: '100dvh', background: DARK, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <main style={{ minHeight: '100vh', background: DARK, display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
       <p style={{ color: 'rgba(212,175,55,0.3)', fontFamily: 'serif', letterSpacing: '0.5em', fontSize: '0.65rem' }}>LOADING...</p>
     </main>
   )
@@ -159,7 +159,7 @@ export default function LobbyPage() {
         }
       `}</style>
 
-      <main style={{ minHeight: '100dvh', background: DARK, fontFamily: "'Inter', sans-serif", paddingBottom: '80px', maxWidth: '480px', margin: '0 auto', position: 'relative' }}>
+      <main style={{ minHeight: '100vh', background: DARK, fontFamily: "'Inter', sans-serif", paddingBottom: '80px', maxWidth: '480px', margin: '0 auto', position: 'relative' }}>
 
         {/* ── HEADER ── */}
         <div className="fade-up fade-up-1" style={{ padding: '20px 20px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(212,175,55,0.1)' }}>
@@ -227,7 +227,7 @@ export default function LobbyPage() {
             <div style={{ position: 'absolute', right: '-20px', top: '-20px', fontSize: '7rem', opacity: 0.06, transform: 'rotate(-15deg)' }}>🎡</div>
             <p style={{ fontSize: '0.45rem', letterSpacing: '0.3em', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', marginBottom: '6px' }}>{GAMES[0].sub}</p>
             <h2 style={{ fontFamily: "'Inter', sans-serif", fontSize: '2rem', color: '#fff', fontWeight: 300, letterSpacing: '0.1em', marginBottom: '20px' }}>{GAMES[0].label}</h2>
-            <button className="play-btn" onClick={(e) => { e.stopPropagation(); router.push('/roulette') }} style={{ background: 'rgba(212,175,55,0.12)', border: `1px solid rgba(212,175,55,0.3)`, borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', position: 'absolute', bottom: '20px', right: '20px' }}>
+            <button className="play-btn" onClick={(e) => { e.stopPropagation(); router.push('/roulette') }} style={{ background: 'rgba(212,175,55,0.12)', border: `1px solid rgba(212,175,55,0.3)`, borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', cursor: 'pointer', position: 'absolute', bottom: '20px', right: '20px' }}>
               <span style={{ color: GOLD, fontSize: '0.9rem', marginLeft: '2px' }}>▶</span>
             </button>
           </div>
@@ -254,7 +254,7 @@ export default function LobbyPage() {
             <div style={{ position: 'absolute', right: '-10px', bottom: '-10px', fontSize: '6rem', opacity: 0.08, transform: 'rotate(15deg)' }}>🎲</div>
             <h2 style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.8rem', color: '#fff', fontWeight: 300, letterSpacing: '0.1em', marginBottom: '6px' }}>{GAMES[3].label}</h2>
             <p style={{ fontSize: '0.55rem', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.3)', maxWidth: '55%', lineHeight: 1.6 }}>{GAMES[3].sub}</p>
-            <button className="play-btn" style={{ background: 'rgba(212,175,55,0.12)', border: `1px solid rgba(212,175,55,0.25)`, borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', position: 'absolute', bottom: '20px', right: '20px' }}>
+            <button className="play-btn" style={{ background: 'rgba(212,175,55,0.12)', border: `1px solid rgba(212,175,55,0.25)`, borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', cursor: 'pointer', position: 'absolute', bottom: '20px', right: '20px' }}>
               <span style={{ color: GOLD, fontSize: '1rem' }}>⊞</span>
             </button>
           </div>
@@ -269,7 +269,7 @@ export default function LobbyPage() {
             { icon: '♛', title: 'Loyalty Rewards', desc: 'Claim your weekly cashback bonus.', action: 'CLAIM', color: '#fff' },
           ].map((item, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '16px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-              <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '0.9rem', color: GOLD }}>
+              <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexShrink: 0, fontSize: '0.9rem', color: GOLD }}>
                 {item.icon}
               </div>
               <div style={{ flex: 1 }}>
@@ -311,4 +311,7 @@ export default function LobbyPage() {
     </>
   )
 }
+
+
+
 

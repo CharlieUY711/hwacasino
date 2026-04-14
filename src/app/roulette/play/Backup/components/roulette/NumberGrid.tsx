@@ -44,7 +44,7 @@ export default function NumberGrid({
                   borderRadius: '2px',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
+                  justifyContent: 'flex-start',
                   fontSize: '0.75rem',
                   fontWeight: 700,
                   color: num === 0 ? '#4ade80' : '#fff',

@@ -179,7 +179,7 @@ export default function AdminDashboard() {
 
   // ── Layout ────────────────────────────────────────────────────────
   if (loading) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0d0d0d' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', background: '#0d0d0d' }}>
       <div style={{ color: GOLD, fontFamily: 'Montserrat, sans-serif', letterSpacing: '3px', fontSize: '13px' }}>
         CARGANDO...
       </div>
@@ -241,7 +241,7 @@ export default function AdminDashboard() {
 
         {/* Footer */}
         <div style={{ padding: '16px 20px', borderTop: '1px solid rgba(212,175,55,0.1)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: GOLD, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 700, color: '#1a0e00', flexShrink: 0 }}>AD</div>
+          <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: GOLD, display: 'flex', alignItems: 'center', justifyContent: 'flex-start', fontSize: '10px', fontWeight: 700, color: '#1a0e00', flexShrink: 0 }}>AD</div>
           <div>
             <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.85)', fontWeight: 500 }}>Admin</div>
             <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)' }}>superadmin</div>
@@ -341,7 +341,7 @@ export default function AdminDashboard() {
                       <tr key={u.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
                         <td style={{ padding: '10px 12px', color: 'rgba(255,255,255,0.85)', fontWeight: 500 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'rgba(212,175,55,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px', color: GOLD, fontWeight: 700 }}>
+                            <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'rgba(212,175,55,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', fontSize: '9px', color: GOLD, fontWeight: 700 }}>
                               {(u.username || 'U').substring(0, 2).toUpperCase()}
                             </div>
                             {u.username}
@@ -484,7 +484,7 @@ export default function AdminDashboard() {
                 <MetricCard label="GANANCIA CASA" value={stats.houseProfitToday.toLocaleString('es-UY')} gold />
                 <MetricCard label="HOUSE EDGE EFECTIVO" value="4.2%" delta="te\u00f3rico 2.7%" />
               </div>
-              <div style={{ ...card, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '200px', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ ...card, display: 'flex', alignItems: 'center', justifyContent: 'flex-start', minHeight: '200px', flexDirection: 'column', gap: '12px' }}>
                 <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.35)' }}>Stats detalladas de rondas disponibles aqu\u00ed</div>
                 <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.2)' }}>Cochips con roulette_rounds + round_bets para historial completo</div>
               </div>
@@ -577,4 +577,7 @@ function ProgressRow({ label, pct, count }: { label: string; pct: number; count:
     </div>
   )
 }
+
+
+
 

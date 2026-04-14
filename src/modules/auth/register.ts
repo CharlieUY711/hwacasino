@@ -15,3 +15,4 @@ export async function registerWithEmail(email: string, password: string, usernam
 
   return data
 }
+

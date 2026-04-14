@@ -19,7 +19,7 @@ export default function FloatingChip({ bet, winning }) {
         border: `1.5px solid ${winning ? GOLD : CHIP_BORDER}`,
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
         boxShadow: winning
           ? `0 0 10px ${GOLD}, 0 0 20px rgba(212,175,55,0.5)`
           : '0 2px 6px rgba(0,0,0,0.7)',

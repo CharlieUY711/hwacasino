@@ -55,3 +55,4 @@ export async function markInviteUsed(id: string, userId: string, rewardValue: nu
     })
   }
 }
+

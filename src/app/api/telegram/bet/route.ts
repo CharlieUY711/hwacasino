@@ -20,3 +20,4 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ ok: true, new_balance: updated?.balance ?? 0 })
 }
 
+

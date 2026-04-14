@@ -49,7 +49,7 @@ export default function RouletteWheelPreview() {
             fontSize: 9,
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
+            justifyContent: 'flex-start',
             borderRadius: 4
           }}
         >
