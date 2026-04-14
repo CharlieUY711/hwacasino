@@ -1,23 +1,18 @@
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import './globals.css'
+import "./globals.css";
+import { RegisterSW } from "./register-sw";
 
-const inter = Inter({ subsets: ['latin'] })
+export const metadata = {
+  title: "HWA Casino",
+  description: "Casino PWA",
+};
 
-export const metadata: Metadata = {
-  title: 'HWA Casino',
-  description: 'Private Members Only',
-  icons: {
-    icon: '/logo-hwa.png',
-  },
-  manifest: '/manifest.json',
-}
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children }) {
   return (
-    <html lang="es" className={inter.className}>
-      <body suppressHydrationWarning>{children}</body>
+    <html lang="en">
+      <body>
+        <RegisterSW />
+        {children}
+      </body>
     </html>
-  )
+  );
 }
-
