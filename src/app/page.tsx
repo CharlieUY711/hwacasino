@@ -1,7 +1,7 @@
-export const dynamic = "force-dynamic";
-import { redirect } from "next/navigation";
-
 export default function Home() {
-  redirect("/code");
-  return null;
+  return (
+    <div style={{ padding: "40px", fontSize: "20px" }}>
+      HOME OK
+    </div>
+  );
 }
