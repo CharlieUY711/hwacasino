@@ -58,13 +58,13 @@ export default function Dashboard() {
   })
 
   if (!data && loading) return (
-    <div style={{ minHeight: '100vh', background: DARK, display: 'flex', alignItems: 'center', justifyContent: 'flex-start', color: 'rgba(255,255,255,0.3)', fontFamily: 'Inter, sans-serif', overflowY: 'auto', WebkitOverflowScrolling: 'touch', WebkitOverflowScrolling: 'touch', overflowY: 'auto' }}>
+    <div style={{ minHeight: '100vh', background: DARK, display: 'flex', alignItems: 'center', justifyContent: 'flex-start', color: 'rgba(255,255,255,0.3)', fontFamily: 'Inter, sans-serif', overflowY: 'auto',WebkitOverflowScrolling: 'touch',overflowY: 'auto' }}>
       Cargando...
     </div>
   )
 
   return (
-    <div style={{ minHeight: '100vh', background: DARK, fontFamily: 'Inter, sans-serif', overflowY: 'auto', WebkitOverflowScrolling: 'touch', WebkitOverflowScrolling: 'touch', overflowY: 'auto', maxWidth: 480, margin: '0 auto', paddingBottom: 40 }}>
+    <div style={{ minHeight: '100vh', background: DARK, fontFamily: 'Inter, sans-serif', overflowY: 'auto',WebkitOverflowScrolling: 'touch',overflowY: 'auto',maxWidth: 480, margin: '0 auto', paddingBottom: 40 }}>
 
       {/* Header */}
       <div style={{ padding: '16px', borderBottom: '1px solid rgba(212,175,55,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -92,10 +92,10 @@ export default function Dashboard() {
         {/* Filtro de fechas */}
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <input type="date" value={from} onChange={e => setFrom(e.target.value)}
-            style={{ flex: 1, padding: '8px 10px', background: '#111', border: '1px solid rgba(212,175,55,0.2)', borderRadius: 8, color: '#fff', fontSize: '0.75rem', fontFamily: 'Inter, sans-serif', overflowY: 'auto', WebkitOverflowScrolling: 'touch', WebkitOverflowScrolling: 'touch', overflowY: 'auto' }} />
+            style={{ flex: 1, padding: '8px 10px', background: '#111', border: '1px solid rgba(212,175,55,0.2)', borderRadius: 8, color: '#fff', fontSize: '0.75rem', fontFamily: 'Inter, sans-serif', overflowY: 'auto',WebkitOverflowScrolling: 'touch',overflowY: 'auto' }} />
           <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.72rem' }}>a</span>
           <input type="date" value={to} onChange={e => setTo(e.target.value)}
-            style={{ flex: 1, padding: '8px 10px', background: '#111', border: '1px solid rgba(212,175,55,0.2)', borderRadius: 8, color: '#fff', fontSize: '0.75rem', fontFamily: 'Inter, sans-serif', overflowY: 'auto', WebkitOverflowScrolling: 'touch', WebkitOverflowScrolling: 'touch', overflowY: 'auto' }} />
+            style={{ flex: 1, padding: '8px 10px', background: '#111', border: '1px solid rgba(212,175,55,0.2)', borderRadius: 8, color: '#fff', fontSize: '0.75rem', fontFamily: 'Inter, sans-serif', overflowY: 'auto',WebkitOverflowScrolling: 'touch',overflowY: 'auto' }} />
         </div>
 
         {/* Métricas */}
@@ -158,6 +158,7 @@ export default function Dashboard() {
     </div>
   )
 }
+
 
 
 
