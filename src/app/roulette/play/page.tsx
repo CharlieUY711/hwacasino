@@ -555,7 +555,7 @@ export default function RoulettePlayPage() {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    position: 'relative'
+    
   }}
 >
 
