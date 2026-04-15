@@ -49,7 +49,12 @@ export default function Home() {
     setLoading(true); setError('')
     try {
       await loginWithEmail(email, password)
-      router.push('/roulette/play?room=vip-1')
+      const { data: prof } = await sb.from('profiles').select('role').eq('id', regData?.user?.id ?? loginData?.user?.id ?? '').single()
+      if (prof?.role && ['admin','superadmin','operator','support'].includes(prof.role)) {
+        router.push('/admin/dashboard')
+      } else {
+        router.push('/dashboard')
+      }
     } catch { setError('Email o contraseña incorrectos') }
     setLoading(false)
   }
@@ -63,7 +68,12 @@ export default function Home() {
       if (inviteId && regData.user) {
         await markInviteUsed(inviteId, regData.user.id, reward)
       }
-      router.push('/roulette/play?room=vip-1')
+      const { data: prof } = await sb.from('profiles').select('role').eq('id', regData?.user?.id ?? loginData?.user?.id ?? '').single()
+      if (prof?.role && ['admin','superadmin','operator','support'].includes(prof.role)) {
+        router.push('/admin/dashboard')
+      } else {
+        router.push('/dashboard')
+      }
     } catch (e: any) { setError(e?.message ?? 'Error al registrar') }
     setLoading(false)
   }
@@ -166,6 +176,7 @@ export default function Home() {
     </div>
   )
 }
+
 
 
 
