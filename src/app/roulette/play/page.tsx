@@ -107,7 +107,7 @@ function fmtChipVal(amount: number): string {
 function ChipMarker({ amount, size = 18, winning = false }: { amount: number; size?: number; winning?: boolean }) {
   const chip = CHIP_DEFS.slice().reverse().find(c => amount >= c.value) ?? CHIP_DEFS[0]
   return (
-    <div style={{ width: size, height: size, borderRadius: '50%', background: winning ? '#fff' : CHIP_BG, border: `1.5px solid ${winning ? GOLD : CHIP_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'flex-start', boxShadow: winning ? `0 0 8px ${GOLD}` : '0 2px 6px rgba(0,0,0,0.6)', transition: 'all 0.3s ease' }}>
+    <div style={{ width: size, height: size, borderRadius: '50%', background: winning ? '#fff' : CHIP_BG, border: `1.5px solid ${winning ? GOLD : CHIP_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: winning ? `0 0 8px ${GOLD}` : '0 2px 6px rgba(0,0,0,0.6)', transition: 'all 0.3s ease' }}>
       <span style={{ fontSize: size * 0.28, fontWeight: 900, color: winning ? GOLD : chip.color, lineHeight: 1 }}>{fmtChipVal(amount)}</span>
     </div>
   )
@@ -117,7 +117,7 @@ function FloatingChip({ bet, winning }: { bet: Bet; winning: boolean }) {
   const chip = CHIP_DEFS.slice().reverse().find(c => bet.amount >= c.value) ?? CHIP_DEFS[0]
   const size = 16
   return (
-    <div style={{ position: 'absolute', left: bet.chipX - size/2, top: bet.chipY - size/2, width: size, height: size, borderRadius: '50%', background: winning ? '#fff' : CHIP_BG, border: `1.5px solid ${winning ? GOLD : CHIP_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'flex-start', boxShadow: winning ? `0 0 10px ${GOLD}, 0 0 20px rgba(212,175,55,0.5)` : '0 2px 6px rgba(0,0,0,0.7)', zIndex: 20, pointerEvents: 'none', transition: 'background 0.3s, box-shadow 0.3s' }}>
+    <div style={{ position: 'absolute', left: bet.chipX - size/2, top: bet.chipY - size/2, width: size, height: size, borderRadius: '50%', background: winning ? '#fff' : CHIP_BG, border: `1.5px solid ${winning ? GOLD : CHIP_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: winning ? `0 0 10px ${GOLD}, 0 0 20px rgba(212,175,55,0.5)` : '0 2px 6px rgba(0,0,0,0.7)', zIndex: 20, pointerEvents: 'none', transition: 'background 0.3s, box-shadow 0.3s' }}>
       <span style={{ fontSize: 5, fontWeight: 900, color: winning ? GOLD : chip.color, lineHeight: 1 }}>{fmtChipVal(bet.amount)}</span>
     </div>
   )
@@ -317,8 +317,13 @@ export default function RoulettePlayPage() {
   // --- POSICION DE CLICK RELATIVA AL PANO ---
   function getRelativePos(e: React.MouseEvent): { x: number; y: number } {
     if (!tableRef.current) return { x: 0, y: 0 }
-    const rect = tableRef.current.getBoundingClientRect()
-    return { x: e.clientX - rect.left, y: e.clientY - rect.top }
+    const tableRect = tableRef.current.getBoundingClientRect()
+    const target = e.currentTarget as HTMLElement
+    const cellRect = target.getBoundingClientRect()
+    return {
+      x: cellRect.left + cellRect.width / 2 - tableRect.left,
+      y: cellRect.top + cellRect.height / 2 - tableRect.top,
+    }
   }
 
   // --- AGREGAR APUESTA ---
@@ -434,7 +439,7 @@ export default function RoulettePlayPage() {
           // +3s: limpiar — volver a idle
           setTimeout(() => {
             setBets([])
-            setLastBets([])
+            // setLastBets([]) — preservado para Repetir
             setShowResult(false)
             setShowPayout(false)
             setPhase('idle')
@@ -847,7 +852,7 @@ export default function RoulettePlayPage() {
               letterSpacing: '0.08em',
               boxShadow: !canBet ? '0 2px 4px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)' : '0 2px 6px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.3), 0 0 20px rgba(212,175,55,0.2)',
               textShadow: canBet ? '0 1px 2px rgba(0,0,0,0.3)' : 'none',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
               gap: '1px', padding: '4px 0',
               cursor: canBet ? 'pointer' : 'not-allowed',
               transition: 'all 0.2s ease',
@@ -893,15 +898,15 @@ export default function RoulettePlayPage() {
                   className={`bet-cell${(roundStatus !== 'betting' || hasBetThisRound) ? ' locked' : ''}${getBetOn('number:0') > 0 && resultNumber !== null && !showResult && resultNumber === 0 ? ' win-cell' : ''}`}
                   onClick={e => addBet('number', '0', e)}
                   style={{
-                    width: 32, height: 90,
+                    width: 32, height: 90, display: 'flex', alignItems: 'center', justifyContent: 'center',
                     background: getBetOn('number:0') > 0 ? 'rgba(15,92,30,0.8)' : 'rgba(15,92,30,0.4)',
                     border: `1px solid ${resultNumber === 0 && !showResult ? GOLD : 'rgba(212,175,55,0.3)'}`,
                     boxShadow: resultNumber === 0 && !showResult ? `0 0 10px rgba(212,175,55,0.5)` : 'none',
                     borderRadius: '4px 0 0 4px',
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', gap: '4px',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px',
                   }}
                 >
-                  <span style={{ color: '#4ade80', fontWeight: 700, fontSize: '1rem' }}>0</span>
+                  <span style={{ color: '#4ade80', fontWeight: 300, fontSize: '1rem' }}>0</span>
                 </div>
               </div>
 
@@ -924,7 +929,7 @@ export default function RoulettePlayPage() {
                   return (
                     <div key={col} className={`bet-cell${won ? ' win-cell' : ''}${(roundStatus !== 'betting' || hasBetThisRound) ? ' locked' : ''}`}
                       onClick={e => addBet('column', col, e)}
-                      style={{ width: 28, flex: 1, background: getBetOn(id) > 0 ? 'rgba(212,175,55,0.2)' : 'rgba(212,175,55,0.05)', border: `1px solid ${won ? GOLD : getBetOn(id) > 0 ? GOLD : 'rgba(212,175,55,0.2)'}`, boxShadow: won ? `0 0 8px rgba(212,175,55,0.4)` : 'none', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
+                      style={{ width: 28, flex: 1, background: getBetOn(id) > 0 ? 'rgba(212,175,55,0.2)' : 'rgba(212,175,55,0.05)', border: `1px solid ${won ? GOLD : getBetOn(id) > 0 ? GOLD : 'rgba(212,175,55,0.2)'}`, boxShadow: won ? `0 0 8px rgba(212,175,55,0.4)` : 'none', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <span style={{ color: won ? GOLD : 'rgba(212,175,55,0.7)', fontSize: '0.35rem', letterSpacing: '0.05em', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>2:1</span>
                     </div>
                   )
@@ -941,7 +946,7 @@ export default function RoulettePlayPage() {
                 return (
                   <div key={d.v} className={`bet-cell${won ? ' win-cell' : ''}${(roundStatus !== 'betting' || hasBetThisRound) ? ' locked' : ''}`}
                     onClick={e => addBet('dozen', d.v, e)}
-                    style={{ height: 24, background: getBetOn(id) > 0 ? 'rgba(212,175,55,0.2)' : 'rgba(212,175,55,0.05)', border: `1px solid ${won ? GOLD : getBetOn(id) > 0 ? GOLD : 'rgba(212,175,55,0.2)'}`, boxShadow: won ? `0 0 8px rgba(212,175,55,0.4)` : 'none', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
+                    style={{ height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', background: getBetOn(id) > 0 ? 'rgba(212,175,55,0.2)' : 'rgba(212,175,55,0.05)', border: `1px solid ${won ? GOLD : getBetOn(id) > 0 ? GOLD : 'rgba(212,175,55,0.2)'}`, boxShadow: won ? `0 0 8px rgba(212,175,55,0.4)` : 'none', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <span style={{ color: won ? GOLD : 'rgba(212,175,55,0.7)', fontSize: '0.38rem', letterSpacing: '0.1em', fontWeight: 600 }}>{d.l}</span>
                   </div>
                 )
@@ -961,7 +966,7 @@ export default function RoulettePlayPage() {
                 return (
                   <div key={b.val} className={`bet-cell${won ? ' win-cell' : ''}${(roundStatus !== 'betting' || hasBetThisRound) ? ' locked' : ''}`}
                     onClick={e => addBet(b.type, b.val, e)}
-                    style={{ height: 24, background: getBetOn(id) > 0 ? 'rgba(212,175,55,0.2)' : 'rgba(212,175,55,0.05)', border: `1px solid ${won ? GOLD : 'rgba(212,175,55,0.2)'}`, boxShadow: won ? `0 0 8px rgba(212,175,55,0.4)` : 'none', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
+                    style={{ height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', background: getBetOn(id) > 0 ? 'rgba(212,175,55,0.2)' : 'rgba(212,175,55,0.05)', border: `1px solid ${won ? GOLD : 'rgba(212,175,55,0.2)'}`, boxShadow: won ? `0 0 8px rgba(212,175,55,0.4)` : 'none', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <span style={{ color: won ? GOLD : 'rgba(212,175,55,0.7)', fontSize: '0.38rem', letterSpacing: '0.1em', fontWeight: 600 }}>{b.label}</span>
                   </div>
                 )
@@ -972,7 +977,7 @@ export default function RoulettePlayPage() {
                 return (
                   <div className={`bet-cell${won ? ' win-cell' : ''}${(roundStatus !== 'betting' || hasBetThisRound) ? ' locked' : ''}`}
                     onClick={e => addBet('color', 'red', e)}
-                    style={{ height: 24, background: getBetOn(id) > 0 ? 'rgba(180,0,0,0.6)' : 'rgba(120,0,0,0.4)', border: `1px solid ${won ? GOLD : 'rgba(255,255,255,0.1)'}`, boxShadow: won ? `0 0 10px rgba(212,175,55,0.5)` : 'none', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
+                    style={{ height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', background: getBetOn(id) > 0 ? 'rgba(180,0,0,0.6)' : 'rgba(120,0,0,0.4)', border: `1px solid ${won ? GOLD : 'rgba(255,255,255,0.1)'}`, boxShadow: won ? `0 0 10px rgba(212,175,55,0.5)` : 'none', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <span style={{ color: won ? GOLD : '#fca5a5', fontSize: '0.7rem' }}>{'\u25C6'}</span>
                   </div>
                 )
@@ -983,7 +988,7 @@ export default function RoulettePlayPage() {
                 return (
                   <div className={`bet-cell${won ? ' win-cell' : ''}${(roundStatus !== 'betting' || hasBetThisRound) ? ' locked' : ''}`}
                     onClick={e => addBet('color', 'black', e)}
-                    style={{ height: 24, background: getBetOn(id) > 0 ? 'rgba(50,50,50,0.8)' : 'rgba(20,20,20,0.6)', border: `1px solid ${won ? GOLD : 'rgba(255,255,255,0.1)'}`, boxShadow: won ? `0 0 10px rgba(212,175,55,0.5)` : 'none', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
+                    style={{ height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', background: getBetOn(id) > 0 ? 'rgba(50,50,50,0.8)' : 'rgba(20,20,20,0.6)', border: `1px solid ${won ? GOLD : 'rgba(255,255,255,0.1)'}`, boxShadow: won ? `0 0 10px rgba(212,175,55,0.5)` : 'none', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <span style={{ color: won ? GOLD : 'rgba(255,255,255,0.6)', fontSize: '0.7rem' }}>{'\u25C6'}</span>
                   </div>
                 )
@@ -997,7 +1002,7 @@ export default function RoulettePlayPage() {
                 return (
                   <div key={b.val} className={`bet-cell${won ? ' win-cell' : ''}${(roundStatus !== 'betting' || hasBetThisRound) ? ' locked' : ''}`}
                     onClick={e => addBet(b.type, b.val, e)}
-                    style={{ height: 24, background: getBetOn(id) > 0 ? 'rgba(212,175,55,0.2)' : 'rgba(212,175,55,0.05)', border: `1px solid ${won ? GOLD : 'rgba(212,175,55,0.2)'}`, boxShadow: won ? `0 0 8px rgba(212,175,55,0.4)` : 'none', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
+                    style={{ height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', background: getBetOn(id) > 0 ? 'rgba(212,175,55,0.2)' : 'rgba(212,175,55,0.05)', border: `1px solid ${won ? GOLD : 'rgba(212,175,55,0.2)'}`, boxShadow: won ? `0 0 8px rgba(212,175,55,0.4)` : 'none', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <span style={{ color: won ? GOLD : 'rgba(212,175,55,0.7)', fontSize: '0.38rem', letterSpacing: '0.1em', fontWeight: 600 }}>{b.label}</span>
                   </div>
                 )
@@ -1006,7 +1011,7 @@ export default function RoulettePlayPage() {
             </div>
             {/* OVERLAY RESULTADO */}
             {phase === 'payout' && resultNumber !== null && (
-              <div style={{ position: 'absolute', inset: 0, background: 'rgba(5,40,20,0.82)', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', zIndex: 30, pointerEvents: 'auto', backdropFilter: 'blur(2px)' }}>
+              <div style={{ position: 'absolute', inset: 0, background: 'rgba(5,40,20,0.82)', borderRadius: '6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 30, pointerEvents: 'auto', backdropFilter: 'blur(2px)' }}>
                 <div style={{ fontSize: '3.5rem', fontWeight: 700, color: resultColor === 'red' ? '#f87171' : resultColor === 'green' ? '#4ade80' : '#fff', fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>{resultNumber}</div>
                 <div style={{ fontSize: '0.65rem', color: GOLD, letterSpacing: '0.2em', marginTop: 4 }}>{resultColor === 'red' ? 'ROJO' : resultColor === 'green' ? 'VERDE' : 'NEGRO'}</div>
                 {totalWon
@@ -1137,7 +1142,7 @@ function NumberGrid({ TABLE_COLS, getBetOn, addBet, resultNumber, showResult, be
               <div key={num}
                 className={`bet-cell${winning ? ' win-cell' : ''}${locked ? ' locked' : ''}`}
                 onClick={e => addBet('number', String(num), e)}
-                style={{ background: betAmt > 0 ? c === 'red' ? 'rgba(180,0,0,0.7)' : 'rgba(30,30,30,0.9)' : c === 'red' ? 'rgba(120,0,0,0.5)' : 'rgba(15,15,15,0.5)', border: `1px solid ${winning ? GOLD : betAmt > 0 ? GOLD : 'rgba(255,255,255,0.08)'}`, boxShadow: winning ? `0 0 10px rgba(212,175,55,0.6)` : 'none', borderRadius: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', minHeight: '28px', padding: '2px', position: 'relative' }}>
+                style={{ background: betAmt > 0 ? c === 'red' ? 'rgba(180,0,0,0.7)' : 'rgba(30,30,30,0.9)' : c === 'red' ? 'rgba(120,0,0,0.5)' : 'rgba(15,15,15,0.5)', border: `1px solid ${winning ? GOLD : betAmt > 0 ? GOLD : 'rgba(255,255,255,0.08)'}`, boxShadow: winning ? `0 0 10px rgba(212,175,55,0.6)` : 'none', borderRadius: '2px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '28px', padding: '0', position: 'relative' }}>
                 <span style={{ color: c === 'red' ? '#fca5a5' : 'rgba(255,255,255,0.8)', fontSize: '0.55rem', fontWeight: 600, lineHeight: 1 }}>{num}</span>
               </div>
             )
@@ -1243,6 +1248,9 @@ function SplitOverlay({
     </div>
   )
 }
+
+
+
 
 
 
