@@ -51,7 +51,8 @@ export default function Home() {
     setLoading(true); setError('')
     try {
       await loginWithEmail(email, password)
-      const { data: prof } = await supabase.from('profiles').select('role').eq('id', regData?.user?.id ?? loginData?.user?.id ?? '').single()
+      const { data: { user: currentUser } } = await supabase.auth.getUser()
+      const { data: prof } = await supabase.from('profiles').select('role').eq('id', currentUser?.id ?? '').single()
       if (prof?.role && ['admin','superadmin','operator','support'].includes(prof.role)) {
         router.push('/admin/dashboard')
       } else {
@@ -178,6 +179,7 @@ export default function Home() {
     </div>
   )
 }
+
 
 
 
