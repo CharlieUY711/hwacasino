@@ -791,7 +791,7 @@ export default function RoulettePlayPage() {
             const isActive = selectedChip.value === chip.value
             return (
               <button key={chip.value} className={`chip-btn${isActive ? " active" : ""}`}
-                onClick={() => setSelectedChip(chip)}
+                onPointerDown={() => setSelectedChip(chip)}
                 style={{ width: 34, height: 34, borderRadius: "50%", background: isActive ? `radial-gradient(circle at 35% 35%, #f5d060, ${GOLD} 50%, #a07820)` : `radial-gradient(circle at 35% 35%, #e8c540, ${GOLD} 55%, #8a6510)`, border: `2px dashed ${isActive ? "#fff" : CHIP_BORDER}`, color: chip.color, fontFamily: "Montserrat, sans-serif", fontWeight: 900, fontSize: "0.6rem", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: isActive ? `0 0 10px rgba(212,175,55,0.8)` : `0 2px 6px rgba(0,0,0,0.6)`, cursor: "pointer" }}>
                 {chip.label}
               </button>
@@ -809,7 +809,7 @@ export default function RoulettePlayPage() {
             { label: 'Doblar',  action: doubleBets },
             { label: 'Repetir', action: repeatBets },
           ].map(btn => (
-            <button key={btn.label} className="action-btn" onClick={btn.action}
+            <button key={btn.label} className="action-btn" onPointerDown={btn.action}
               style={{
                 flex: 1,
                 background: hasBetThisRound
@@ -835,7 +835,7 @@ export default function RoulettePlayPage() {
           ))}
           <button
             className={`apostar-btn${(waitingForResult || hasBetThisRound) ? ' waiting' : ''}`}
-            onClick={placeBets}
+            onPointerDown={placeBets}
             disabled={!canBet}
             style={{
               flex: '0 0 90px',
@@ -1060,7 +1060,7 @@ export default function RoulettePlayPage() {
         </div>
         {/* --- BOTON CAJA ANCHO COMPLETO --- */}
         <div style={{ padding: '0 16px 8px' }}>
-          <button onClick={() => setShowPayment(true)} style={{ width: '100%', background: 'linear-gradient(180deg,#2d7a4f 0%,#1e5c38 100%)', border: 'none', borderBottom: '2px solid #0d3320', borderRadius: 4, padding: '8px 0', fontSize: '0.72rem', color: '#fff', fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingLeft: '16px', paddingRight: '16px' }}>
+          <button onPointerDown={() => setShowPayment(true)} style={{ width: '100%', background: 'linear-gradient(180deg,#2d7a4f 0%,#1e5c38 100%)', border: 'none', borderBottom: '2px solid #0d3320', borderRadius: 4, padding: '8px 0', fontSize: '0.72rem', color: '#fff', fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingLeft: '16px', paddingRight: '16px' }}>
             <span>Caja</span>
             <span style={{ display: 'flex', flexDirection: 'column', lineHeight: 1, fontSize: '0.5rem', opacity: 0.7 }}><span>▲</span><span>▼</span></span>
           </button>
@@ -1248,6 +1248,7 @@ function SplitOverlay({
     </div>
   )
 }
+
 
 
 

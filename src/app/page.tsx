@@ -112,7 +112,7 @@ export default function Home() {
           </div>
           <input style={inputStyle} placeholder="VIP-XXXX-XXXX-XXXX" value={code} onChange={e => setCode(e.target.value.toUpperCase())} autoCapitalize="characters" spellCheck={false} />
           {error && <div style={{ fontSize: '0.75rem', color: '#f87171', textAlign: 'center' }}>{error}</div>}
-          <button style={btnStyle} onClick={handleVerify} disabled={loading}>{loading ? 'Verificando...' : 'VERIFICAR'}</button>
+          <button style={btnStyle} onPointerDown={handleVerify} disabled={loading}>{loading ? 'Verificando...' : 'VERIFICAR'}</button>
           <button style={linkStyle} onClick={() => { setStep('login'); setError('') }}>Ya tengo cuenta → Ingresar</button>
         </>)}
 
@@ -140,7 +140,7 @@ export default function Home() {
             <button onClick={() => setShowPass(p => !p)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.35)', fontSize: '1rem', padding: 0 }}>{showPass ? '🙈' : '👁'}</button>
           </div>
           {error && <div style={{ fontSize: '0.75rem', color: '#f87171', textAlign: 'center' }}>{error}</div>}
-          <button style={btnStyle} onClick={handleRegister} disabled={loading}>{loading ? 'Creando cuenta...' : 'REGISTRARME'}</button>
+          <button style={btnStyle} onPointerDown={handleRegister} disabled={loading}>{loading ? 'Creando cuenta...' : 'REGISTRARME'}</button>
           <button style={linkStyle} onClick={() => { setStep('welcome'); setError('') }}>← Volver</button>
         </>)}
 
@@ -156,7 +156,7 @@ export default function Home() {
             <button onClick={() => setShowPass(p => !p)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.35)', fontSize: '1rem', padding: 0 }}>{showPass ? '🙈' : '👁'}</button>
           </div>
           {error && <div style={{ fontSize: '0.75rem', color: '#f87171', textAlign: 'center' }}>{error}</div>}
-          <button style={btnStyle} onClick={handleLogin} disabled={loading}>{loading ? 'Ingresando...' : 'INGRESAR'}</button>
+          <button style={btnStyle} onPointerDown={handleLogin} disabled={loading}>{loading ? 'Ingresando...' : 'INGRESAR'}</button>
           <button style={linkStyle} onClick={() => { setStep('code'); setError('') }}>← Volver</button>
         </>)}
 
@@ -166,6 +166,8 @@ export default function Home() {
     </div>
   )
 }
+
+
 
 
 
