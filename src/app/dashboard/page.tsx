@@ -76,7 +76,6 @@ export default function DashboardPage() {
 
       <main style={{ minHeight: '100dvh', background: DARK, fontFamily: "'Montserrat', sans-serif", maxWidth: '480px', margin: '0 auto', paddingBottom: '72px' }}>
 
-        {/* HEADER */}
         <div style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(212,175,55,0.1)', position: 'sticky', top: 0, background: 'rgba(10,10,10,0.95)', backdropFilter: 'blur(10px)', zIndex: 90 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <img src="/logo-hwa.png" alt="HWA" style={{ width: 36, height: 36, borderRadius: '50%', border: `1.5px solid ${GOLD}`, objectFit: 'cover' }} />
@@ -91,7 +90,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* HOME */}
         {tab === 'home' && (
           <div className="fade-up">
             <div style={{ padding: '28px 20px 20px' }}>
@@ -147,7 +145,6 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* GAMES */}
         {tab === 'games' && (
           <div className="fade-up" style={{ padding: '24px 20px' }}>
             <p style={{ fontSize: '0.45rem', letterSpacing: '0.3em', color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', marginBottom: '16px' }}>SELECCIONÁ TU JUEGO</p>
@@ -171,7 +168,6 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* HISTORY */}
         {tab === 'history' && (
           <div className="fade-up" style={{ padding: '24px 20px' }}>
             <p style={{ fontSize: '0.45rem', letterSpacing: '0.3em', color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', marginBottom: '16px' }}>HISTORIAL DE JUGADAS</p>
@@ -194,7 +190,6 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* WALLET */}
         {tab === 'wallet' && (
           <div className="fade-up" style={{ padding: '24px 20px' }}>
             <p style={{ fontSize: '0.45rem', letterSpacing: '0.3em', color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', marginBottom: '16px' }}>MI WALLET</p>
@@ -230,7 +225,6 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* PROFILE */}
         {tab === 'profile' && (
           <div className="fade-up" style={{ padding: '24px 20px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '28px' }}>
@@ -260,7 +254,6 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* BOTTOM NAV */}
         <nav style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: '480px', background: '#0d0d0d', borderTop: '1px solid rgba(212,175,55,0.12)', display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', zIndex: 100 }}>
           {([
             { id: 'home',    icon: '⌂', label: 'INICIO' },
