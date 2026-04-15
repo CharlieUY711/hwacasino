@@ -3,9 +3,9 @@ const nextConfig = {
   async redirects() {
     return [
       {
-        source: '/',
+        source: '/:path*',
         has: [{ type: 'host', value: 'admin.hwacasino.com' }],
-        destination: '/admin/dashboard',
+        destination: 'https://admin.hwacasino.com/admin/dashboard',
         permanent: false,
       },
     ]
