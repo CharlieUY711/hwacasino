@@ -42,6 +42,12 @@ export async function middleware(request: NextRequest) {
 
   // --- AUTH PROTECTION ---
   const isProtected = PROTECTED.some(route => pathname.startsWith(route))
+  // Admin subdomain redirect
+  const host = request.headers.get('host') ?? ''
+  if (host.startsWith('admin.') && pathname === '/') {
+    return NextResponse.redirect(new URL('/admin/dashboard', request.url))
+  }
+
   if (!isProtected) return response
 
   let authResponse = NextResponse.next({ request })
@@ -81,3 +87,4 @@ export const config = {
     '/((?!api|_next/static|_next/image|favicon.ico|logo|icons|manifest|service-worker).*)',
   ],
 }
+
