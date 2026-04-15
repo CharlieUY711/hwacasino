@@ -435,7 +435,7 @@ export default function RoulettePlayPage() {
           setShowPayout(true)
           setShowResult(true)
           const betTotal = betsSnap.reduce((s, b) => s + b.amount, 0)
-          setDisplayBalance(prev => (prev !== null ? prev : 0) - betTotal + (netPayout ?? 0))
+          setDisplayBalance(prev => (prev !== null ? prev : 0) + (netPayout ?? 0))
 
           // +3s: limpiar — volver a idle
           setTimeout(() => {
@@ -1248,6 +1248,7 @@ function SplitOverlay({
     </div>
   )
 }
+
 
 
 
