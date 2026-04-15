@@ -569,24 +569,16 @@ export default function RoulettePlayPage() {
   {/* IZQUIERDA */}
   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
     <button
-      onPointerDown={() => {
-        if (
-          window.matchMedia('(display-mode: standalone)').matches ||
-          (window.navigator as any).standalone
-        ) {
-          // disabled
-          void 0;
-        } else {
-          void 0;
-      }}
+      onPointerDown={() => {}}
       style={{
         background: 'none',
         border: 'none',
-        color: 'rgba(255,255,255,0.35)',
-        cursor: 'pointer',
+        color: 'rgba(255,255,255,0.2)',
+        cursor: 'default',
         fontSize: '0.9rem',
         padding: 0,
-        flexShrink: 0
+        flexShrink: 0,
+        opacity: 0.3
       }}
     >
       ←
