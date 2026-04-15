@@ -903,7 +903,6 @@ export default function RoulettePlayPage() {
                     border: `1px solid ${resultNumber === 0 && !showResult ? GOLD : 'rgba(212,175,55,0.3)'}`,
                     boxShadow: resultNumber === 0 && !showResult ? `0 0 10px rgba(212,175,55,0.5)` : 'none',
                     borderRadius: '4px 0 0 4px',
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px',
                   }}
                 >
                   <span style={{ color: '#4ade80', fontWeight: 300, fontSize: '1rem' }}>0</span>
@@ -1248,6 +1247,7 @@ function SplitOverlay({
     </div>
   )
 }
+
 
 
 
