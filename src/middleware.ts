@@ -46,7 +46,7 @@ export async function middleware(request: NextRequest) {
   const host = request.headers.get('host') ?? ''
   if (host.startsWith('admin.')) {
     if (pathname === '/' || pathname === '') {
-      return NextResponse.redirect(new URL('/admin/login', request.url))
+      return NextResponse.redirect(new URL('https://www.hwacasino.com', request.url))
     }
   }
 
@@ -89,6 +89,7 @@ export const config = {
     '/((?!api|_next/static|_next/image|favicon.ico|logo|icons|manifest|service-worker).*)',
   ],
 }
+
 
 
 
