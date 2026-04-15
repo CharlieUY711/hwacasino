@@ -1,4 +1,6 @@
 'use client'
+import { supabase } from '@/lib/supabaseClient'
+
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { loginWithEmail } from '@/modules/auth/login'
@@ -49,7 +51,7 @@ export default function Home() {
     setLoading(true); setError('')
     try {
       await loginWithEmail(email, password)
-      const { data: prof } = await sb.from('profiles').select('role').eq('id', regData?.user?.id ?? loginData?.user?.id ?? '').single()
+      const { data: prof } = await supabase.from('profiles').select('role').eq('id', regData?.user?.id ?? loginData?.user?.id ?? '').single()
       if (prof?.role && ['admin','superadmin','operator','support'].includes(prof.role)) {
         router.push('/admin/dashboard')
       } else {
@@ -68,7 +70,7 @@ export default function Home() {
       if (inviteId && regData.user) {
         await markInviteUsed(inviteId, regData.user.id, reward)
       }
-      const { data: prof } = await sb.from('profiles').select('role').eq('id', regData?.user?.id ?? loginData?.user?.id ?? '').single()
+      const { data: prof } = await supabase.from('profiles').select('role').eq('id', regData?.user?.id ?? loginData?.user?.id ?? '').single()
       if (prof?.role && ['admin','superadmin','operator','support'].includes(prof.role)) {
         router.push('/admin/dashboard')
       } else {
@@ -176,6 +178,8 @@ export default function Home() {
     </div>
   )
 }
+
+
 
 
 
