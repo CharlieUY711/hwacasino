@@ -34,11 +34,11 @@ export default function Home() {
       // Obtener bonus_label
       const { createClient } = await import('@supabase/supabase-js')
       const sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
-      const { data } = await sb.from('invites').select('bonus_label, initial_chips').eq('id', result.id!).single()
+      const { data } = await sb.from('vip_codes').select('bonus_label, initial_chips').eq('id', result.id!).single()
       
       setInviteId(result.id)
-      setReward(result.initial_chips)
-      setBonusLabel(data?.bonus_label || `¡Tu código te da ${result.initial_chips.toLocaleString('es-UY')} Chips de bienvenida!`)
+      setReward(data?.initial_chips ?? 0)
+      setBonusLabel(data?.bonus_label || `¡Tu código te da ${data?.initial_chips ?? 0.toLocaleString('es-UY')} Chips de bienvenida!`)
       setStep('welcome')
     } catch { setError('Error al verificar. Intentá de nuevo.') }
     setLoading(false)
@@ -119,7 +119,7 @@ export default function Home() {
         {/* ── BIENVENIDA ── */}
         {step === 'welcome' && (<>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '2rem', marginBottom: 8 }}>🎰</div>
+            
             <div style={{ fontSize: '1rem', color: GOLD, fontWeight: 600, marginBottom: 8 }}>¡Código válido!</div>
             <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.6 }}>{bonusLabel}</div>
           </div>
@@ -166,3 +166,5 @@ export default function Home() {
     </div>
   )
 }
+
+

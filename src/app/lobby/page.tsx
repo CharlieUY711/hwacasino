@@ -165,7 +165,7 @@ export default function LobbyPage() {
         <div className="fade-up fade-up-1" style={{ padding: '20px 20px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(212,175,55,0.1)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <img
-              src="/logo-dorado.jpg"
+              src="/logo-hwa.png"
               alt="HWA Casino"
               style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', border: `1.5px solid ${GOLD}` }}
             />
@@ -311,6 +311,7 @@ export default function LobbyPage() {
     </>
   )
 }
+
 
 
 

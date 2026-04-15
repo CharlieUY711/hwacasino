@@ -70,7 +70,7 @@ export async function GET(req: NextRequest) {
     round = newRound
   }
 
-  const secondsRemaining = Math.max(0, Math.floor((new Date(round.closes_at).getTime() - now.getTime()) / 1000))
+  const secondsRemaining = round.closes_at ? Math.max(0, Math.floor((new Date(round.closes_at).getTime() - now.getTime()) / 1000)) : 0
 
   return NextResponse.json({
     round_id: round.id,
@@ -82,4 +82,6 @@ export async function GET(req: NextRequest) {
     winning_index: round.winning_index ?? null,
   })
 }
+
+
 

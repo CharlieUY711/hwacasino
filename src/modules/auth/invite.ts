@@ -1,21 +1,21 @@
 import { supabase } from '@/lib/supabaseClient'
 
-export async function validateInviteCode(code: string): Promise<{ valid: boolean; id: string | null; initial_chips: number }> {
+export async function validateInviteCode(code: string): Promise<{ valid: boolean; id: string | null; bonus_chips: number }> {
   const { data, error } = await supabase
     .from('invites')
-    .select('id, used, used_count, max_uses, initial_chips, expires_at')
+    .select('id, used, used_count, max_uses, bonus_chips, expires_at')
     .eq('code', code.toUpperCase())
     .single()
 
-  if (error || !data) return { valid: false, id: null, initial_chips: 0 }
+  if (error || !data) return { valid: false, id: null, bonus_chips: 0 }
 
-  if (data.expires_at && new Date(data.expires_at) < new Date()) return { valid: false, id: null, initial_chips: 0 }
+  if (data.expires_at && new Date(data.expires_at) < new Date()) return { valid: false, id: null, bonus_chips: 0 }
 
   const maxUses = data.max_uses ?? 1
   const usedCount = data.used_count ?? 0
-  if (usedCount >= maxUses) return { valid: false, id: null, initial_chips: 0 }
+  if (usedCount >= maxUses) return { valid: false, id: null, bonus_chips: 0 }
 
-  return { valid: true, id: data.id, initial_chips: data.initial_chips ?? 0 }
+  return { valid: true, id: data.id, bonus_chips: data.bonus_chips ?? 0 }
 }
 
 export async function markInviteUsed(id: string, userId: string, rewardValue: number = 0): Promise<void> {
@@ -55,4 +55,5 @@ export async function markInviteUsed(id: string, userId: string, rewardValue: nu
     })
   }
 }
+
 
