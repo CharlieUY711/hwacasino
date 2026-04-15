@@ -1,7 +1,7 @@
 'use client'
 import { supabase } from '@/lib/supabaseClient'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { loginWithEmail } from '@/modules/auth/login'
 import { registerWithEmail } from '@/modules/auth/register'
@@ -14,6 +14,13 @@ type Step = 'code' | 'welcome' | 'register' | 'login'
 
 export default function Home() {
   const router = useRouter()
+    useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('admin_login') === '1') {
+      supabase.auth.signOut()
+      window.history.replaceState({}, '', '/')
+    }
+  }, [])
   const [step, setStep]           = useState<Step>('code')
   const [code, setCode]           = useState('')
   const [email, setEmail]         = useState('')
@@ -179,6 +186,8 @@ export default function Home() {
     </div>
   )
 }
+
+
 
 
 
