@@ -62,9 +62,9 @@ export default function Home() {
       const { data: { user: currentUser } } = await supabase.auth.getUser()
       const { data: prof } = await supabase.from('profiles').select('role').eq('id', currentUser?.id ?? '').single()
       if (prof?.role && ['admin','superadmin','operator','support'].includes(prof.role)) {
-        router.push('/dashboard')
+        router.push('/roulette/play?room=vip-1')
       } else {
-        router.push('/dashboard')
+        router.push('/roulette/play?room=vip-1')
       }
     } catch { setError('Email o contraseña incorrectos') }
     setLoading(false)
@@ -81,9 +81,9 @@ export default function Home() {
       }
       const { data: prof } = await supabase.from('profiles').select('role').eq('id', regData?.user?.id ?? '').single()
       if (prof?.role && ['admin','superadmin','operator','support'].includes(prof.role)) {
-        router.push('/dashboard')
+        router.push('/roulette/play?room=vip-1')
       } else {
-        router.push('/dashboard')
+        router.push('/roulette/play?room=vip-1')
       }
     } catch (e: any) { setError(e?.message ?? 'Error al registrar') }
     setLoading(false)
@@ -187,6 +187,7 @@ export default function Home() {
     </div>
   )
 }
+
 
 
 
