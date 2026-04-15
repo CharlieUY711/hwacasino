@@ -1,583 +1,276 @@
 'use client'
+export const dynamic = 'force-dynamic'
 
-import { useEffect, useState, useCallback } from 'react'
-import { supabase } from '@/lib/supabaseClient'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabaseClient'
+import { useWallet } from '@/hooks/useWallet'
 
 const GOLD = '#D4AF37'
-const GOLD_BG = '#fef3c7'
-const GOLD_TEXT = '#78350f'
+const DARK = '#0A0A0A'
 
-// ── Types ──────────────────────────────────────────────────────────────
-interface AdminStats {
-  totalUsers: number
-  activeNow: number
-  totalChipsInPlay: number
-  depositsToday: number
-  depositsTodayUsd: number
-  pendingDeposits: number
-  houseProfitToday: number
-  roundsToday: number
-  webUsers: number
-  telegramUsers: number
-}
+const GAMES = [
+  { id: 'roulette', label: 'ROULETTE', sub: 'THE CLASSICS', emoji: '🎡', route: '/roulette/play', status: 'live', gradient: 'linear-gradient(160deg,#1a0a00,#2d1200,#0a0a0a)' },
+  { id: 'blackjack', label: 'BLACKJACK', sub: 'PRIVATE TABLE', emoji: '🃏', route: '/lobby/blackjack', status: 'soon', gradient: 'linear-gradient(160deg,#001a0a,#002d14,#0a0a0a)' },
+  { id: 'slots', label: 'SLOTS', sub: 'HIGH VOLATILITY', emoji: '🎰', route: '/lobby/slots', status: 'soon', gradient: 'linear-gradient(160deg,#0a001a,#14002d,#0a0a0a)' },
+  { id: 'dice', label: 'DICE', sub: 'PROVABLY FAIR', emoji: '🎲', route: '/lobby/dice', status: 'soon', gradient: 'linear-gradient(160deg,#0a0800,#1a1400,#0a0a0a)' },
+  { id: 'bingo', label: 'BINGO', sub: 'LIVE SESSIONS', emoji: '🎱', route: '/lobby/bingo', status: 'soon', gradient: 'linear-gradient(160deg,#00101a,#001a2d,#0a0a0a)' },
+]
 
-interface UserRow {
-  id: string
-  username: string
-  role: string
-  telegram_id: number | null
-  created_at: string
-  balance: number
-  bet_count: number
-}
+type Tab = 'home' | 'games' | 'history' | 'wallet' | 'profile'
 
-interface DepositRow {
-  id: string
-  user_id: string
-  username: string
-  amount_usd: number
-  chip_amount: number
-  paypal_order_id: string
-  status: string
-  created_at: string
-}
-
-interface InviteRow {
-  id: string
-  code: string
-  used: boolean
-  used_at: string | null
-  invited_username: string | null
-}
-
-type Panel = 'overview' | 'users' | 'deposits' | 'invites' | 'transactions' | 'roulette' | 'settings'
-
-// ── Styles helpers ─────────────────────────────────────────────────────
-const card = {
-  background: 'rgba(255,255,255,0.03)',
-  border: '1px solid rgba(212,175,55,0.15)',
-  borderRadius: '12px',
-  padding: '20px',
-}
-
-const metricCard = {
-  background: 'rgba(212,175,55,0.05)',
-  border: '1px solid rgba(212,175,55,0.2)',
-  borderRadius: '10px',
-  padding: '16px 20px',
-}
-
-const badge = (color: 'green' | 'amber' | 'red' | 'blue' | 'gold') => {
-  const map = {
-    green: { bg: 'rgba(34,197,94,0.15)', color: '#22c55e' },
-    amber: { bg: 'rgba(245,158,11,0.15)', color: '#f59e0b' },
-    red:   { bg: 'rgba(239,68,68,0.15)',  color: '#ef4444' },
-    blue:  { bg: 'rgba(59,130,246,0.15)', color: '#60a5fa' },
-    gold:  { bg: 'rgba(212,175,55,0.15)', color: GOLD },
-  }
-  return {
-    display: 'inline-block',
-    background: map[color].bg,
-    color: map[color].color,
-    padding: '2px 8px',
-    borderRadius: '8px',
-    fontSize: '11px',
-    fontWeight: 500,
-  }
-}
-
-const inputStyle: React.CSSProperties = {
-  background: 'rgba(255,255,255,0.05)',
-  border: '1px solid rgba(212,175,55,0.2)',
-  borderRadius: '6px',
-  color: 'rgba(255,255,255,0.85)',
-  padding: '8px 12px',
-  fontSize: '13px',
-  outline: 'none',
-  width: '100%',
-}
-
-// ── Main component ─────────────────────────────────────────────────────
-export default function AdminDashboard() {
+export default function DashboardPage() {
   const router = useRouter()
-  const [activePanel, setActivePanel] = useState<Panel>('overview')
-  const [stats, setStats] = useState<AdminStats | null>(null)
-  const [users, setUsers] = useState<UserRow[]>([])
-  const [deposits, setDeposits] = useState<DepositRow[]>([])
-  const [invites, setInvites] = useState<InviteRow[]>([])
+  const { balance, balances, formatChips } = useWallet()
+  const [tab, setTab] = useState<Tab>('home')
+  const [username, setUsername] = useState('MEMBER')
+  const [email, setEmail] = useState('')
+  const [userId, setUserId] = useState('')
   const [loading, setLoading] = useState(true)
-  const [userFilter, setUserFilter] = useState('')
-  const [generating, setGenerating] = useState(false)
+  const [history, setHistory] = useState<any[]>([])
+  const [transactions, setTransactions] = useState<any[]>([])
 
-  // ── Auth guard: only role=admin/superadmin ─────────────────────────
   useEffect(() => {
-    async function checkAdmin() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/'); return }
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single()
-      if (!profile || !['admin', 'superadmin'].includes(profile.role)) {
-        router.push('/lobby')
-      }
-    }
-    checkAdmin()
-  }, [router])
-
-  // ── Load data ─────────────────────────────────────────────────────
-  const loadData = useCallback(async () => {
-    setLoading(true)
-    try {
-      const res = await fetch('/api/admin/stats')
-      if (!res.ok) throw new Error('Unauthorized')
-      const data = await res.json()
-      setStats(data.stats)
-      setUsers(data.users)
-      setDeposits(data.deposits)
-      setInvites(data.invites)
-    } catch {
-      router.push('/lobby')
-    } finally {
+    async function init() {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) { router.replace('/'); return }
+      setUserId(session.user.id)
+      setEmail(session.user.email ?? '')
+      const { data: profile } = await supabase.from('profiles').select('username').eq('id', session.user.id).single()
+      setUsername(profile?.username?.toUpperCase() ?? 'MEMBER')
       setLoading(false)
     }
+    init()
   }, [router])
 
-  useEffect(() => { loadData() }, [loadData])
+  useEffect(() => {
+    if (!userId || tab !== 'history') return
+    supabase.from('game_rounds').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(20)
+      .then(({ data }) => setHistory(data ?? []))
+  }, [userId, tab])
 
-  // ── Actions ───────────────────────────────────────────────────────
-  async function generateInviteCode() {
-    setGenerating(true)
-    try {
-      const res = await fetch('/api/admin/invites', { method: 'POST' })
-      const { code } = await res.json()
-      setInvites(prev => [{ id: Date.now().toString(), code, used: false, used_at: null, invited_username: null }, ...prev])
-    } finally {
-      setGenerating(false)
-    }
-  }
+  useEffect(() => {
+    if (!userId || tab !== 'wallet') return
+    supabase.from('wallet_transactions').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(20)
+      .then(({ data }) => setTransactions(data ?? []))
+  }, [userId, tab])
 
-  async function revokeInvite(id: string) {
-    await fetch(`/api/admin/invites?id=${id}`, { method: 'DELETE' })
-    setInvites(prev => prev.filter(i => i.id !== id))
-  }
-
-  async function captureDeposit(depositId: string) {
-    await fetch('/api/admin/deposits', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ depositId, action: 'complete' }),
-    })
-    loadData()
-  }
-
-  const filteredUsers = users.filter(u =>
-    u.username?.toLowerCase().includes(userFilter.toLowerCase())
-  )
-
-  // ── Layout ────────────────────────────────────────────────────────
   if (loading) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', background: '#0d0d0d' }}>
-      <div style={{ color: GOLD, fontFamily: 'Montserrat, sans-serif', letterSpacing: '3px', fontSize: '13px' }}>
-        CARGANDO...
-      </div>
-    </div>
+    <main style={{ minHeight: '100vh', background: DARK, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <p style={{ color: 'rgba(212,175,55,0.3)', letterSpacing: '0.5em', fontSize: '0.65rem', fontFamily: 'serif' }}>LOADING...</p>
+    </main>
   )
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#0d0d0d', fontFamily: 'Montserrat, sans-serif', color: 'rgba(255,255,255,0.85)' }}>
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Montserrat:wght@200;300;400;600;700&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: ${DARK}; overflow-x: hidden; }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(12px) } to { opacity:1; transform:translateY(0) } }
+        .fade-up { animation: fadeUp 0.5s ease both; }
+        .game-card { transition: transform 0.25s ease; cursor: pointer; touch-action: manipulation; }
+        .game-card:active { transform: scale(0.97); }
+        .tab-btn { touch-action: manipulation; transition: color 0.2s ease; }
+      `}</style>
 
-      {/* ── Sidebar ─────────────────────────────────────────── */}
-      <aside style={{
-        width: '220px', flexShrink: 0,
-        background: 'rgba(255,255,255,0.02)',
-        borderRight: '1px solid rgba(212,175,55,0.12)',
-        display: 'flex', flexDirection: 'column',
-      }}>
-        {/* Logo */}
-        <div style={{ padding: '24px 20px 20px', borderBottom: '1px solid rgba(212,175,55,0.1)' }}>
-          <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '20px', color: GOLD, letterSpacing: '4px' }}>HWA</div>
-          <div style={{ fontSize: '9px', color: 'rgba(255,255,255,0.3)', letterSpacing: '3px', marginTop: '2px' }}>CASINO PRIVADO</div>
-          <div style={{ width: '28px', height: '1px', background: GOLD, marginTop: '8px', opacity: 0.6 }} />
+      <main style={{ minHeight: '100dvh', background: DARK, fontFamily: "'Montserrat', sans-serif", maxWidth: '480px', margin: '0 auto', paddingBottom: '72px' }}>
+
+        <div style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(212,175,55,0.1)', position: 'sticky', top: 0, background: 'rgba(10,10,10,0.95)', backdropFilter: 'blur(10px)', zIndex: 90 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <img src="/logo-hwa.png" alt="HWA" style={{ width: 36, height: 36, borderRadius: '50%', border: `1.5px solid ${GOLD}`, objectFit: 'cover' }} />
+            <div>
+              <p style={{ fontSize: '0.42rem', letterSpacing: '0.25em', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase' }}>VIP MEMBER</p>
+              <p style={{ fontSize: '0.85rem', color: '#fff', fontWeight: 600, letterSpacing: '0.1em' }}>{username}</p>
+            </div>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <p style={{ fontSize: '0.42rem', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', marginBottom: '2px' }}>BALANCE</p>
+            <p style={{ fontSize: '1rem', color: GOLD, fontWeight: 700 }}>{formatChips(balance)}</p>
+          </div>
         </div>
 
-        {/* Nav */}
-        <nav style={{ flex: 1, padding: '16px 0' }}>
-          {[
-            { id: 'overview', label: 'Overview', icon: '\u25a0' },
-            { id: 'users', label: 'Usuarios', icon: '\u25b2', badge: stats?.totalUsers },
-            { id: 'deposits', label: 'Dep\u00f3sitos', icon: '\u25c6', badge: stats?.pendingDeposits || undefined },
-            { id: 'invites', label: 'Invitaciones', icon: '\u2665' },
-            { id: 'transactions', label: 'Transacciones', icon: '\u25a0' },
-            { id: 'roulette', label: 'Ruleta Stats', icon: '\u25cb' },
-            { id: 'settings', label: 'Configuraci\u00f3n', icon: '\u25a0' },
-          ].map(item => (
-            <button
-              key={item.id}
-              onClick={() => setActivePanel(item.id as Panel)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '10px',
-                width: '100%', padding: '10px 20px',
-                background: activePanel === item.id ? 'rgba(212,175,55,0.08)' : 'transparent',
-                borderLeft: activePanel === item.id ? `2px solid ${GOLD}` : '2px solid transparent',
-                border: 'none', cursor: 'pointer',
-                color: activePanel === item.id ? GOLD : 'rgba(255,255,255,0.45)',
-                fontSize: '13px', textAlign: 'left',
-                transition: 'all 0.15s',
-              }}
-            >
-              <span style={{ fontSize: '12px', width: '14px' }}>{item.icon}</span>
-              <span style={{ flex: 1 }}>{item.label}</span>
-              {item.badge ? (
-                <span style={{ background: GOLD, color: '#1a0e00', fontSize: '9px', fontWeight: 700, padding: '1px 5px', borderRadius: '8px' }}>
-                  {item.badge}
-                </span>
-              ) : null}
+        {tab === 'home' && (
+          <div className="fade-up">
+            <div style={{ padding: '28px 20px 20px' }}>
+              <p style={{ fontSize: '0.48rem', letterSpacing: '0.4em', color: GOLD, textTransform: 'uppercase', marginBottom: '8px' }}>EXCLUSIVE ACCESS</p>
+              <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2.8rem', color: '#fff', fontWeight: 300, lineHeight: 1, marginBottom: '20px' }}>
+                HWA <span style={{ color: GOLD, fontWeight: 700 }}>CASINO</span><br />EXPERIENCE
+              </h1>
+              <button onPointerDown={() => setTab('games')} style={{ background: GOLD, border: 'none', borderRadius: '2px', padding: '12px 24px', fontFamily: "'Montserrat', sans-serif", fontWeight: 700, fontSize: '0.65rem', letterSpacing: '0.3em', color: '#000', cursor: 'pointer', touchAction: 'manipulation' }}>
+                ENTER GAMES
+              </button>
+            </div>
+
+            <div style={{ margin: '0 20px 24px', background: 'rgba(212,175,55,0.05)', border: '1px solid rgba(212,175,55,0.15)', borderRadius: '8px', padding: '16px' }}>
+              <p style={{ fontSize: '0.45rem', letterSpacing: '0.3em', color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', marginBottom: '12px' }}>MY WALLET</p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                {[
+                  { label: 'CHIPS', value: (balances?.CHIPS ?? 0).toLocaleString('es-UY') },
+                  { label: 'USD', value: `$${(balances?.USD ?? 0).toLocaleString('es-UY')}` },
+                  { label: 'USDT', value: (balances?.USDT ?? 0).toLocaleString('es-UY') },
+                ].map(b => (
+                  <div key={b.label} style={{ textAlign: 'center', padding: '10px', background: 'rgba(255,255,255,0.03)', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                    <p style={{ fontSize: '0.38rem', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.35)', marginBottom: '4px' }}>{b.label}</p>
+                    <p style={{ fontSize: '0.8rem', color: GOLD, fontWeight: 700 }}>{b.value}</p>
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '10px' }}>
+                <button onPointerDown={() => router.push('/deposit')} style={{ background: GOLD, border: 'none', borderRadius: '4px', padding: '10px', fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.2em', color: '#000', cursor: 'pointer', touchAction: 'manipulation' }}>DEPOSITAR</button>
+                <button onPointerDown={() => setTab('wallet')} style={{ background: 'transparent', border: '1px solid rgba(212,175,55,0.3)', borderRadius: '4px', padding: '10px', fontSize: '0.55rem', fontWeight: 600, letterSpacing: '0.2em', color: GOLD, cursor: 'pointer', touchAction: 'manipulation' }}>HISTORIAL</button>
+              </div>
+            </div>
+
+            <div style={{ margin: '0 20px 24px' }}>
+              <p style={{ fontSize: '0.45rem', letterSpacing: '0.3em', color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', marginBottom: '12px' }}>BONOS ACTIVOS</p>
+              {[
+                { icon: '🎁', title: 'Bono de Bienvenida', desc: 'Chips de bienvenida acreditados', status: 'ACTIVO', color: '#4ade80' },
+                { icon: '♛', title: 'Cashback Semanal', desc: '5% de tus pérdidas de la semana', status: 'DISPONIBLE', color: GOLD },
+              ].map((b, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                  <span style={{ fontSize: '1.4rem' }}>{b.icon}</span>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontSize: '0.65rem', fontWeight: 600, color: '#fff', marginBottom: '2px' }}>{b.title}</p>
+                    <p style={{ fontSize: '0.5rem', color: 'rgba(255,255,255,0.35)' }}>{b.desc}</p>
+                  </div>
+                  <span style={{ fontSize: '0.42rem', fontWeight: 700, letterSpacing: '0.15em', color: b.color }}>{b.status}</span>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ textAlign: 'center', padding: '8px 20px 16px' }}>
+              <button onPointerDown={async () => { await supabase.auth.signOut(); router.replace('/') }} style={{ background: 'transparent', border: 'none', fontSize: '0.45rem', letterSpacing: '0.3em', color: 'rgba(255,255,255,0.15)', cursor: 'pointer', textTransform: 'uppercase', touchAction: 'manipulation' }}>CERRAR SESIÓN</button>
+            </div>
+          </div>
+        )}
+
+        {tab === 'games' && (
+          <div className="fade-up" style={{ padding: '24px 20px' }}>
+            <p style={{ fontSize: '0.45rem', letterSpacing: '0.3em', color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', marginBottom: '16px' }}>SELECCIONÁ TU JUEGO</p>
+            <div className="game-card" onPointerDown={() => router.push('/roulette/play')} style={{ background: GAMES[0].gradient, border: '1px solid rgba(212,175,55,0.12)', borderRadius: '6px', padding: '28px 20px', marginBottom: '12px', position: 'relative', overflow: 'hidden', minHeight: '150px' }}>
+              <div style={{ position: 'absolute', right: '-20px', top: '-20px', fontSize: '7rem', opacity: 0.06 }}>🎡</div>
+              <div style={{ position: 'absolute', top: '12px', right: '12px', background: '#16a34a', borderRadius: '20px', padding: '3px 8px', fontSize: '0.38rem', letterSpacing: '0.15em', color: '#fff', fontWeight: 700 }}>● LIVE</div>
+              <p style={{ fontSize: '0.42rem', letterSpacing: '0.3em', color: 'rgba(255,255,255,0.3)', marginBottom: '6px', textTransform: 'uppercase' }}>{GAMES[0].sub}</p>
+              <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2.2rem', color: '#fff', fontWeight: 300, letterSpacing: '0.1em' }}>{GAMES[0].label}</h2>
+              <p style={{ fontSize: '0.45rem', color: 'rgba(255,255,255,0.25)', marginTop: '4px' }}>Ruleta europea · Apuestas desde 10 CHIPS</p>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              {GAMES.slice(1).map(game => (
+                <div key={game.id} className="game-card" style={{ background: game.gradient, border: '1px solid rgba(212,175,55,0.08)', borderRadius: '6px', padding: '20px 14px', position: 'relative', overflow: 'hidden', minHeight: '120px', opacity: 0.5 }}>
+                  <div style={{ position: 'absolute', right: '-8px', top: '-8px', fontSize: '4rem', opacity: 0.08 }}>{game.emoji}</div>
+                  <div style={{ position: 'absolute', top: '10px', right: '10px', fontSize: '0.38rem', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.25)', fontWeight: 600 }}>PRONTO</div>
+                  <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.4rem', color: '#fff', fontWeight: 400, letterSpacing: '0.05em', marginBottom: '4px' }}>{game.label}</h3>
+                  <p style={{ fontSize: '0.4rem', color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', letterSpacing: '0.15em' }}>{game.sub}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {tab === 'history' && (
+          <div className="fade-up" style={{ padding: '24px 20px' }}>
+            <p style={{ fontSize: '0.45rem', letterSpacing: '0.3em', color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', marginBottom: '16px' }}>HISTORIAL DE JUGADAS</p>
+            {history.length === 0 ? (
+              <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.65rem', textAlign: 'center', marginTop: '60px' }}>Sin jugadas registradas aún.</p>
+            ) : history.map((h, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                <div>
+                  <p style={{ fontSize: '0.65rem', color: '#fff', fontWeight: 600, marginBottom: '2px' }}>{h.game_type ?? 'Roulette'}</p>
+                  <p style={{ fontSize: '0.48rem', color: 'rgba(255,255,255,0.3)' }}>{new Date(h.created_at).toLocaleDateString('es-UY')}</p>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <p style={{ fontSize: '0.7rem', fontWeight: 700, color: (h.payout ?? 0) > 0 ? '#4ade80' : '#f87171' }}>
+                    {(h.payout ?? 0) > 0 ? '+' : ''}{(h.payout ?? 0).toLocaleString('es-UY')}
+                  </p>
+                  <p style={{ fontSize: '0.42rem', color: 'rgba(255,255,255,0.25)' }}>CHIPS</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {tab === 'wallet' && (
+          <div className="fade-up" style={{ padding: '24px 20px' }}>
+            <p style={{ fontSize: '0.45rem', letterSpacing: '0.3em', color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', marginBottom: '16px' }}>MI WALLET</p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '20px' }}>
+              {[
+                { label: 'CHIPS', value: (balances?.CHIPS ?? 0).toLocaleString('es-UY') },
+                { label: 'USD', value: `$${(balances?.USD ?? 0).toLocaleString('es-UY')}` },
+                { label: 'USDT', value: (balances?.USDT ?? 0).toLocaleString('es-UY') },
+              ].map(b => (
+                <div key={b.label} style={{ textAlign: 'center', padding: '14px 8px', background: 'rgba(212,175,55,0.05)', borderRadius: '6px', border: '1px solid rgba(212,175,55,0.15)' }}>
+                  <p style={{ fontSize: '0.38rem', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.35)', marginBottom: '6px' }}>{b.label}</p>
+                  <p style={{ fontSize: '0.9rem', color: GOLD, fontWeight: 700 }}>{b.value}</p>
+                </div>
+              ))}
+            </div>
+            <button onPointerDown={() => router.push('/deposit')} style={{ width: '100%', background: GOLD, border: 'none', borderRadius: '4px', padding: '14px', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.3em', color: '#000', cursor: 'pointer', marginBottom: '24px', touchAction: 'manipulation' }}>
+              DEPOSITAR / RETIRAR
+            </button>
+            <p style={{ fontSize: '0.45rem', letterSpacing: '0.3em', color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', marginBottom: '12px' }}>ÚLTIMAS TRANSACCIONES</p>
+            {transactions.length === 0 ? (
+              <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.65rem', textAlign: 'center', marginTop: '40px' }}>Sin transacciones aún.</p>
+            ) : transactions.map((t, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                <div>
+                  <p style={{ fontSize: '0.62rem', color: '#fff', fontWeight: 600, marginBottom: '2px', textTransform: 'capitalize' }}>{t.type ?? 'transacción'}</p>
+                  <p style={{ fontSize: '0.46rem', color: 'rgba(255,255,255,0.3)' }}>{t.reason ?? ''} · {new Date(t.created_at).toLocaleDateString('es-UY')}</p>
+                </div>
+                <p style={{ fontSize: '0.75rem', fontWeight: 700, color: t.type === 'credit' ? '#4ade80' : '#f87171' }}>
+                  {t.type === 'credit' ? '+' : '-'}{(t.amount ?? 0).toLocaleString('es-UY')}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {tab === 'profile' && (
+          <div className="fade-up" style={{ padding: '24px 20px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '28px' }}>
+              <div style={{ width: 80, height: 80, borderRadius: '50%', border: `2px solid ${GOLD}`, overflow: 'hidden', marginBottom: '12px' }}>
+                <img src="/logo-hwa.png" alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }} />
+              </div>
+              <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.6rem', color: '#fff', fontWeight: 300, letterSpacing: '0.2em' }}>{username}</p>
+              <p style={{ fontSize: '0.48rem', color: 'rgba(255,255,255,0.3)', marginTop: '4px' }}>{email}</p>
+              <div style={{ marginTop: '8px', background: 'rgba(212,175,55,0.1)', borderRadius: '20px', padding: '4px 12px', border: '1px solid rgba(212,175,55,0.3)' }}>
+                <span style={{ fontSize: '0.42rem', letterSpacing: '0.2em', color: GOLD, fontWeight: 700 }}>VIP MEMBER</span>
+              </div>
+            </div>
+            {[
+              { label: 'Usuario', value: username },
+              { label: 'Email', value: email },
+              { label: 'Miembro desde', value: 'Abril 2026' },
+              { label: 'Nivel', value: 'VIP' },
+            ].map((f, i) => (
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                <p style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.1em' }}>{f.label}</p>
+                <p style={{ fontSize: '0.62rem', color: '#fff', fontWeight: 500 }}>{f.value}</p>
+              </div>
+            ))}
+            <button onPointerDown={async () => { await supabase.auth.signOut(); router.replace('/') }} style={{ width: '100%', marginTop: '32px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', padding: '12px', fontSize: '0.55rem', letterSpacing: '0.3em', color: 'rgba(255,255,255,0.25)', cursor: 'pointer', touchAction: 'manipulation' }}>
+              CERRAR SESIÓN
+            </button>
+          </div>
+        )}
+
+        <nav style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: '480px', background: '#0d0d0d', borderTop: '1px solid rgba(212,175,55,0.12)', display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', zIndex: 100 }}>
+          {([
+            { id: 'home',    icon: '⌂', label: 'INICIO' },
+            { id: 'games',   icon: '♠', label: 'JUEGOS' },
+            { id: 'history', icon: '◷', label: 'HISTORIAL' },
+            { id: 'wallet',  icon: '◈', label: 'WALLET' },
+            { id: 'profile', icon: '◎', label: 'PERFIL' },
+          ] as { id: Tab; icon: string; label: string }[]).map(item => (
+            <button key={item.id} className="tab-btn" onPointerDown={() => setTab(item.id)}
+              style={{ background: 'transparent', border: 'none', color: tab === item.id ? GOLD : 'rgba(255,255,255,0.25)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px', padding: '10px 0', cursor: 'pointer', fontFamily: "'Montserrat', sans-serif" }}>
+              <span style={{ fontSize: '1rem' }}>{item.icon}</span>
+              <span style={{ fontSize: '0.36rem', letterSpacing: '0.1em', fontWeight: tab === item.id ? 700 : 300 }}>{item.label}</span>
             </button>
           ))}
         </nav>
 
-        {/* Footer */}
-        <div style={{ padding: '16px 20px', borderTop: '1px solid rgba(212,175,55,0.1)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: GOLD, display: 'flex', alignItems: 'center', justifyContent: 'flex-start', fontSize: '10px', fontWeight: 700, color: '#1a0e00', flexShrink: 0 }}>AD</div>
-          <div>
-            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.85)', fontWeight: 500 }}>Admin</div>
-            <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)' }}>superadmin</div>
-          </div>
-        </div>
-      </aside>
-
-      {/* ── Main ────────────────────────────────────────────── */}
-      <main style={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
-        {/* Topbar */}
-        <header style={{
-          padding: '0 28px', height: '52px',
-          borderBottom: '1px solid rgba(212,175,55,0.1)',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          background: 'rgba(0,0,0,0.3)',
-          position: 'sticky', top: 0, zIndex: 10,
-        }}>
-          <div style={{ fontSize: '14px', fontWeight: 500, color: 'rgba(255,255,255,0.85)' }}>
-            {{ overview: 'Overview del Casino', users: 'Gesti\u00f3n de Usuarios', deposits: 'Dep\u00f3sitos PayPal', invites: 'C\u00f3digos VIP', transactions: 'Historial de Transacciones', roulette: 'Ruleta \u2014 Estad\u00edsticas', settings: 'Configuraci\u00f3n' }[activePanel]}
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>
-              <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#22c55e' }} />
-              En vivo
-            </div>
-            <button onClick={loadData} style={{ ...inputStyle, width: 'auto', padding: '6px 14px', cursor: 'pointer' }}>
-              \u21bb Actualizar
-            </button>
-          </div>
-        </header>
-
-        <div style={{ padding: '24px 28px', flex: 1 }}>
-
-          {/* ── OVERVIEW ─────────────────────────────────── */}
-          {activePanel === 'overview' && stats && (
-            <>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '24px' }}>
-                <MetricCard label="CHIPS EN JUEGO" value={stats.totalChipsInPlay.toLocaleString('es-UY')} delta={`${stats.activeNow} jugadores ahora`} gold />
-                <MetricCard label="USUARIOS ACTIVOS" value={stats.totalUsers.toString()} delta={`${stats.activeNow} en mesa ahora`} />
-                <MetricCard label="DEP\u00d3SITOS HOY (USD)" value={`$${stats.depositsToday}`} delta={`${stats.depositsTodayUsd} operaciones`} />
-                <MetricCard label="GANANCIA CASA HOY" value={stats.houseProfitToday.toLocaleString('es-UY')} delta="Nectar neto" gold />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
-                <div style={{ ...card, gridColumn: 'span 2' }}>
-                  <div style={{ fontSize: '13px', fontWeight: 500, color: GOLD, marginBottom: '16px' }}>Plataformas activas</div>
-                  <ProgressRow label="Web (hwacasino.com)" pct={Math.round((stats.webUsers / stats.totalUsers) * 100)} count={`${stats.webUsers} usuarios`} />
-                  <ProgressRow label="Telegram Bot" pct={Math.round((stats.telegramUsers / stats.totalUsers) * 100)} count={`${stats.telegramUsers} usuarios`} />
-                </div>
-                <div style={card}>
-                  <div style={{ fontSize: '13px', fontWeight: 500, color: GOLD, marginBottom: '16px' }}>Dep\u00f3sitos pendientes</div>
-                  <div style={{ fontSize: '32px', fontWeight: 500, color: stats.pendingDeposits > 0 ? '#f59e0b' : '#22c55e', marginBottom: '8px' }}>
-                    {stats.pendingDeposits}
-                  </div>
-                  <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.35)' }}>
-                    {stats.pendingDeposits > 0 ? 'requieren revisi\u00f3n' : 'todo al d\u00eda'}
-                  </div>
-                  {stats.pendingDeposits > 0 && (
-                    <button onClick={() => setActivePanel('deposits')} style={{ marginTop: '12px', ...inputStyle, width: 'auto', padding: '6px 14px', cursor: 'pointer', color: '#f59e0b', borderColor: 'rgba(245,158,11,0.3)' }}>
-                      Ver dep\u00f3sitos \u2192
-                    </button>
-                  )}
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* ── USERS ────────────────────────────────────── */}
-          {activePanel === 'users' && (
-            <>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '24px' }}>
-                <MetricCard label="USUARIOS TOTALES" value={stats?.totalUsers.toString() ?? '0'} delta="desde el inicio" />
-                <MetricCard label="CON TELEGRAM" value={stats?.telegramUsers.toString() ?? '0'} delta="vinculados al bot" />
-                <MetricCard label="SOLO WEB" value={stats?.webUsers.toString() ?? '0'} delta="hwacasino.com" />
-              </div>
-
-              <div style={card}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                  <div style={{ fontSize: '13px', fontWeight: 500, color: GOLD }}>Todos los usuarios</div>
-                  <input
-                    placeholder="Buscar usuario..."
-                    value={userFilter}
-                    onChange={e => setUserFilter(e.target.value)}
-                    style={{ ...inputStyle, width: '200px' }}
-                  />
-                </div>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
-                  <thead>
-                    <tr style={{ color: 'rgba(255,255,255,0.3)', fontSize: '10px', letterSpacing: '0.8px' }}>
-                      {['USUARIO', 'PLATAFORMA', 'BALANCE (NECTAR)', 'APUESTAS', 'ROL', 'DESDE'].map(h => (
-                        <th key={h} style={{ padding: '8px 12px', textAlign: 'left', borderBottom: '1px solid rgba(212,175,55,0.1)' }}>{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredUsers.map(u => (
-                      <tr key={u.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                        <td style={{ padding: '10px 12px', color: 'rgba(255,255,255,0.85)', fontWeight: 500 }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'rgba(212,175,55,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', fontSize: '9px', color: GOLD, fontWeight: 700 }}>
-                              {(u.username || 'U').substring(0, 2).toUpperCase()}
-                            </div>
-                            {u.username}
-                          </div>
-                        </td>
-                        <td style={{ padding: '10px 12px' }}>
-                          <span style={badge(u.telegram_id ? 'gold' : 'blue')}>
-                            {u.telegram_id ? 'Web+TG' : 'Web'}
-                          </span>
-                        </td>
-                        <td style={{ padding: '10px 12px', color: GOLD, fontWeight: 500 }}>
-                          {u.balance?.toLocaleString('es-UY') ?? '0'}
-                        </td>
-                        <td style={{ padding: '10px 12px', color: 'rgba(255,255,255,0.5)' }}>{u.bet_count}</td>
-                        <td style={{ padding: '10px 12px' }}>
-                          <span style={badge(u.role === 'admin' || u.role === 'superadmin' ? 'red' : 'green')}>
-                            {u.role}
-                          </span>
-                        </td>
-                        <td style={{ padding: '10px 12px', color: 'rgba(255,255,255,0.35)', fontSize: '11px' }}>
-                          {new Date(u.created_at).toLocaleDateString('es-UY', { day: '2-digit', month: 'short' })}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </>
-          )}
-
-          {/* ── DEPOSITS ─────────────────────────────────── */}
-          {activePanel === 'deposits' && (
-            <>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '24px' }}>
-                <MetricCard label="TOTAL EMITIDO (USD)" value={`$${stats?.depositsToday ?? 0}`} gold />
-                <MetricCard label="PENDIENTES" value={stats?.pendingDeposits.toString() ?? '0'} delta="revisar ahora" />
-                <MetricCard label="OPERACIONES HOY" value={stats?.depositsTodayUsd.toString() ?? '0'} />
-                <MetricCard label="MODO PAYPAL" value="SANDBOX" delta="cambiar en settings" />
-              </div>
-
-              <div style={card}>
-                <div style={{ fontSize: '13px', fontWeight: 500, color: GOLD, marginBottom: '16px' }}>Dep\u00f3sitos recientes</div>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
-                  <thead>
-                    <tr style={{ color: 'rgba(255,255,255,0.3)', fontSize: '10px', letterSpacing: '0.8px' }}>
-                      {['USUARIO', 'USD', 'CHIPS', 'ORDER ID', 'ESTADO', 'FECHA', 'ACCIONES'].map(h => (
-                        <th key={h} style={{ padding: '8px 12px', textAlign: 'left', borderBottom: '1px solid rgba(212,175,55,0.1)' }}>{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {deposits.map(d => (
-                      <tr key={d.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                        <td style={{ padding: '10px 12px', color: 'rgba(255,255,255,0.85)', fontWeight: 500 }}>{d.username}</td>
-                        <td style={{ padding: '10px 12px' }}>${d.amount_usd?.toFixed(2)}</td>
-                        <td style={{ padding: '10px 12px', color: GOLD, fontWeight: 500 }}>{d.chip_amount?.toLocaleString('es-UY')}</td>
-                        <td style={{ padding: '10px 12px', fontFamily: 'monospace', fontSize: '10px', color: 'rgba(255,255,255,0.35)' }}>
-                          {d.paypal_order_id?.substring(0, 12)}...
-                        </td>
-                        <td style={{ padding: '10px 12px' }}>
-                          <span style={badge(d.status === 'completed' ? 'green' : d.status === 'pending' ? 'amber' : 'red')}>
-                            {d.status}
-                          </span>
-                        </td>
-                        <td style={{ padding: '10px 12px', color: 'rgba(255,255,255,0.35)', fontSize: '11px' }}>
-                          {new Date(d.created_at).toLocaleDateString('es-UY', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                        </td>
-                        <td style={{ padding: '10px 12px' }}>
-                          {d.status === 'pending' && (
-                            <button
-                              onClick={() => captureDeposit(d.id)}
-                              style={{ fontSize: '11px', padding: '4px 10px', background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: '6px', color: '#22c55e', cursor: 'pointer' }}
-                            >
-                              Completar
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </>
-          )}
-
-          {/* ── INVITES ───────────────────────────────────── */}
-          {activePanel === 'invites' && (
-            <>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '24px' }}>
-                <MetricCard label="TOTAL C\u00d3DIGOS" value={invites.length.toString()} />
-                <MetricCard label="USADOS" value={invites.filter(i => i.used).length.toString()} delta="jugadores registrados" />
-                <MetricCard label="DISPONIBLES" value={invites.filter(i => !i.used).length.toString()} delta="sin usar" gold />
-              </div>
-
-              <div style={card}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                  <div style={{ fontSize: '13px', fontWeight: 500, color: GOLD }}>C\u00f3digos VIP</div>
-                  <button
-                    onClick={generateInviteCode}
-                    disabled={generating}
-                    style={{ padding: '8px 16px', background: GOLD, color: '#1a0e00', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 700, fontSize: '12px', fontFamily: 'Montserrat, sans-serif' }}
-                  >
-                    {generating ? 'Generando...' : '+ Generar c\u00f3digo'}
-                  </button>
-                </div>
-
-                {invites.map(inv => (
-                  <div key={inv.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid rgba(212,175,55,0.08)' }}>
-                    <div>
-                      <div style={{ fontFamily: 'monospace', fontSize: '14px', color: inv.used ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.85)', letterSpacing: '1px' }}>{inv.code}</div>
-                      <div style={{ fontSize: '10px', marginTop: '3px', color: inv.used ? 'rgba(255,255,255,0.25)' : '#22c55e' }}>
-                        {inv.used ? `usado por ${inv.invited_username ?? 'desconocido'} \u2022 ${inv.used_at ? new Date(inv.used_at).toLocaleDateString('es-UY') : ''}` : 'disponible'}
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                      <span style={badge(inv.used ? 'amber' : 'green')}>{inv.used ? 'Usado' : 'Libre'}</span>
-                      {!inv.used && (
-                        <>
-                          <button onClick={() => navigator.clipboard.writeText(inv.code)} style={{ ...inputStyle, width: 'auto', padding: '4px 10px', cursor: 'pointer', fontSize: '11px' }}>
-                            copiar
-                          </button>
-                          <button onClick={() => revokeInvite(inv.id)} style={{ ...inputStyle, width: 'auto', padding: '4px 10px', cursor: 'pointer', fontSize: '11px', color: '#ef4444', borderColor: 'rgba(239,68,68,0.3)' }}>
-                            revocar
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-
-          {/* ── ROULETTE STATS ────────────────────────────── */}
-          {activePanel === 'roulette' && stats && (
-            <>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '24px' }}>
-                <MetricCard label="RONDAS HOY" value={stats.roundsToday.toString()} />
-                <MetricCard label="CHIPS APOSTADOS HOY" value={stats.houseProfitToday.toLocaleString('es-UY')} gold />
-                <MetricCard label="GANANCIA CASA" value={stats.houseProfitToday.toLocaleString('es-UY')} gold />
-                <MetricCard label="HOUSE EDGE EFECTIVO" value="4.2%" delta="te\u00f3rico 2.7%" />
-              </div>
-              <div style={{ ...card, display: 'flex', alignItems: 'center', justifyContent: 'flex-start', minHeight: '200px', flexDirection: 'column', gap: '12px' }}>
-                <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.35)' }}>Stats detalladas de rondas disponibles aqu\u00ed</div>
-                <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.2)' }}>Cochips con roulette_rounds + round_bets para historial completo</div>
-              </div>
-            </>
-          )}
-
-          {/* ── TRANSACTIONS ─────────────────────────────── */}
-          {activePanel === 'transactions' && (
-            <div style={card}>
-              <div style={{ fontSize: '13px', fontWeight: 500, color: GOLD, marginBottom: '16px' }}>Historial de transacciones</div>
-              <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.35)', textAlign: 'center', padding: '40px' }}>
-                Cochips con tabla transactions de Supabase para historial completo.
-                <br /><br />
-                Columnas: id, user_id, type, amount, direction, reference_id, metadata, created_at
-              </div>
-            </div>
-          )}
-
-          {/* ── SETTINGS ─────────────────────────────────── */}
-          {activePanel === 'settings' && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-              <div style={card}>
-                <div style={{ fontSize: '13px', fontWeight: 500, color: GOLD, marginBottom: '20px' }}>Configuraci\u00f3n de plataforma</div>
-                {[
-                  { label: 'ROUND_DURATION_SECONDS', defaultValue: '40', type: 'number' },
-                  { label: 'Bono bienvenida (Chips)', defaultValue: '1000', type: 'number' },
-                  { label: 'M\u00ednimo dep\u00f3sito (USD)', defaultValue: '10', type: 'number' },
-                  { label: 'M\u00e1ximo dep\u00f3sito (USD)', defaultValue: '1000', type: 'number' },
-                ].map(f => (
-                  <div key={f.label} style={{ marginBottom: '16px' }}>
-                    <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.35)', letterSpacing: '1px', marginBottom: '6px' }}>{f.label}</div>
-                    <input type={f.type} defaultValue={f.defaultValue} style={inputStyle} />
-                  </div>
-                ))}
-                <button style={{ width: '100%', padding: '10px', background: GOLD, color: '#1a0e00', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 700, fontSize: '12px', fontFamily: 'Montserrat, sans-serif', marginTop: '8px' }}>
-                  Guardar cambios
-                </button>
-              </div>
-
-              <div style={card}>
-                <div style={{ fontSize: '13px', fontWeight: 500, color: GOLD, marginBottom: '20px' }}>Estado del sistema</div>
-                {[
-                  { label: 'Supabase DB', status: 'Conectado', color: 'green' as const },
-                  { label: 'Realtime Presence', status: 'Activo', color: 'green' as const },
-                  { label: 'PayPal API', status: 'Sandbox', color: 'amber' as const },
-                  { label: 'Telegram Bot', status: 'Running', color: 'green' as const },
-                  { label: 'Vercel Deploy', status: 'OK', color: 'green' as const },
-                  { label: 'Retiros', status: 'No implementado', color: 'red' as const },
-                ].map(s => (
-                  <div key={s.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '11px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                    <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)' }}>{s.label}</span>
-                    <span style={badge(s.color)}>{s.status}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-        </div>
       </main>
-    </div>
+    </>
   )
 }
-
-// ── Sub-components ────────────────────────────────────────────────────
-function MetricCard({ label, value, delta, gold }: { label: string; value: string; delta?: string; gold?: boolean }) {
-  return (
-    <div style={{
-      background: gold ? 'rgba(212,175,55,0.07)' : 'rgba(255,255,255,0.03)',
-      border: `1px solid ${gold ? 'rgba(212,175,55,0.25)' : 'rgba(255,255,255,0.07)'}`,
-      borderRadius: '10px', padding: '16px 18px',
-    }}>
-      <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.35)', letterSpacing: '1px', marginBottom: '8px' }}>{label}</div>
-      <div style={{ fontSize: '22px', fontWeight: 500, color: gold ? GOLD : 'rgba(255,255,255,0.85)', lineHeight: 1 }}>{value}</div>
-      {delta && <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', marginTop: '6px' }}>{delta}</div>}
-    </div>
-  )
-}
-
-function ProgressRow({ label, pct, count }: { label: string; pct: number; count: string }) {
-  return (
-    <div style={{ marginBottom: '14px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '5px' }}>
-        <span style={{ color: 'rgba(255,255,255,0.6)' }}>{label}</span>
-        <span style={{ color: 'rgba(255,255,255,0.35)' }}>{count}</span>
-      </div>
-      <div style={{ height: '4px', background: 'rgba(255,255,255,0.07)', borderRadius: '2px', overflow: 'hidden' }}>
-        <div style={{ width: `${pct}%`, height: '100%', background: GOLD, borderRadius: '2px' }} />
-      </div>
-    </div>
-  )
-}
-
-
-
-
