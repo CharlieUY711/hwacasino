@@ -574,10 +574,10 @@ export default function RoulettePlayPage() {
           window.matchMedia('(display-mode: standalone)').matches ||
           (window.navigator as any).standalone
         ) {
-          router.push('/dashboard');
+          // disabled
+          void 0;
         } else {
-          router.push('/roulette');
-        }
+          void 0;
       }}
       style={{
         background: 'none',
@@ -634,7 +634,7 @@ export default function RoulettePlayPage() {
   {/* DERECHA */}
   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
     <button
-      onPointerDown={() => router.push('/dashboard')}
+      onPointerDown={() => {}}
       style={{
         background: 'none',
         border: 'none',
