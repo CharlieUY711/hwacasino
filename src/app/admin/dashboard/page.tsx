@@ -33,7 +33,7 @@ export default function DashboardPage() {
   useEffect(() => {
     async function init() {
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session) { router.replace('/'); return }
+      if (!session) { window.location.href = 'https://www.hwacasino.com'; return }
       setUserId(session.user.id)
       setEmail(session.user.email ?? '')
       const { data: profile } = await supabase.from('profiles').select('username').eq('id', session.user.id).single()
@@ -140,7 +140,7 @@ export default function DashboardPage() {
             </div>
 
             <div style={{ textAlign: 'center', padding: '8px 20px 16px' }}>
-              <button onPointerDown={async () => { await supabase.auth.signOut(); router.replace('/') }} style={{ background: 'transparent', border: 'none', fontSize: '0.45rem', letterSpacing: '0.3em', color: 'rgba(255,255,255,0.15)', cursor: 'pointer', textTransform: 'uppercase', touchAction: 'manipulation' }}>CERRAR SESIÓN</button>
+              <button onPointerDown={async () => { await supabase.auth.signOut(); window.location.href = 'https://www.hwacasino.com' }} style={{ background: 'transparent', border: 'none', fontSize: '0.45rem', letterSpacing: '0.3em', color: 'rgba(255,255,255,0.15)', cursor: 'pointer', textTransform: 'uppercase', touchAction: 'manipulation' }}>CERRAR SESIÓN</button>
             </div>
           </div>
         )}
@@ -248,7 +248,7 @@ export default function DashboardPage() {
                 <p style={{ fontSize: '0.62rem', color: '#fff', fontWeight: 500 }}>{f.value}</p>
               </div>
             ))}
-            <button onPointerDown={async () => { await supabase.auth.signOut(); router.replace('/') }} style={{ width: '100%', marginTop: '32px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', padding: '12px', fontSize: '0.55rem', letterSpacing: '0.3em', color: 'rgba(255,255,255,0.25)', cursor: 'pointer', touchAction: 'manipulation' }}>
+            <button onPointerDown={async () => { await supabase.auth.signOut(); window.location.href = 'https://www.hwacasino.com' }} style={{ width: '100%', marginTop: '32px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', padding: '12px', fontSize: '0.55rem', letterSpacing: '0.3em', color: 'rgba(255,255,255,0.25)', cursor: 'pointer', touchAction: 'manipulation' }}>
               CERRAR SESIÓN
             </button>
           </div>
@@ -274,3 +274,4 @@ export default function DashboardPage() {
     </>
   )
 }
+
