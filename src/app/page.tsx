@@ -38,7 +38,7 @@ export default function Home() {
       
       setInviteId(result.id)
       setReward(data?.initial_chips ?? 0)
-      setBonusLabel(data?.bonus_label || `¡Tu código te da ${data?.initial_chips ?? 0.toLocaleString('es-UY')} Chips de bienvenida!`)
+      setBonusLabel(data?.bonus_label || `¡Tu código te da ${(data?.initial_chips ?? 0).toLocaleString('es-UY')} Chips de bienvenida!`)
       setStep('welcome')
     } catch { setError('Error al verificar. Intentá de nuevo.') }
     setLoading(false)
@@ -166,5 +166,6 @@ export default function Home() {
     </div>
   )
 }
+
 
 
