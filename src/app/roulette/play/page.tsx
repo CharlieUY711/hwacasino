@@ -412,6 +412,7 @@ export default function RoulettePlayPage() {
       }
 
       // Girar la rueda
+      setDisplayBalance(balance - totalBet)
       setPhase('spinning')
       const winIdx = WHEEL_ORDER.indexOf(winNum!)
       setResultNumber(null)
@@ -496,7 +497,7 @@ export default function RoulettePlayPage() {
 
   // Sincronizar displayBalance con balance del servidor (Realtime)
   useEffect(() => {
-    if (!showPayout) setDisplayBalance(balance)
+    if (phase === 'idle' && bets.length === 0) setDisplayBalance(balance)
   }, [balance, showPayout])
 
   return (
@@ -1247,6 +1248,7 @@ function SplitOverlay({
     </div>
   )
 }
+
 
 
 
