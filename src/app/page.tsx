@@ -61,7 +61,7 @@ export default function Home() {
       const { data: { user: currentUser } } = await supabase.auth.getUser()
       const { data: prof } = await supabase.from('profiles').select('role').eq('id', currentUser?.id ?? '').single()
       if (prof?.role && ['admin','superadmin','operator','support'].includes(prof.role)) {
-        router.push('/admin/dashboard')
+        window.location.href = 'https://admin.hwacasino.com'
       } else {
         router.push('/dashboard')
       }
@@ -80,7 +80,7 @@ export default function Home() {
       }
       const { data: prof } = await supabase.from('profiles').select('role').eq('id', regData?.user?.id ?? '').single()
       if (prof?.role && ['admin','superadmin','operator','support'].includes(prof.role)) {
-        router.push('/admin/dashboard')
+        window.location.href = 'https://admin.hwacasino.com'
       } else {
         router.push('/dashboard')
       }
@@ -186,6 +186,7 @@ export default function Home() {
     </div>
   )
 }
+
 
 
 
