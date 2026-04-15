@@ -945,7 +945,7 @@ export default function RoulettePlayPage() {
                 return (
                   <div key={d.v} className={`bet-cell${won ? ' win-cell' : ''}${(roundStatus !== 'betting' || hasBetThisRound) ? ' locked' : ''}`}
                     onClick={e => addBet('dozen', d.v, e)}
-                    style={{ height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', background: getBetOn(id) > 0 ? 'rgba(212,175,55,0.2)' : 'rgba(212,175,55,0.05)', border: `1px solid ${won ? GOLD : getBetOn(id) > 0 ? GOLD : 'rgba(212,175,55,0.2)'}`, boxShadow: won ? `0 0 8px rgba(212,175,55,0.4)` : 'none', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    style={{ height: 24, background: getBetOn(id) > 0 ? 'rgba(212,175,55,0.2)' : 'rgba(212,175,55,0.05)', border: `1px solid ${won ? GOLD : getBetOn(id) > 0 ? GOLD : 'rgba(212,175,55,0.2)'}`, boxShadow: won ? `0 0 8px rgba(212,175,55,0.4)` : 'none', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <span style={{ color: won ? GOLD : 'rgba(212,175,55,0.7)', fontSize: '0.38rem', letterSpacing: '0.1em', fontWeight: 600 }}>{d.l}</span>
                   </div>
                 )
@@ -965,7 +965,7 @@ export default function RoulettePlayPage() {
                 return (
                   <div key={b.val} className={`bet-cell${won ? ' win-cell' : ''}${(roundStatus !== 'betting' || hasBetThisRound) ? ' locked' : ''}`}
                     onClick={e => addBet(b.type, b.val, e)}
-                    style={{ height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', background: getBetOn(id) > 0 ? 'rgba(212,175,55,0.2)' : 'rgba(212,175,55,0.05)', border: `1px solid ${won ? GOLD : 'rgba(212,175,55,0.2)'}`, boxShadow: won ? `0 0 8px rgba(212,175,55,0.4)` : 'none', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    style={{ height: 24, background: getBetOn(id) > 0 ? 'rgba(212,175,55,0.2)' : 'rgba(212,175,55,0.05)', border: `1px solid ${won ? GOLD : 'rgba(212,175,55,0.2)'}`, boxShadow: won ? `0 0 8px rgba(212,175,55,0.4)` : 'none', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <span style={{ color: won ? GOLD : 'rgba(212,175,55,0.7)', fontSize: '0.38rem', letterSpacing: '0.1em', fontWeight: 600 }}>{b.label}</span>
                   </div>
                 )
@@ -976,7 +976,7 @@ export default function RoulettePlayPage() {
                 return (
                   <div className={`bet-cell${won ? ' win-cell' : ''}${(roundStatus !== 'betting' || hasBetThisRound) ? ' locked' : ''}`}
                     onClick={e => addBet('color', 'red', e)}
-                    style={{ height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', background: getBetOn(id) > 0 ? 'rgba(180,0,0,0.6)' : 'rgba(120,0,0,0.4)', border: `1px solid ${won ? GOLD : 'rgba(255,255,255,0.1)'}`, boxShadow: won ? `0 0 10px rgba(212,175,55,0.5)` : 'none', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    style={{ height: 24, background: getBetOn(id) > 0 ? 'rgba(180,0,0,0.6)' : 'rgba(120,0,0,0.4)', border: `1px solid ${won ? GOLD : 'rgba(255,255,255,0.1)'}`, boxShadow: won ? `0 0 10px rgba(212,175,55,0.5)` : 'none', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <span style={{ color: won ? GOLD : '#fca5a5', fontSize: '0.7rem' }}>{'\u25C6'}</span>
                   </div>
                 )
@@ -987,7 +987,7 @@ export default function RoulettePlayPage() {
                 return (
                   <div className={`bet-cell${won ? ' win-cell' : ''}${(roundStatus !== 'betting' || hasBetThisRound) ? ' locked' : ''}`}
                     onClick={e => addBet('color', 'black', e)}
-                    style={{ height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', background: getBetOn(id) > 0 ? 'rgba(50,50,50,0.8)' : 'rgba(20,20,20,0.6)', border: `1px solid ${won ? GOLD : 'rgba(255,255,255,0.1)'}`, boxShadow: won ? `0 0 10px rgba(212,175,55,0.5)` : 'none', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    style={{ height: 24, background: getBetOn(id) > 0 ? 'rgba(50,50,50,0.8)' : 'rgba(20,20,20,0.6)', border: `1px solid ${won ? GOLD : 'rgba(255,255,255,0.1)'}`, boxShadow: won ? `0 0 10px rgba(212,175,55,0.5)` : 'none', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <span style={{ color: won ? GOLD : 'rgba(255,255,255,0.6)', fontSize: '0.7rem' }}>{'\u25C6'}</span>
                   </div>
                 )
@@ -1001,7 +1001,7 @@ export default function RoulettePlayPage() {
                 return (
                   <div key={b.val} className={`bet-cell${won ? ' win-cell' : ''}${(roundStatus !== 'betting' || hasBetThisRound) ? ' locked' : ''}`}
                     onClick={e => addBet(b.type, b.val, e)}
-                    style={{ height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', background: getBetOn(id) > 0 ? 'rgba(212,175,55,0.2)' : 'rgba(212,175,55,0.05)', border: `1px solid ${won ? GOLD : 'rgba(212,175,55,0.2)'}`, boxShadow: won ? `0 0 8px rgba(212,175,55,0.4)` : 'none', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    style={{ height: 24, background: getBetOn(id) > 0 ? 'rgba(212,175,55,0.2)' : 'rgba(212,175,55,0.05)', border: `1px solid ${won ? GOLD : 'rgba(212,175,55,0.2)'}`, boxShadow: won ? `0 0 8px rgba(212,175,55,0.4)` : 'none', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <span style={{ color: won ? GOLD : 'rgba(212,175,55,0.7)', fontSize: '0.38rem', letterSpacing: '0.1em', fontWeight: 600 }}>{b.label}</span>
                   </div>
                 )
@@ -1247,6 +1247,7 @@ function SplitOverlay({
     </div>
   )
 }
+
 
 
 
