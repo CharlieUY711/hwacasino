@@ -71,7 +71,7 @@ export default function Home() {
       if (inviteId && regData.user) {
         await markInviteUsed(inviteId, regData.user.id, reward)
       }
-      const { data: prof } = await supabase.from('profiles').select('role').eq('id', regData?.user?.id ?? loginData?.user?.id ?? '').single()
+      const { data: prof } = await supabase.from('profiles').select('role').eq('id', regData?.user?.id ?? '').single()
       if (prof?.role && ['admin','superadmin','operator','support'].includes(prof.role)) {
         router.push('/admin/dashboard')
       } else {
@@ -179,6 +179,7 @@ export default function Home() {
     </div>
   )
 }
+
 
 
 
