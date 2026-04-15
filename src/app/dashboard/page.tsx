@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
+import { LocaleSelector } from '@/components/LocaleSelector'
 import { useWallet } from '@/hooks/useWallet'
 
 const GOLD = '#D4AF37'
@@ -11,9 +12,9 @@ const DARK = '#0A0A0A'
 
 const GAMES = [
   { id: 'roulette', label: 'ROULETTE', sub: 'THE CLASSICS', emoji: '🎡', route: '/roulette/play', status: 'live', gradient: 'linear-gradient(160deg,#1a0a00,#2d1200,#0a0a0a)' },
-  { id: 'blackjack', label: 'BLACKJACK', sub: 'PRIVATE TABLE', emoji: '🃏', route: '/lobby/blackjack', status: 'soon', gradient: 'linear-gradient(160deg,#001a0a,#002d14,#0a0a0a)' },
-  { id: 'slots', label: 'SLOTS', sub: 'HIGH VOLATILITY', emoji: '🎰', route: '/lobby/slots', status: 'soon', gradient: 'linear-gradient(160deg,#0a001a,#14002d,#0a0a0a)' },
-  { id: 'dice', label: 'DICE', sub: 'PROVABLY FAIR', emoji: '🎲', route: '/lobby/dice', status: 'soon', gradient: 'linear-gradient(160deg,#0a0800,#1a1400,#0a0a0a)' },
+  { id: 'blackjack', label: 'BLACKJACK', sub: 'PRIVATE TABLE', emoji: '🃏', route: '/lobby/blackjack', status: 'hidden', gradient: 'linear-gradient(160deg,#001a0a,#002d14,#0a0a0a)' },
+  { id: 'slots', label: 'SLOTS', sub: 'HIGH VOLATILITY', emoji: '🎰', route: '/lobby/slots', status: 'hidden', gradient: 'linear-gradient(160deg,#0a001a,#14002d,#0a0a0a)' },
+  { id: 'dice', label: 'DICE', sub: 'PROVABLY FAIR', emoji: '🎲', route: '/lobby/dice', status: 'hidden', gradient: 'linear-gradient(160deg,#0a0800,#1a1400,#0a0a0a)' },
   { id: 'bingo', label: 'BINGO', sub: 'LIVE SESSIONS', emoji: '🎱', route: '/lobby/bingo', status: 'soon', gradient: 'linear-gradient(160deg,#00101a,#001a2d,#0a0a0a)' },
 ]
 
@@ -84,10 +85,13 @@ export default function DashboardPage() {
               <p style={{ fontSize: '0.85rem', color: '#fff', fontWeight: 600, letterSpacing: '0.1em' }}>{username}</p>
             </div>
           </div>
-          <div style={{ textAlign: 'right' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <LocaleSelector />
+            <div style={{ textAlign: 'right' }}>
             <p style={{ fontSize: '0.42rem', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', marginBottom: '2px' }}>BALANCE</p>
             <p style={{ fontSize: '1rem', color: GOLD, fontWeight: 700 }}>{formatChips(balance)}</p>
           </div>
+            </div>
         </div>
 
         {tab === 'home' && (

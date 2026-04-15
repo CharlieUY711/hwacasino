@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import { useWallet } from '@/hooks/useWallet'
+import { LocaleSelector } from '@/components/LocaleSelector'
 
 const GOLD = '#D4AF37'
 const DARK = '#0A0A0A'

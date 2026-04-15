@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { loginWithEmail } from '@/modules/auth/login'
 import { registerWithEmail } from '@/modules/auth/register'
 import { validateInviteCode, markInviteUsed } from '@/modules/auth/invite'
+import { LocaleSelector } from '@/components/LocaleSelector'
 
 const GOLD = '#D4AF37'
 const DARK = '#0a0a0a'
