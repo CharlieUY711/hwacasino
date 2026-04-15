@@ -77,7 +77,7 @@ export default function RouletteWheelPreview() {
       </div>
 
       <button
-        onClick={spin}
+        onPointerDown={spin}
         style={{
           padding: '8px 14px',
           border: '1px solid gold',
@@ -97,3 +97,4 @@ export default function RouletteWheelPreview() {
     </div>
   )
 }
+

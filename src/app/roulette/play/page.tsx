@@ -568,7 +568,7 @@ export default function RoulettePlayPage() {
   {/* IZQUIERDA */}
   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
     <button
-      onClick={() => {
+      onPointerDown={() => {
         if (
           window.matchMedia('(display-mode: standalone)').matches ||
           (window.navigator as any).standalone
@@ -633,7 +633,7 @@ export default function RoulettePlayPage() {
   {/* DERECHA */}
   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
     <button
-      onClick={() => router.push('/dashboard')}
+      onPointerDown={() => router.push('/dashboard')}
       style={{
         background: 'none',
         border: 'none',
@@ -654,7 +654,7 @@ export default function RoulettePlayPage() {
     </button>
 
     <button
-      onClick={() => supabase.auth.signOut().then(() => router.push('/'))}
+      onPointerDown={() => supabase.auth.signOut().then(() => router.push('/'))}
       style={{
         background: 'none',
         border: 'none',
@@ -1248,6 +1248,7 @@ function SplitOverlay({
     </div>
   )
 }
+
 
 
 

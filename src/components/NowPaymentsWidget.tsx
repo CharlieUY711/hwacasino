@@ -85,7 +85,7 @@ export function NowPaymentsWidget({ userId }: { userId: string | null }) {
                 {invoice.pay_address}
               </div>
               <button
-                onClick={copyAddress}
+                onPointerDown={copyAddress}
                 style={{
                   marginTop: 8, width: '100%', padding: '8px',
                   background: copied ? 'rgba(74,222,128,0.1)' : 'rgba(212,175,55,0.1)',
@@ -108,7 +108,7 @@ export function NowPaymentsWidget({ userId }: { userId: string | null }) {
         {/* Botón nuevo depósito */}
         {(status === 'finished' || status === 'expired' || status === 'failed') && (
           <button
-            onClick={reset}
+            onPointerDown={reset}
             style={{
               padding: '10px', background: 'rgba(212,175,55,0.1)',
               border: '1px solid rgba(212,175,55,0.3)', borderRadius: 4,
@@ -136,7 +136,7 @@ export function NowPaymentsWidget({ userId }: { userId: string | null }) {
           {CURRENCIES.map(c => (
             <button
               key={c.id}
-              onClick={() => setCurrency(c.id)}
+              onPointerDown={() => setCurrency(c.id)}
               style={{
                 padding: '5px 12px', borderRadius: 4, cursor: 'pointer',
                 background: currency === c.id ? 'rgba(212,175,55,0.15)' : 'rgba(255,255,255,0.04)',
@@ -160,7 +160,7 @@ export function NowPaymentsWidget({ userId }: { userId: string | null }) {
           {AMOUNTS.map(a => (
             <button
               key={a}
-              onClick={() => { setAmount(a); setCustom('') }}
+              onPointerDown={() => { setAmount(a); setCustom('') }}
               style={{
                 padding: '8px 4px', borderRadius: 4, cursor: 'pointer',
                 background: amount === a && !custom ? 'rgba(212,175,55,0.15)' : 'rgba(255,255,255,0.04)',
@@ -200,7 +200,7 @@ export function NowPaymentsWidget({ userId }: { userId: string | null }) {
 
       {/* Botón generar */}
       <button
-        onClick={handleCreate}
+        onPointerDown={handleCreate}
         disabled={status === 'creating' || !finalAmount || finalAmount < 1}
         style={{
           padding: '12px',
@@ -226,4 +226,5 @@ export function NowPaymentsWidget({ userId }: { userId: string | null }) {
     </div>
   )
 }
+
 

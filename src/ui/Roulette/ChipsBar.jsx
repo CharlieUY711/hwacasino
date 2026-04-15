@@ -4,7 +4,7 @@ export default function ChipsBar({ onSelect }) {
   return (
     <div className="flex gap-2">
       {chips.map(c=>(
-        <div key={c} onClick={()=>onSelect(c)}
+        <div key={c} onPointerDown={()=>onSelect(c)}
           className="coin w-10 h-10 text-black">
           {c}
         </div>
@@ -12,4 +12,5 @@ export default function ChipsBar({ onSelect }) {
     </div>
   );
 }
+
 

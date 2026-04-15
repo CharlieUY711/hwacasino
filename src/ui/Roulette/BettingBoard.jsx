@@ -5,7 +5,7 @@ export default function BettingBoard({ onBet }) {
     <div className="grid grid-cols-6 gap-1">
       {numbers.map(n=>(
         <div key={n}
-          onClick={()=>onBet(n)}
+          onPointerDown={()=>onBet(n)}
           className="bet-cell h-10">
           {n}
         </div>
@@ -13,4 +13,5 @@ export default function BettingBoard({ onBet }) {
     </div>
   );
 }
+
 

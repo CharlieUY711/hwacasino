@@ -88,7 +88,7 @@ export default function RouletteLobbyPage() {
       <main style={{ minHeight: '100vh', background: DARK, fontFamily: "'Inter', sans-serif", maxWidth: '480px', margin: '0 auto', paddingBottom: '40px' }}>
 
         <div style={{ padding: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(212,175,55,0.1)' }}>
-          <button onClick={() => router.push('/lobby')} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '0.6rem', letterSpacing: '0.25em', fontFamily: "'Inter', sans-serif" }}>{'\u2190'} LOBBY</button>
+          <button onPointerDown={() => router.push('/lobby')} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '0.6rem', letterSpacing: '0.25em', fontFamily: "'Inter', sans-serif" }}>{'\u2190'} LOBBY</button>
           <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.2rem', color: GOLD, fontStyle: 'normal', letterSpacing: '0.1em' }}>Roulette</p>
           <p style={{ fontSize: '0.65rem', color: GOLD, fontWeight: 700 }}>{formatChips(balance)}</p>
         </div>
@@ -143,7 +143,7 @@ export default function RouletteLobbyPage() {
                     <p style={{ fontSize: '0.7rem', color: GOLD, fontWeight: 700 }}>{table.minBet.toLocaleString('es-UY')} \u2014 {table.maxBet.toLocaleString('es-UY')} NECTAR</p>
                   </div>
                   <button className="join-btn"
-                    onClick={() => router.push(`/roulette/play?room=${table.id}`)}
+                    onPointerDown={() => router.push(`/roulette/play?room=${table.id}`)}
                     style={{ background: table.vip ? GOLD : 'rgba(212,175,55,0.12)', border: `1px solid ${table.vip ? GOLD : 'rgba(212,175,55,0.3)'}`, borderRadius: '3px', padding: '10px 20px', fontFamily: "'Inter', sans-serif", fontWeight: 700, fontSize: '0.55rem', letterSpacing: '0.25em', color: table.vip ? '#000' : GOLD, textTransform: 'uppercase', cursor: 'pointer' }}>
                     JUGAR
                   </button>
@@ -157,6 +157,7 @@ export default function RouletteLobbyPage() {
     </>
   )
 }
+
 
 
 

@@ -175,7 +175,7 @@ export default function PaymentModal({ open, onClose, userId, username, balances
       position: 'fixed', inset: 0, zIndex: 999,
       background: 'rgba(0,0,0,0.85)',
       display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-start',
-    }} onClick={onClose}>
+    }} onPointerDown={onClose}>
       <div style={{
         width: '100%', maxWidth: 480,
         background: '#0f0f0f',
@@ -203,10 +203,10 @@ export default function PaymentModal({ open, onClose, userId, username, balances
 
         {/* Tabs */}
         <div style={{ display: 'flex', borderBottom: '1px solid rgba(212,175,55,0.1)' }}>
-          <button style={tabStyle('paypal')} onClick={() => { setTab('paypal'); setStatus('idle'); setMessage('') }}>PAYPAL</button>
-          <button style={tabStyle('crypto')} onClick={() => { setTab('crypto'); setStatus('idle'); setMessage('') }}>CRYPTO</button>
-          <button style={tabStyle('usdt')} onClick={() => { setTab('usdt'); setStatus('idle'); setMessage('') }}>USDT</button>
-          <button style={tabStyle('withdraw')} onClick={() => { setTab('withdraw'); setStatus('idle'); setMessage('') }}>RETIRAR</button>
+          <button style={tabStyle('paypal')} onPointerDown={() => { setTab('paypal'); setStatus('idle'); setMessage('') }}>PAYPAL</button>
+          <button style={tabStyle('crypto')} onPointerDown={() => { setTab('crypto'); setStatus('idle'); setMessage('') }}>CRYPTO</button>
+          <button style={tabStyle('usdt')} onPointerDown={() => { setTab('usdt'); setStatus('idle'); setMessage('') }}>USDT</button>
+          <button style={tabStyle('withdraw')} onPointerDown={() => { setTab('withdraw'); setStatus('idle'); setMessage('') }}>RETIRAR</button>
         </div>
 
         <div style={{ padding: '20px 20px 8px', display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -217,7 +217,7 @@ export default function PaymentModal({ open, onClose, userId, username, balances
               <p style={{ margin: 0, fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em' }}>SELECCIONÁ EL MONTO</p>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
                 {PACKAGES.map(p => (
-                  <button key={p.usd} onClick={() => { setPkg(p); setStatus('idle'); setMessage('') }}
+                  <button key={p.usd} onPointerDown={() => { setPkg(p); setStatus('idle'); setMessage('') }}
                     style={{
                       padding: '12px 4px',
                       borderRadius: 6,
@@ -259,7 +259,7 @@ export default function PaymentModal({ open, onClose, userId, username, balances
               <div style={{ background: 'rgba(212,175,55,0.06)', border: '1px solid rgba(212,175,55,0.2)', borderRadius: 8, padding: '14px' }}>
                 <p style={{ margin: '0 0 8px', fontSize: '0.6rem', color: 'rgba(255,255,255,0.5)' }}>Enviá USDT (red ERC-20) a:</p>
                 <p style={{ margin: '0 0 10px', fontSize: '0.65rem', color: GOLD, wordBreak: 'break-all', fontFamily: 'monospace' }}>{USDT_WALLET}</p>
-                <button onClick={copyWallet} style={{ ...btnStyle, padding: '10px' }}>
+                <button onPointerDown={copyWallet} style={{ ...btnStyle, padding: '10px' }}>
                   {copied ? '✓ COPIADO' : 'COPIAR DIRECCIÓN'}
                 </button>
               </div>
@@ -269,7 +269,7 @@ export default function PaymentModal({ open, onClose, userId, username, balances
                 onChange={e => setTxHash(e.target.value)} style={inputStyle} />
               {status === 'success'
                 ? <div style={{ padding: '14px', background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.3)', borderRadius: 6, color: '#4ade80', fontSize: '0.75rem', textAlign: 'center' }}>{message}</div>
-                : <button onClick={submitUSDT} disabled={status === 'loading'} style={btnStyle}>
+                : <button onPointerDown={submitUSDT} disabled={status === 'loading'} style={btnStyle}>
                     {status === 'loading' ? 'ENVIANDO...' : 'NOTIFICAR DEPÓSITO'}
                   </button>
               }
@@ -300,7 +300,7 @@ export default function PaymentModal({ open, onClose, userId, username, balances
                 onChange={e => setWithdrawAmt(e.target.value)} style={inputStyle} />
               {status === 'success'
                 ? <div style={{ padding: '14px', background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.3)', borderRadius: 6, color: '#4ade80', fontSize: '0.75rem', textAlign: 'center' }}>{message}</div>
-                : <button onClick={submitWithdraw} disabled={status === 'loading'} style={btnStyle}>
+                : <button onPointerDown={submitWithdraw} disabled={status === 'loading'} style={btnStyle}>
                     {status === 'loading' ? 'ENVIANDO...' : 'SOLICITAR RETIRO'}
                   </button>
               }
@@ -319,4 +319,5 @@ export default function PaymentModal({ open, onClose, userId, username, balances
     </div>
   )
 }
+
 
