@@ -106,7 +106,7 @@ export default function Home() {
     borderRadius: 8, color: loading ? 'rgba(212,175,55,0.4)' : '#1a0e00',
     fontSize: '0.85rem', fontFamily: 'Inter, sans-serif',
     fontWeight: 700, letterSpacing: '0.1em',
-    cursor: loading ? 'not-allowed' : 'pointer', transition: 'all 0.2s',
+    cursor: loading ? 'not-allowed' : 'pointer', transition: 'all 0.2s', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
   }
 
   const linkStyle: React.CSSProperties = {
@@ -187,6 +187,7 @@ export default function Home() {
     </div>
   )
 }
+
 
 
 

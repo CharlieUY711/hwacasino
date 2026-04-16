@@ -128,7 +128,7 @@ function FloatingChip({ bet, winning }: { bet: Bet; winning: boolean }) {
 export default function RoulettePlayPage() {
   const router = useRouter()
   const [activeCurrency, setActiveCurrency] = useState<'CHIPS'|'USD'>('CHIPS')
-  const { balance, balances, formatChips, username } = useWallet(activeCurrency)
+  const { balance, balances, formatChips, username, loading: walletLoading } = useWallet(activeCurrency)
   const [userId, setUserId] = useState<string | null>(null)
   const [selectedChip, setSelectedChip] = useState(CHIP_DEFS[0])
   const [bets, setBets] = useState<Bet[]>([])
@@ -502,7 +502,7 @@ export default function RoulettePlayPage() {
   useEffect(() => {
     if (phase === 'idle' && bets.length === 0) {
     setDisplayBalance(balance)
-    if (balance <= 0) setShowChipShop(true)
+    if (balance <= 0 && userId && !walletLoading) setShowChipShop(true)
   }
   }, [balance, showPayout])
 
