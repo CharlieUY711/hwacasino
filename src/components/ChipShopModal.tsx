@@ -31,7 +31,7 @@ export default function ChipShopModal({ open, onClose, userId }: Props) {
       const res = await fetch('/api/paypal/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: userId, amount_usd: selected.usd, chips: selected.chips }),
+        body: JSON.stringify({ user_id: userId, amount_usd: selected.usd, chips: selected.chips, return_url: window.location.origin + '/roulette/play?room=vip-1&payment=success', cancel_url: window.location.origin + '/roulette/play?room=vip-1' }),
       })
       const data = await res.json()
       if (data.error) { setError('Error al crear la orden. Intentá de nuevo.'); setLoading(false); return }

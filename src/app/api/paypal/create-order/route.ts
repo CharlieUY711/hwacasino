@@ -21,9 +21,9 @@ async function getAccessToken() {
 
 export async function POST(req: Request) {
   try {
-    const { user_id, amount_usd } = await req.json()
+    const { user_id, amount_usd, chips, return_url, cancel_url } = await req.json()
 
-    if (!user_id || !amount_usd || amount_usd < 1) {
+    if (!user_id || !amount_usd || amount_usd < 0.5) {
       return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 })
     }
 
@@ -65,4 +65,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Error interno' }, { status: 500 })
   }
 }
+
+
 
