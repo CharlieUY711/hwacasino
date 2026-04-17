@@ -151,7 +151,7 @@ export default function Home() {
         </>)}
 
         {/* ── REGISTRO ── */}
-        {step === 'register' && (<>
+        {step === 'register' && (<form onSubmit={handleRegister} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div>
             <div style={{ fontSize: '1rem', color: GOLD, fontWeight: 600, marginBottom: 4 }}>Crear cuenta</div>
             <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)' }}>Código: {code}</div>
@@ -159,29 +159,29 @@ export default function Home() {
           <input style={inputStyle} placeholder="Email" type="email" value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" />
           <input style={inputStyle} placeholder="Nombre de usuario" value={username} onChange={e => setUsername(e.target.value)} autoCapitalize="none" spellCheck={false} />
           <div style={{ position: 'relative' }}>
-            <input style={{...inputStyle, paddingRight: '44px'}} placeholder="Contraseña" type={showPass ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleRegister()} autoComplete="new-password" />
-            <button onPointerDown={() => setShowPass(p => !p)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.35)', fontSize: '1rem', padding: 0 }}>{showPass ? '🙈' : '👁'}</button>
+            <input style={{...inputStyle, paddingRight: '44px'}} placeholder="Contraseña" type={showPass ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} autoComplete="new-password" />
+            <button type="button" onPointerDown={() => setShowPass(p => !p)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.35)', fontSize: '1rem', padding: 0 }}>{showPass ? '🙈' : '👁'}</button>
           </div>
           {error && <div style={{ fontSize: '0.75rem', color: '#f87171', textAlign: 'center' }}>{error}</div>}
-          <button style={btnStyle} onPointerDown={handleRegister} onClick={handleRegister} onTouchEnd={e => { e.preventDefault(); handleRegister() }} disabled={loading}>{loading ? 'Creando cuenta...' : 'REGISTRARME'}</button>
-          <button style={linkStyle} onPointerDown={() => { setStep('welcome'); setError('') }}>← Volver</button>
-        </>)}
+          <button type="submit" style={btnStyle} disabled={loading}>{loading ? 'Creando cuenta...' : 'REGISTRARME'}</button>
+          <button type="button" style={linkStyle} onPointerDown={() => { setStep('welcome'); setError('') }}>← Volver</button>
+        </form>)}
 
-        {/* ── LOGIN ── */}
-        {step === 'login' && (<>
+        {step === 'login' && (<form onSubmit={handleLogin} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div>
             <div style={{ fontSize: '1rem', color: GOLD, fontWeight: 600, marginBottom: 4 }}>Ingresar</div>
             <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)' }}>Bienvenido de vuelta</div>
           </div>
           <input style={inputStyle} placeholder="Email" type="email" value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" />
           <div style={{ position: 'relative' }}>
-            <input style={{...inputStyle, paddingRight: '44px'}} placeholder="Contraseña" type={showPass ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleLogin()} autoComplete="current-password" />
-            <button onPointerDown={() => setShowPass(p => !p)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.35)', fontSize: '1rem', padding: 0 }}>{showPass ? '🙈' : '👁'}</button>
+            <input style={{...inputStyle, paddingRight: '44px'}} placeholder="Contraseña" type={showPass ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} autoComplete="current-password" />
+            <button type="button" onPointerDown={() => setShowPass(p => !p)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.35)', fontSize: '1rem', padding: 0 }}>{showPass ? '🙈' : '👁'}</button>
           </div>
           {error && <div style={{ fontSize: '0.75rem', color: '#f87171', textAlign: 'center' }}>{error}</div>}
-          <button style={btnStyle} onPointerDown={handleLogin} onClick={handleLogin} onTouchEnd={e => { e.preventDefault(); handleLogin() }} disabled={loading}>{loading ? 'Ingresando...' : 'INGRESAR'}</button>
-          <button style={linkStyle} onPointerDown={() => { setStep('code'); setError('') }}>← Volver</button>
-        </>)}
+          <button type="submit" style={btnStyle} disabled={loading}>{loading ? 'Ingresando...' : 'INGRESAR'}</button>
+          <button type="button" style={linkStyle} onPointerDown={() => { setStep('code'); setError('') }}>← Volver</button>
+        </form>)}
+
 
       </div>
 
