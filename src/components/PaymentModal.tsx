@@ -93,6 +93,7 @@ export default function PaymentModal({ open, onClose, userId, username, balances
   }, [sdkReady, tab, userId, selectedPkg])
 
   useEffect(() => { ppRef.current = false }, [selectedPkg])
+  useEffect(() => { if (!open) ppRef.current = false }, [open])
 
   async function validatePromo() {
     if (!promoCode.trim()) return
