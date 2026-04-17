@@ -27,7 +27,7 @@ async function getAccessToken() {
 
 export async function POST(req: Request) {
   try {
-    const { order_id } = await req.json()
+    const { order_id, chips, promo_code } = await req.json()
     if (!order_id) return NextResponse.json({ error: 'order_id requerido' }, { status: 400 })
 
     const token = await getAccessToken()
