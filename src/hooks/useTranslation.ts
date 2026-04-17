@@ -34,11 +34,18 @@ export function useTranslation() {
   useEffect(() => {
     const saved = getCookie('hwa_locale') as Locale
     if (saved && locales[saved]) setLocaleState(saved)
+    function onLocaleChange(e: Event) {
+      const l = (e as CustomEvent).detail as Locale
+      if (locales[l]) setLocaleState(l)
+    }
+    window.addEventListener('hwa_locale_change', onLocaleChange)
+    return () => window.removeEventListener('hwa_locale_change', onLocaleChange)
   }, [])
 
   function setLocale(l: Locale) {
     setLocaleState(l)
     setCookie('hwa_locale', l)
+    window.dispatchEvent(new CustomEvent('hwa_locale_change', { detail: l }))
   }
 
   function t(key: string): string {
@@ -59,3 +66,5 @@ export function useTranslation() {
     availableLocales: Object.keys(locales) as Locale[],
   }
 }
+
+
