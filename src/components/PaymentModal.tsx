@@ -1,10 +1,9 @@
 'use client'
-import { supabase } from '@/lib/supabaseClient'
 import { useState, useEffect, useRef } from 'react'
+import { supabase } from '@/lib/supabaseClient'
 import { NowPaymentsWidget } from '@/components/NowPaymentsWidget'
 
 const GOLD = '#D4AF37'
-const DARK = '#0a0a0a'
 const USDT_WALLET = process.env.NEXT_PUBLIC_USDT_WALLET ?? '0x3dAD0FD24fECf8095EFC3e281dF0B169920E03c8'
 
 const PACKAGES = [
@@ -12,7 +11,6 @@ const PACKAGES = [
   { usd: 1.99, label: '1.000 Chips', chips: 1000 },
   { usd: 4.99, label: '2.500 Chips', chips: 2500 },
 ]
-
 
 type Tab = 'paypal' | 'crypto' | 'usdt' | 'withdraw'
 
@@ -41,7 +39,6 @@ export default function PaymentModal({ open, onClose, userId, username, balances
   const [promoLoading, setPromoLoading] = useState(false)
   const ppRef = useRef(false)
 
-  // Cargar PayPal SDK
   useEffect(() => {
     if (!open) return
     const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID
@@ -53,7 +50,6 @@ export default function PaymentModal({ open, onClose, userId, username, balances
     document.body.appendChild(s)
   }, [open])
 
-  // Renderizar botón PayPal
   useEffect(() => {
     if (!sdkReady || tab !== 'paypal' || !userId || ppRef.current) return
     const w = window as typeof window & { paypal?: any }
@@ -80,23 +76,47 @@ export default function PaymentModal({ open, onClose, userId, username, balances
       onApprove: async (data: { orderID: string }) => {
         setStatus('loading')
         setMessage('Procesando...')
+        const chipsToCredit = getChipsWithPromo(selectedPkg.chips)
         const res = await fetch('/api/paypal/capture', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ order_id: data.orderID }),
+          body: JSON.stringify({ order_id: data.orderID, chips: chipsToCredit, promo_code: promoData?.code }),
         })
         const d = await res.json()
         if (!res.ok) { setStatus('error'); setMessage(d.error); return }
         setStatus('success')
-        setMessage(`¡Listo! Se acreditaron $${d.amount_usd} USD a tu wallet.`)
+        setMessage(`¡Listo! Se acreditaron ${chipsToCredit.toLocaleString('es-UY')} Chips a tu wallet.`)
       },
       onError: () => { setStatus('error'); setMessage('Error en el pago. Intentá de nuevo.') },
       onCancel: () => { setStatus('idle'); setMessage('') },
     }).render('#pp-btn')
   }, [sdkReady, tab, userId, selectedPkg])
 
-  // Reset al cambiar paquete
   useEffect(() => { ppRef.current = false }, [selectedPkg])
+
+  async function validatePromo() {
+    if (!promoCode.trim()) return
+    setPromoLoading(true)
+    setPromoStatus('idle')
+    const { data, error } = await supabase
+      .from('promo_codes')
+      .select('*')
+      .eq('code', promoCode.trim().toUpperCase())
+      .eq('is_active', true)
+      .single()
+    setPromoLoading(false)
+    if (error || !data) { setPromoStatus('invalid'); setPromoData(null); return }
+    if (data.max_uses && data.uses_count >= data.max_uses) { setPromoStatus('invalid'); setPromoData(null); return }
+    setPromoStatus('valid')
+    setPromoData(data)
+  }
+
+  function getChipsWithPromo(baseChips: number): number {
+    if (!promoData || promoStatus !== 'valid') return baseChips
+    if (promoData.type === 'free_chips') return baseChips * promoData.value
+    if (promoData.type === 'percent') return baseChips + Math.floor(baseChips * promoData.value / 100)
+    return baseChips
+  }
 
   function copyWallet() {
     navigator.clipboard.writeText(USDT_WALLET)
@@ -130,104 +150,62 @@ export default function PaymentModal({ open, onClose, userId, username, balances
     else { setStatus('success'); setMessage('Solicitud de retiro registrada. Procesamos en 24hs.') }
   }
 
-  async function validatePromo() {
-    if (!promoCode.trim()) return
-    setPromoLoading(true)
-    setPromoStatus('idle')
-    const { data, error } = await supabase
-      .from('promo_codes')
-      .select('*')
-      .eq('code', promoCode.trim().toUpperCase())
-      .eq('is_active', true)
-      .single()
-    setPromoLoading(false)
-    if (error || !data) { setPromoStatus('invalid'); setPromoData(null); return }
-    if (data.max_uses && data.uses_count >= data.max_uses) { setPromoStatus('invalid'); setPromoData(null); return }
-    setPromoStatus('valid')
-    setPromoData(data)
-  }
-
-  function getChipsWithPromo(baseChips: number): number {
-    if (!promoData || promoStatus !== 'valid') return baseChips
-    if (promoData.type === 'free_chips') return baseChips * promoData.value
-    if (promoData.type === 'percent') return baseChips + Math.floor(baseChips * promoData.value / 100)
-    return baseChips
-  }
-
   if (!open) return null
 
   const tabStyle = (t: Tab): React.CSSProperties => ({
-    flex: 1,
-    padding: '12px 4px',
-    fontSize: '0.65rem',
-    fontFamily: "'Inter', sans-serif",
-    fontWeight: 700,
-    letterSpacing: '0.1em',
+    flex: 1, padding: '12px 4px', fontSize: '0.65rem',
+    fontFamily: "'Inter', sans-serif", fontWeight: 700, letterSpacing: '0.1em',
     border: 'none',
     background: tab === t ? 'rgba(212,175,55,0.1)' : 'transparent',
     color: tab === t ? GOLD : 'rgba(255,255,255,0.35)',
     borderBottom: tab === t ? `2px solid ${GOLD}` : '2px solid transparent',
-    cursor: 'pointer',
-    transition: 'all 0.2s',
+    cursor: 'pointer', transition: 'all 0.2s', touchAction: 'manipulation',
   })
 
   const inputStyle: React.CSSProperties = {
-    width: '100%',
-    padding: '13px 14px',
+    width: '100%', padding: '13px 14px',
     background: 'rgba(255,255,255,0.05)',
     border: '1px solid rgba(212,175,55,0.2)',
-    borderRadius: 6,
-    color: '#fff',
-    fontSize: '0.85rem',
-    fontFamily: "'Inter', sans-serif",
-    outline: 'none',
-    boxSizing: 'border-box',
+    borderRadius: 6, color: '#fff', fontSize: '0.85rem',
+    fontFamily: "'Inter', sans-serif", outline: 'none', boxSizing: 'border-box',
   }
 
   const btnStyle: React.CSSProperties = {
-    width: '100%',
-    padding: '14px',
+    width: '100%', padding: '14px',
     background: 'linear-gradient(180deg, #f5d060 0%, #d4af37 50%, #a07820 100%)',
-    border: 'none',
-    borderBottom: '3px solid #7a5a10',
-    borderRadius: 6,
-    color: '#1a0e00',
-    fontSize: '0.7rem',
-    fontFamily: "'Inter', sans-serif",
-    fontWeight: 900,
-    letterSpacing: '0.15em',
-    cursor: 'pointer',
+    border: 'none', borderBottom: '3px solid #7a5a10', borderRadius: 6,
+    color: '#1a0e00', fontSize: '0.7rem', fontFamily: "'Inter', sans-serif",
+    fontWeight: 900, letterSpacing: '0.15em', cursor: 'pointer', touchAction: 'manipulation',
   }
 
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 999,
       background: 'rgba(0,0,0,0.85)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-    }>
+      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px',
+    }}>
       <div style={{
         width: '100%', maxWidth: 480,
         background: '#0f0f0f',
         border: '1px solid rgba(212,175,55,0.2)',
-        borderRadius: '16px',
+        borderRadius: 16,
+        maxHeight: '90dvh', overflowY: 'auto',
         paddingBottom: 'env(safe-area-inset-bottom, 16px)',
-        maxHeight: '90dvh',
-        overflowY: 'auto',
-      }} onClick={e => e.stopPropagation()}>
+      }}>
 
-        {/* Handle */}
-        <div style={{ display: 'flex', justifyContent: 'flex-start', padding: '12px 0 4px' }}>
-          <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.15)' }} />
-        </div>
-
-        {/* Título */}
-        <div style={{ padding: '8px 20px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(212,175,55,0.1)' }}>
-          <div><span style={{ fontFamily: "'Inter', sans-serif", fontStyle: 'normal', fontSize: '1.3rem', color: GOLD }}>Caja</span>{username && <span style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', marginLeft: 8 }}>{username}</span>}</div>
-          <button onPointerDown={onClose} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '1.2rem', cursor: 'pointer', padding: '4px 8px', touchAction: 'manipulation' }}>✕</button>
-          <div style={{ display: 'flex', gap: 16, fontSize: '0.55rem', fontFamily: "'Inter', sans-serif" }}>
-            {Object.entries(balances).filter(([,v]) => v > 0).map(([k,v]) => (
-              <span key={k} style={{ color: GOLD }}>{v.toLocaleString('es-UY')} {k}</span>
-            ))}
+        {/* Titulo */}
+        <div style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(212,175,55,0.1)' }}>
+          <div>
+            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.3rem', color: GOLD }}>Caja</span>
+            {username && <span style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', marginLeft: 8 }}>{username}</span>}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div style={{ display: 'flex', gap: 12, fontSize: '0.55rem' }}>
+              {Object.entries(balances).filter(([,v]) => v > 0).map(([k,v]) => (
+                <span key={k} style={{ color: GOLD }}>{v.toLocaleString('es-UY')} {k}</span>
+              ))}
+            </div>
+            <button onPointerDown={onClose} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '1.2rem', cursor: 'pointer', padding: '4px 8px', touchAction: 'manipulation' }}>✕</button>
           </div>
         </div>
 
@@ -241,36 +219,31 @@ export default function PaymentModal({ open, onClose, userId, username, balances
 
         <div style={{ padding: '20px 20px 8px', display: 'flex', flexDirection: 'column', gap: 12 }}>
 
-          {/* ── PAYPAL ── */}
+          {/* PAYPAL */}
           {tab === 'paypal' && (
             <>
-              <p style={{ margin: 0, fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em' }}>SELECCIONÁ EL MONTO</p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+              <p style={{ margin: 0, fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em' }}>SELECCIONÁ EL PAQUETE</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {PACKAGES.map(p => (
                   <button key={p.usd} onPointerDown={() => { setPkg(p); setStatus('idle'); setMessage('') }}
                     style={{
-                      padding: '12px 4px',
-                      borderRadius: 6,
-                      border: selectedPkg.usd === p.usd ? `2px solid ${GOLD}` : '1px solid rgba(255,255,255,0.1)',
+                      padding: '14px 16px', borderRadius: 8,
+                      border: selectedPkg.usd === p.usd ? `1px solid ${GOLD}` : '1px solid rgba(255,255,255,0.08)',
                       background: selectedPkg.usd === p.usd ? 'rgba(212,175,55,0.1)' : 'rgba(255,255,255,0.03)',
-                      color: selectedPkg.usd === p.usd ? GOLD : 'rgba(255,255,255,0.6)',
-                      fontSize: '0.8rem',
-                      fontWeight: 700,
-                      fontFamily: "'Inter', sans-serif",
-                      cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      cursor: 'pointer', touchAction: 'manipulation',
                     }}>
-                    {p.label}
+                    <span style={{ color: '#fff', fontWeight: 700, fontSize: '0.85rem' }}>{p.label}</span>
+                    <span style={{ color: selectedPkg.usd === p.usd ? GOLD : 'rgba(255,255,255,0.6)', fontWeight: 700, fontSize: '1rem' }}>USD {p.usd.toFixed(2)}</span>
                   </button>
                 ))}
               </div>
-              {/* PROMO CODE */}
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                <input
-                  placeholder="¿Tenés un código promo?"
-                  value={promoCode}
+
+              {/* Promo code */}
+              <div style={{ display: 'flex', gap: 8 }}>
+                <input placeholder="¿Tenés un código promo?" value={promoCode}
                   onChange={e => { setPromoCode(e.target.value.toUpperCase()); setPromoStatus('idle'); setPromoData(null) }}
-                  style={{ ...inputStyle, flex: 1, fontSize: '0.75rem', padding: '10px 12px' }}
-                />
+                  style={{ ...inputStyle, flex: 1, fontSize: '0.75rem', padding: '10px 12px' }} />
                 <button onPointerDown={validatePromo} disabled={promoLoading}
                   style={{ background: 'rgba(212,175,55,0.15)', border: '1px solid rgba(212,175,55,0.3)', borderRadius: 6, padding: '10px 14px', color: GOLD, fontSize: '0.6rem', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', touchAction: 'manipulation' }}>
                   {promoLoading ? '...' : 'APLICAR'}
@@ -293,18 +266,18 @@ export default function PaymentModal({ open, onClose, userId, username, balances
               {status === 'error' && <p style={{ color: '#f87171', fontSize: '0.7rem', margin: 0 }}>{message}</p>}
               <p style={{ margin: 0, fontSize: '0.55rem', color: 'rgba(255,255,255,0.25)', lineHeight: 1.7 }}>
                 • Pago seguro vía PayPal<br />
-                • Se acredita USD a tu wallet al instante<br />
-                • Podés jugar con USD o convertirlo
+                • Chips acreditados al instante<br />
+                • Desactivá tu ad blocker para usar PayPal
               </p>
             </>
           )}
 
-          {/* ── CRYPTO (NOWPayments) ── */}
+          {/* CRYPTO */}
           {tab === 'crypto' && (
             <NowPaymentsWidget userId={userId} />
           )}
 
-          {/* ── USDT ── */}
+          {/* USDT */}
           {tab === 'usdt' && (
             <>
               <p style={{ margin: 0, fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em' }}>DEPOSITAR USDT (ERC-20)</p>
@@ -328,13 +301,13 @@ export default function PaymentModal({ open, onClose, userId, username, balances
               {status === 'error' && <p style={{ color: '#f87171', fontSize: '0.7rem', margin: 0 }}>{message}</p>}
               <p style={{ margin: 0, fontSize: '0.55rem', color: 'rgba(255,255,255,0.25)', lineHeight: 1.7 }}>
                 • Red: ERC-20 (Ethereum) únicamente<br />
-                • Confirmamos manualmente — procesamos en breve<br />
+                • Confirmamos manualmente en breve<br />
                 • Mínimo: 5 USDT
               </p>
             </>
           )}
 
-          {/* ── RETIRAR ── */}
+          {/* RETIRAR */}
           {tab === 'withdraw' && (
             <>
               <p style={{ margin: 0, fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em' }}>SOLICITAR RETIRO</p>
@@ -371,5 +344,3 @@ export default function PaymentModal({ open, onClose, userId, username, balances
     </div>
   )
 }
-
-
