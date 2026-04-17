@@ -203,13 +203,13 @@ export default function PaymentModal({ open, onClose, userId, username, balances
     <div style={{
       position: 'fixed', inset: 0, zIndex: 999,
       background: 'rgba(0,0,0,0.85)',
-      display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-start',
-    }} onPointerDown={onClose}>
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+    }>
       <div style={{
         width: '100%', maxWidth: 480,
         background: '#0f0f0f',
         border: '1px solid rgba(212,175,55,0.2)',
-        borderRadius: '16px 16px 0 0',
+        borderRadius: '16px',
         paddingBottom: 'env(safe-area-inset-bottom, 16px)',
         maxHeight: '90dvh',
         overflowY: 'auto',
@@ -223,6 +223,7 @@ export default function PaymentModal({ open, onClose, userId, username, balances
         {/* Título */}
         <div style={{ padding: '8px 20px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(212,175,55,0.1)' }}>
           <div><span style={{ fontFamily: "'Inter', sans-serif", fontStyle: 'normal', fontSize: '1.3rem', color: GOLD }}>Caja</span>{username && <span style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', marginLeft: 8 }}>{username}</span>}</div>
+          <button onPointerDown={onClose} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '1.2rem', cursor: 'pointer', padding: '4px 8px', touchAction: 'manipulation' }}>✕</button>
           <div style={{ display: 'flex', gap: 16, fontSize: '0.55rem', fontFamily: "'Inter', sans-serif" }}>
             {Object.entries(balances).filter(([,v]) => v > 0).map(([k,v]) => (
               <span key={k} style={{ color: GOLD }}>{v.toLocaleString('es-UY')} {k}</span>
