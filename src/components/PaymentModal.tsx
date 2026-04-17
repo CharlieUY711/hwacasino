@@ -26,7 +26,7 @@ interface Props {
 
 export default function PaymentModal({ open, onClose, userId, username, balances }: Props) {
   const [tab, setTab]             = useState<Tab>('paypal')
-  const [selectedPkg, setPkg]     = useState(PACKAGES[1])
+  const [selectedPkg, setPkg]     = useState<{usd: number, label: string, chips: number}>(PACKAGES[1])
   const [sdkReady, setSdkReady]   = useState(false)
   const [status, setStatus]       = useState<'idle'|'loading'|'success'|'error'>('idle')
   const [message, setMessage]     = useState('')
