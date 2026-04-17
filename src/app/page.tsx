@@ -161,7 +161,7 @@ export default function Home() {
             <button onPointerDown={() => setShowPass(p => !p)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.35)', fontSize: '1rem', padding: 0 }}>{showPass ? '🙈' : '👁'}</button>
           </div>
           {error && <div style={{ fontSize: '0.75rem', color: '#f87171', textAlign: 'center' }}>{error}</div>}
-          <button style={btnStyle} onPointerDown={handleRegister} onClick={handleRegister} onTouchEnd={e => { e.preventDefault(); handleRegister() }}} disabled={loading}>{loading ? 'Creando cuenta...' : 'REGISTRARME'}</button>
+          <button style={btnStyle} onPointerDown={handleRegister} onClick={handleRegister} onTouchEnd={e => { e.preventDefault(); handleRegister() }} disabled={loading}>{loading ? 'Creando cuenta...' : 'REGISTRARME'}</button>
           <button style={linkStyle} onPointerDown={() => { setStep('welcome'); setError('') }}>← Volver</button>
         </>)}
 
@@ -187,6 +187,7 @@ export default function Home() {
     </div>
   )
 }
+
 
 
 
