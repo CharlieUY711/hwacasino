@@ -8,11 +8,11 @@ const DARK = '#0a0a0a'
 const USDT_WALLET = process.env.NEXT_PUBLIC_USDT_WALLET ?? '0x3dAD0FD24fECf8095EFC3e281dF0B169920E03c8'
 
 const PACKAGES = [
-  { usd: 10,  label: '$10' },
-  { usd: 25,  label: '$25' },
-  { usd: 50,  label: '$50' },
-  { usd: 100, label: '$100' },
+  { usd: 0.99, label: '300 Chips',   chips: 300  },
+  { usd: 1.99, label: '1.000 Chips', chips: 1000 },
+  { usd: 4.99, label: '2.500 Chips', chips: 2500 },
 ]
+
 
 type Tab = 'paypal' | 'crypto' | 'usdt' | 'withdraw'
 
