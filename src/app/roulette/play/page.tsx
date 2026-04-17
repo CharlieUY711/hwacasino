@@ -630,6 +630,7 @@ export default function RoulettePlayPage() {
 
   {/* DERECHA */}
   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+    <LocaleSelector />
     <button
       onPointerDown={() => {}}
       style={{
@@ -1247,6 +1248,7 @@ function SplitOverlay({
     </div>
   )
 }
+
 
 
 
