@@ -116,7 +116,8 @@ export default function Home() {
   }
 
   return (
-    <div style={{ minHeight: '100dvh', background: DARK, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px 16px', fontFamily: 'Inter, sans-serif' }}>
+    <div style={{ minHeight: '100dvh', background: DARK, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px 16px', fontFamily: 'Inter, sans-serif', position: 'relative' }}>
+      <div style={{ position: 'absolute', top: 16, right: 16, zIndex: 100 }}><LocaleSelector /></div>
 
       <div style={{ marginBottom: 32, textAlign: 'center' }}>
         <img src="/logo-hwa.png" alt="HWA" style={{ height: 250, width: 'auto', borderRadius: 14 }} />
@@ -189,6 +190,7 @@ export default function Home() {
     </div>
   )
 }
+
 
 
 
