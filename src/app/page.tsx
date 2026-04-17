@@ -77,7 +77,11 @@ export default function Home() {
     try {
       const regData = await registerWithEmail(email, password, username)
       if (inviteId && regData.user) {
-        await markInviteUsed(inviteId, regData.user.id, reward)
+        await fetch('/api/invite/redeem', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ invite_id: inviteId, user_id: regData.user.id }),
+        })
       }
       const { data: { user: currentUser } } = await supabase.auth.getUser()
       const { data: prof } = await supabase.from('profiles').select('role').eq('id', currentUser?.id ?? '').single()
