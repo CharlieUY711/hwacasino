@@ -77,12 +77,16 @@ export default function Home() {
     try {
       const regData = await registerWithEmail(email, password, username)
       if (inviteId && regData.user) {
-        await fetch('/api/invite/redeem', {
+        const redeemRes = await fetch('/api/invite/redeem', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ invite_id: inviteId, user_id: regData.user.id }),
         })
+        const redeemData = await redeemRes.json()
+        console.log('[redeem result]', redeemData)
       }
+      // Esperar que la sesion se establezca
+      await new Promise(resolve => setTimeout(resolve, 500))
       const { data: { user: currentUser } } = await supabase.auth.getUser()
       const { data: prof } = await supabase.from('profiles').select('role').eq('id', currentUser?.id ?? '').single()
       if (prof?.role && ['admin','superadmin','operator','support'].includes(prof.role)) {
