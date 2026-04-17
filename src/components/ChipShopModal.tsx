@@ -36,6 +36,7 @@ export default function ChipShopModal({ open, onClose, userId }: Props) {
       const data = await res.json()
       if (data.error) { setError('Error al crear la orden. Intentá de nuevo.'); setLoading(false); return }
       // Redirigir al checkout de PayPal
+      console.log('paypal response:', JSON.stringify(data))
       const approveUrl = data.links?.find((l: any) => l.rel === 'approve')?.href
       if (approveUrl) window.location.href = approveUrl
     } catch {
@@ -100,3 +101,4 @@ export default function ChipShopModal({ open, onClose, userId }: Props) {
     </div>
   )
 }
+
