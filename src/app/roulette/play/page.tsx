@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import { useWallet } from '@/hooks/useWallet'
-import ChipShopModal from '@/components/ChipShopModal'
+
 import { LocaleSelector } from '@/components/LocaleSelector'
 
 const GOLD = '#D4AF37'
@@ -143,7 +143,7 @@ export default function RoulettePlayPage() {
   const [error, setError]               = useState<string | null>(null)
   const [showResult, setShowResult]     = useState(false)
   const [showPayment, setShowPayment] = useState(false)
-  const [showChipShop, setShowChipShop] = useState(false)
+  
 
   const [showPayout, setShowPayout]     = useState(false)
   const [phase, setPhase]               = useState<'idle'|'spinning'|'result'|'payout'>('idle')
@@ -502,7 +502,7 @@ export default function RoulettePlayPage() {
   useEffect(() => {
     if (phase === 'idle' && bets.length === 0) {
     setDisplayBalance(balance)
-    if (balance <= 0 && userId && !walletLoading) setShowChipShop(true)
+    if (balance <= 0 && userId && !walletLoading) setShowPayment(true)
   }
   }, [balance, showPayout])
 
@@ -1080,7 +1080,7 @@ export default function RoulettePlayPage() {
         balances={{}}
       />
       </main>
-      <ChipShopModal open={showChipShop} onClose={() => setShowChipShop(false)} userId={userId} />
+      
     </>
   )
 }
