@@ -1,101 +1,101 @@
 'use client'
 import { supabase } from '@/lib/supabaseClient'
-
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { loginWithEmail } from '@/modules/auth/login'
 import { registerWithEmail } from '@/modules/auth/register'
 import { validateInviteCode, markInviteUsed } from '@/modules/auth/invite'
 import { LocaleSelector } from '@/components/LocaleSelector'
+import { useTranslation } from '@/hooks/useTranslation'
 
 const GOLD = '#D4AF37'
 const DARK = '#0a0a0a'
-
 type Step = 'code' | 'welcome' | 'register' | 'login'
 
 export default function Home() {
   const router = useRouter()
-    useEffect(() => {
+  const { t } = useTranslation()
+  const [step, setStep] = useState<Step>('code')
+  const [code, setCode] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [username, setUsername] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [reward, setReward] = useState(0)
+  const [inviteId, setInviteId] = useState<string | null>(null)
+  const [bonusLabel, setBonusLabel] = useState('')
+  const [showPass, setShowPass] = useState(false)
+
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     if (params.get('admin_login') === '1') {
       supabase.auth.signOut()
       window.history.replaceState({}, '', '/')
     }
   }, [])
-  const [step, setStep]           = useState<Step>('code')
-  const [code, setCode]           = useState('')
-  const [email, setEmail]         = useState('')
-  const [password, setPassword]   = useState('')
-  const [username, setUsername]   = useState('')
-  const [loading, setLoading]     = useState(false)
-  const [error, setError]         = useState('')
-  const [showPass, setShowPass]   = useState(false)
-  const [inviteId, setInviteId]   = useState<string|null>(null)
-  const [reward, setReward]       = useState(0)
-  const [bonusLabel, setBonusLabel] = useState('')
 
-  async function handleVerify(e?: React.FormEvent) { if (e) e.preventDefault();
-    if (!code.trim()) { setError('Ingresá tu código'); return }
+  async function handleVerify(e?: React.FormEvent) {
+    if (e) e.preventDefault()
+    if (!code.trim()) return
     setLoading(true); setError('')
     try {
       const result = await validateInviteCode(code.trim().toUpperCase())
-      if (!result.valid) { setError('Código inválido o ya utilizado'); setLoading(false); return }
-      
-      // Obtener bonus_label
-      const { createClient } = await import('@supabase/supabase-js')
-      const sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
-      const { data } = await sb.from('vip_codes').select('bonus_label, initial_chips').eq('id', result.id!).single()
-      
+      if (!result.valid) { setError(t('landing.invalid_code')); setLoading(false); return }
+      const { data } = await supabase.from('invites').select('bonus_label, bonus_chips').eq('id', result.id!).single()
       setInviteId(result.id)
-      setReward(data?.initial_chips ?? 0)
-      setBonusLabel(data?.bonus_label || `¡Tu código te da ${(data?.initial_chips ?? 0).toLocaleString('es-UY')} Chips de bienvenida!`)
+      setReward(data?.bonus_chips ?? 0)
+      const chips = data?.bonus_chips ?? 0
+      setBonusLabel(data?.bonus_label || t('landing.welcome_chips').replace('{chips}', chips.toLocaleString('es-UY')))
       setStep('welcome')
-    } catch { setError('Error al verificar. Intentá de nuevo.') }
+    } catch { setError(t('landing.connection_error')) }
     setLoading(false)
   }
 
-  async function handleLogin(e?: React.FormEvent) { if (e) e.preventDefault();
-    if (!email.trim() || !password) { setError('Completá todos los campos'); return }
+  async function handleLogin(e?: React.FormEvent) {
+    if (e) e.preventDefault()
+    if (!email.trim() || !password) { setError(t('register.fill_all')); return }
     setLoading(true); setError('')
     try {
       await loginWithEmail(email, password)
       const { data: { user: currentUser } } = await supabase.auth.getUser()
       const { data: prof } = await supabase.from('profiles').select('role').eq('id', currentUser?.id ?? '').single()
       if (prof?.role && ['admin','superadmin','operator','support'].includes(prof.role)) {
-        router.push('/roulette/play?room=vip-1')
+        window.location.href = 'https://admin.hwacasino.com'
       } else {
         router.push('/roulette/play?room=vip-1')
       }
-    } catch { setError('Email o contraseña incorrectos') }
+    } catch { setError(t('login.invalid_credentials')) }
     setLoading(false)
   }
 
-  async function handleRegister(e?: React.FormEvent) { if (e) e.preventDefault();
-    if (!email.trim() || !username.trim() || !password) { setError('Completá todos los campos'); return }
-    if (password.length < 6) { setError('La contraseña debe tener al menos 6 caracteres'); return }
+  async function handleRegister(e?: React.FormEvent) {
+    if (e) e.preventDefault()
+    if (!email.trim() || !username.trim() || !password) { setError(t('register.fill_all')); return }
+    if (password.length < 6) { setError(t('register.min_password')); return }
     setLoading(true); setError('')
     try {
       const regData = await registerWithEmail(email, password, username)
       if (inviteId && regData.user) {
         await markInviteUsed(inviteId, regData.user.id, reward)
       }
-      const { data: prof } = await supabase.from('profiles').select('role').eq('id', regData?.user?.id ?? '').single()
+      const { data: { user: currentUser } } = await supabase.auth.getUser()
+      const { data: prof } = await supabase.from('profiles').select('role').eq('id', currentUser?.id ?? '').single()
       if (prof?.role && ['admin','superadmin','operator','support'].includes(prof.role)) {
-        router.push('/roulette/play?room=vip-1')
+        window.location.href = 'https://admin.hwacasino.com'
       } else {
         router.push('/roulette/play?room=vip-1')
       }
-    } catch (e: any) { setError(e?.message ?? 'Error al registrar') }
+    } catch { setError(t('landing.connection_error')) }
     setLoading(false)
   }
 
   const inputStyle: React.CSSProperties = {
-    width: '100%', padding: '13px 16px',
-    background: 'rgba(255,255,255,0.05)',
+    width: '100%', padding: '13px 14px',
+    background: 'rgba(255,255,255,0.06)',
     border: '1px solid rgba(212,175,55,0.2)',
-    borderRadius: 8, color: '#fff',
-    fontSize: '0.95rem', fontFamily: 'Inter, sans-serif',
-    outline: 'none', boxSizing: 'border-box',
+    borderRadius: 8, color: '#fff', fontSize: '0.85rem',
+    fontFamily: 'Inter, sans-serif', outline: 'none', boxSizing: 'border-box',
   }
 
   const btnStyle: React.CSSProperties = {
@@ -106,13 +106,16 @@ export default function Home() {
     borderRadius: 8, color: loading ? 'rgba(212,175,55,0.4)' : '#1a0e00',
     fontSize: '0.85rem', fontFamily: 'Inter, sans-serif',
     fontWeight: 700, letterSpacing: '0.1em',
-    cursor: loading ? 'not-allowed' : 'pointer', transition: 'all 0.2s', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent', userSelect: 'none', WebkitUserSelect: 'none',
+    cursor: loading ? 'not-allowed' : 'pointer', transition: 'all 0.2s',
+    touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
+    userSelect: 'none',
   }
 
   const linkStyle: React.CSSProperties = {
     background: 'none', border: 'none',
     color: 'rgba(255,255,255,0.3)', fontSize: '0.72rem',
     cursor: 'pointer', textAlign: 'center', width: '100%',
+    touchAction: 'manipulation',
   }
 
   return (
@@ -120,69 +123,70 @@ export default function Home() {
       <div style={{ position: 'absolute', top: 16, right: 16, zIndex: 100 }}><LocaleSelector /></div>
 
       <div style={{ marginBottom: 32, textAlign: 'center' }}>
-        <img src="/logo-hwa.png" alt="HWA" style={{ height: 250, width: 'auto', borderRadius: 14 }} />
-        <div style={{ marginTop: 12, fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', letterSpacing: '0.25em' }}>PRIVATE MEMBERS ONLY</div>
+        <img src="/logo-hwa.png" alt="HWA" style={{ height: 200, width: 'auto', borderRadius: 14 }} />
+        <div style={{ marginTop: 12, fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', letterSpacing: '0.25em' }}>{t('landing.subtitle')}</div>
       </div>
 
       <div style={{ width: '100%', maxWidth: 380, background: '#111', border: '1px solid rgba(212,175,55,0.15)', borderRadius: 16, padding: '28px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-        {/* ── CÓDIGO ── */}
-        {step === 'code' && (<>
-          <div>
-            <div style={{ fontSize: '1rem', color: GOLD, fontWeight: 600, marginBottom: 4 }}>Código de acceso</div>
-            <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)' }}>Ingresá tu código de invitación</div>
-          </div>
-          <form onSubmit={handleVerify} style={{ width: "100%", display: "flex", flexDirection: "column", gap: 12 }}>
-          <input style={inputStyle} placeholder="VIP-XXXX-XXXX-XXXX" value={code} onChange={e => setCode(e.target.value.toUpperCase())} autoCapitalize="characters" spellCheck={false} />
-          {error && <div style={{ fontSize: '0.75rem', color: '#f87171', textAlign: 'center' }}>{error}</div>}
-          <button type="submit" style={btnStyle} disabled={loading}>{loading ? 'Verificando...' : 'VERIFICAR'}</button>
+        {step === 'code' && (
+          <form onSubmit={handleVerify} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div>
+              <div style={{ fontSize: '1rem', color: GOLD, fontWeight: 600, marginBottom: 4 }}>{t('landing.subtitle')}</div>
+              <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)' }}>{t('landing.code_placeholder')}</div>
+            </div>
+            <input style={inputStyle} placeholder="VIP-XXXX-XXXX-XXXX" value={code} onChange={e => setCode(e.target.value.toUpperCase())} autoCapitalize="characters" spellCheck={false} />
+            {error && <div style={{ fontSize: '0.75rem', color: '#f87171', textAlign: 'center' }}>{error}</div>}
+            <button type="submit" style={btnStyle} disabled={loading}>{loading ? t('landing.verifying') : t('landing.verify_btn')}</button>
+            <button type="button" style={linkStyle} onPointerDown={() => { setStep('login'); setError('') }}>{t('landing.already_member')}</button>
           </form>
-          <button style={linkStyle} onPointerDown={() => { setStep('login'); setError('') }}>Ya tengo cuenta → Ingresar</button>
-        </>)}
+        )}
 
-        {/* ── BIENVENIDA ── */}
-        {step === 'welcome' && (<>
-          <div style={{ textAlign: 'center' }}>
-            
-            <div style={{ fontSize: '1rem', color: GOLD, fontWeight: 600, marginBottom: 8 }}>¡Código válido!</div>
-            <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.6 }}>{bonusLabel}</div>
+        {step === 'welcome' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '1rem', color: GOLD, fontWeight: 600, marginBottom: 8 }}>{t('landing.valid_code')}</div>
+              <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.6 }}>{bonusLabel}</div>
+            </div>
+            <button style={btnStyle} onPointerDown={() => { setStep('register'); setError('') }}>{t('landing.create_account')}</button>
+            <button style={linkStyle} onPointerDown={() => { setStep('code'); setError('') }}>{t('landing.back')}</button>
           </div>
-          <button style={btnStyle} onPointerDown={() => { setStep('register'); setError('') }}>CREAR MI CUENTA</button>
-          <button style={linkStyle} onPointerDown={() => { setStep('code'); setError('') }}>← Volver</button>
-        </>)}
+        )}
 
-        {/* ── REGISTRO ── */}
-        {step === 'register' && (<form onSubmit={handleRegister} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div>
-            <div style={{ fontSize: '1rem', color: GOLD, fontWeight: 600, marginBottom: 4 }}>Crear cuenta</div>
-            <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)' }}>Código: {code}</div>
-          </div>
-          <input style={inputStyle} placeholder="Email" type="email" value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" />
-          <input style={inputStyle} placeholder="Nombre de usuario" value={username} onChange={e => setUsername(e.target.value)} autoCapitalize="none" spellCheck={false} />
-          <div style={{ position: 'relative' }}>
-            <input style={{...inputStyle, paddingRight: '44px'}} placeholder="Contraseña" type={showPass ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} autoComplete="new-password" />
-            <button type="button" onPointerDown={() => setShowPass(p => !p)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.35)', fontSize: '1rem', padding: 0 }}>{showPass ? '🙈' : '👁'}</button>
-          </div>
-          {error && <div style={{ fontSize: '0.75rem', color: '#f87171', textAlign: 'center' }}>{error}</div>}
-          <button type="submit" style={btnStyle} disabled={loading}>{loading ? 'Creando cuenta...' : 'REGISTRARME'}</button>
-          <button type="button" style={linkStyle} onPointerDown={() => { setStep('welcome'); setError('') }}>← Volver</button>
-        </form>)}
+        {step === 'register' && (
+          <form onSubmit={handleRegister} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div>
+              <div style={{ fontSize: '1rem', color: GOLD, fontWeight: 600, marginBottom: 4 }}>{t('register.title')}</div>
+              <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)' }}>Código: {code}</div>
+            </div>
+            <input style={inputStyle} placeholder={t('register.email')} type="email" value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" />
+            <input style={inputStyle} placeholder={t('register.username')} value={username} onChange={e => setUsername(e.target.value)} autoCapitalize="none" spellCheck={false} />
+            <div style={{ position: 'relative' }}>
+              <input style={{...inputStyle, paddingRight: '44px'}} placeholder={t('register.password')} type={showPass ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} autoComplete="new-password" />
+              <button type="button" onPointerDown={() => setShowPass(p => !p)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.35)', fontSize: '1rem', padding: 0 }}>{showPass ? '🙈' : '👁'}</button>
+            </div>
+            {error && <div style={{ fontSize: '0.75rem', color: '#f87171', textAlign: 'center' }}>{error}</div>}
+            <button type="submit" style={btnStyle} disabled={loading}>{loading ? t('register.registering') : t('register.register_btn')}</button>
+            <button type="button" style={linkStyle} onPointerDown={() => { setStep('welcome'); setError('') }}>{t('landing.back')}</button>
+          </form>
+        )}
 
-        {step === 'login' && (<form onSubmit={handleLogin} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div>
-            <div style={{ fontSize: '1rem', color: GOLD, fontWeight: 600, marginBottom: 4 }}>Ingresar</div>
-            <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)' }}>Bienvenido de vuelta</div>
-          </div>
-          <input style={inputStyle} placeholder="Email" type="email" value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" />
-          <div style={{ position: 'relative' }}>
-            <input style={{...inputStyle, paddingRight: '44px'}} placeholder="Contraseña" type={showPass ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} autoComplete="current-password" />
-            <button type="button" onPointerDown={() => setShowPass(p => !p)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.35)', fontSize: '1rem', padding: 0 }}>{showPass ? '🙈' : '👁'}</button>
-          </div>
-          {error && <div style={{ fontSize: '0.75rem', color: '#f87171', textAlign: 'center' }}>{error}</div>}
-          <button type="submit" style={btnStyle} disabled={loading}>{loading ? 'Ingresando...' : 'INGRESAR'}</button>
-          <button type="button" style={linkStyle} onPointerDown={() => { setStep('code'); setError('') }}>← Volver</button>
-        </form>)}
-
+        {step === 'login' && (
+          <form onSubmit={handleLogin} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div>
+              <div style={{ fontSize: '1rem', color: GOLD, fontWeight: 600, marginBottom: 4 }}>{t('login.title')}</div>
+              <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)' }}>Bienvenido de vuelta</div>
+            </div>
+            <input style={inputStyle} placeholder={t('login.email')} type="email" value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" />
+            <div style={{ position: 'relative' }}>
+              <input style={{...inputStyle, paddingRight: '44px'}} placeholder={t('login.password')} type={showPass ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} autoComplete="current-password" />
+              <button type="button" onPointerDown={() => setShowPass(p => !p)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.35)', fontSize: '1rem', padding: 0 }}>{showPass ? '🙈' : '👁'}</button>
+            </div>
+            {error && <div style={{ fontSize: '0.75rem', color: '#f87171', textAlign: 'center' }}>{error}</div>}
+            <button type="submit" style={btnStyle} disabled={loading}>{loading ? t('login.logging_in') : t('login.login_btn')}</button>
+            <button type="button" style={linkStyle} onPointerDown={() => { setStep('code'); setError('') }}>{t('landing.back')}</button>
+          </form>
+        )}
 
       </div>
 
@@ -190,22 +194,3 @@ export default function Home() {
     </div>
   )
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
