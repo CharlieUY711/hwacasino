@@ -145,6 +145,10 @@ export default function RoulettePlayPage() {
   const [error, setError]               = useState<string | null>(null)
   const [showResult, setShowResult]     = useState(false)
   const [showPayment, setShowPayment] = useState(false)
+  const [showMultiModal, setShowMultiModal] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [showMultiModal, setShowMultiModal] = useState(false)
+  const [copied, setCopied] = useState(false)
   
 
   const [showPayout, setShowPayout]     = useState(false)
@@ -484,6 +488,32 @@ export default function RoulettePlayPage() {
 
   // Modo solo vs multijugador
   const isSolo = onlineCount <= 1
+  const isCustomRoom = room !== 'vip-1' && room !== 'vip-2' && room !== 'vip-3'
+
+  function createRoom() {
+    const id = Math.random().toString(36).substring(2, 8).toUpperCase()
+    window.location.href = '/roulette/play?room=' + id
+  }
+
+  function copyRoomLink() {
+    const link = window.location.origin + '/roulette/play?room=' + room
+    navigator.clipboard.writeText(link)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+  const isCustomRoom = room !== 'vip-1' && room !== 'vip-2' && room !== 'vip-3'
+
+  function createRoom() {
+    const id = Math.random().toString(36).substring(2, 8).toUpperCase()
+    window.location.href = '/roulette/play?room=' + id
+  }
+
+  function copyRoomLink() {
+    const link = window.location.origin + '/roulette/play?room=' + room
+    navigator.clipboard.writeText(link)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   // Estado del boton APOSTAR
   const canBet = isSolo
@@ -1061,19 +1091,17 @@ export default function RoulettePlayPage() {
         </div>
         {/* --- BOTON CAJA ANCHO COMPLETO --- */}
         <div style={{ padding: '0 16px 8px' }}>
-          <button onPointerDown={() => setShowPayment(true)} style={{ width: '100%', background: 'linear-gradient(180deg,#2d7a4f 0%,#1e5c38 100%)', border: 'none', borderBottom: '2px solid #0d3320', borderRadius: 4, padding: '8px 0', fontSize: '0.72rem', color: '#fff', fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingLeft: '16px', paddingRight: '16px' }}>
-            <span>Caja</span>
-            <span style={{ display: 'flex', flexDirection: 'column', lineHeight: 1, fontSize: '0.5rem', opacity: 0.7 }}><span>▲</span><span>▼</span></span>
+          {isSolo && (
+          <button onPointerDown={() => setShowMultiModal(true)}
+            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', padding: '6px 10px', color: 'rgba(255,255,255,0.6)', fontSize: '0.55rem', fontWeight: 600, letterSpacing: '0.1em', cursor: 'pointer', touchAction: 'manipulation' }}>
+            ⚡ MULTI
           </button>
-        </div>
-
-      {/* BLOQUEO GLOBAL durante spinning/result/payout */}
-      {phase !== 'idle' && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 999, cursor: 'not-allowed' }} 
-          onClick={e => e.stopPropagation()}
-          onTouchStart={e => e.stopPropagation()}
-          onTouchEnd={e => e.stopPropagation()}
-        />
+        )}
+        {!isSolo && (
+          <button onPointerDown={copyRoomLink}
+            style={{ background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.3)', borderRadius: '6px', padding: '6px 10px', color: GOLD, fontSize: '0.55rem', fontWeight: 600, letterSpacing: '0.1em', cursor: 'pointer', touchAction: 'manipulation' }}>
+            {copied ? '✓ COPIADO' : '🔗 SALA: ' + room}
+          </button>
       )}
       <PaymentModal
         open={showPayment}
