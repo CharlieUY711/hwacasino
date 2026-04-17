@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabaseClient'
 import { useWallet } from '@/hooks/useWallet'
 
 import { LocaleSelector } from '@/components/LocaleSelector'
+import { useTranslation } from '@/hooks/useTranslation'
 
 const GOLD = '#D4AF37'
 const DARK = '#0A0A0A'
@@ -129,6 +130,7 @@ export default function RoulettePlayPage() {
   const router = useRouter()
   const [activeCurrency, setActiveCurrency] = useState<'CHIPS'|'USD'>('CHIPS')
   const { balance, balances, formatChips, username, loading: walletLoading } = useWallet(activeCurrency)
+  const { t } = useTranslation()
   const [userId, setUserId] = useState<string | null>(null)
   const [selectedChip, setSelectedChip] = useState(CHIP_DEFS[0])
   const [bets, setBets] = useState<Bet[]>([])
@@ -488,11 +490,11 @@ export default function RoulettePlayPage() {
     ? bets.length > 0 && phase === 'idle'
     : roundStatus === 'betting' && !hasBetThisRound && bets.length > 0 && phase === 'idle'
   const btnLabel = spinning ? '...'
-    : waitingForResult ? 'ESPERANDO'
+    : waitingForResult ? t('roulette.waiting').toUpperCase()
     : hasBetThisRound  ? 'APOSTASTE'
-    : isSolo ? 'GIRAR'
+    : isSolo ? t('roulette.spin').toUpperCase()
     : roundStatus === 'betting' ? `APOSTAR ${secondsRemaining}s`
-    : roundStatus === 'spinning' ? 'GIRANDO'
+    : roundStatus === 'spinning' ? t('roulette.spinning').toUpperCase()
     : 'CERRADO'
 
   // Color del countdown
@@ -803,10 +805,10 @@ export default function RoulettePlayPage() {
   <div style={{ display: 'flex', gap: '4px', alignItems: 'stretch', padding: '4px 16px 4px' }}>
 
           {[
-            { label: 'Limpiar', action: clearBets  },
-            { label: 'Borrar',  action: removeLast },
-            { label: 'Doblar',  action: doubleBets },
-            { label: 'Repetir', action: repeatBets },
+            { label: t('roulette.clear'), action: clearBets  },
+            { label: t('roulette.delete'), action: removeLast },
+            { label: t('roulette.double'), action: doubleBets },
+            { label: t('roulette.repeat'), action: repeatBets },
           ].map(btn => (
             <button key={btn.label} className="action-btn" onPointerDown={btn.action}
               style={{
