@@ -34,7 +34,7 @@ export default function Home() {
   const [reward, setReward]       = useState(0)
   const [bonusLabel, setBonusLabel] = useState('')
 
-  async function handleVerify() {
+  async function handleVerify(e?: React.FormEvent) { if (e) e.preventDefault();
     if (!code.trim()) { setError('Ingresá tu código'); return }
     setLoading(true); setError('')
     try {
@@ -54,7 +54,7 @@ export default function Home() {
     setLoading(false)
   }
 
-  async function handleLogin() {
+  async function handleLogin(e?: React.FormEvent) { if (e) e.preventDefault();
     if (!email.trim() || !password) { setError('Completá todos los campos'); return }
     setLoading(true); setError('')
     try {
@@ -70,7 +70,7 @@ export default function Home() {
     setLoading(false)
   }
 
-  async function handleRegister() {
+  async function handleRegister(e?: React.FormEvent) { if (e) e.preventDefault();
     if (!email.trim() || !username.trim() || !password) { setError('Completá todos los campos'); return }
     if (password.length < 6) { setError('La contraseña debe tener al menos 6 caracteres'); return }
     setLoading(true); setError('')
@@ -131,9 +131,11 @@ export default function Home() {
             <div style={{ fontSize: '1rem', color: GOLD, fontWeight: 600, marginBottom: 4 }}>Código de acceso</div>
             <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)' }}>Ingresá tu código de invitación</div>
           </div>
+          <form onSubmit={handleVerify} style={{ width: "100%", display: "flex", flexDirection: "column", gap: 12 }}>
           <input style={inputStyle} placeholder="VIP-XXXX-XXXX-XXXX" value={code} onChange={e => setCode(e.target.value.toUpperCase())} autoCapitalize="characters" spellCheck={false} />
           {error && <div style={{ fontSize: '0.75rem', color: '#f87171', textAlign: 'center' }}>{error}</div>}
-          <button style={btnStyle} onPointerDown={handleVerify} onClick={handleVerify} onTouchEnd={e => { e.preventDefault(); handleVerify() }} disabled={loading}>{loading ? 'Verificando...' : 'VERIFICAR'}</button>
+          <button type="submit" style={btnStyle} disabled={loading}>{loading ? 'Verificando...' : 'VERIFICAR'}</button>
+          </form>
           <button style={linkStyle} onPointerDown={() => { setStep('login'); setError('') }}>Ya tengo cuenta → Ingresar</button>
         </>)}
 
