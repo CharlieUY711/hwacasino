@@ -1,4 +1,5 @@
 'use client'
+import { supabase } from '@/lib/supabaseClient'
 import { useState, useEffect, useRef } from 'react'
 import { NowPaymentsWidget } from '@/components/NowPaymentsWidget'
 
@@ -34,6 +35,10 @@ export default function PaymentModal({ open, onClose, userId, username, balances
   const [txHash, setTxHash]       = useState('')
   const [withdrawAmt, setWithdrawAmt] = useState('')
   const [withdrawAddr, setWithdrawAddr] = useState('')
+  const [promoCode, setPromoCode] = useState('')
+  const [promoData, setPromoData] = useState<any>(null)
+  const [promoStatus, setPromoStatus] = useState<'idle'|'valid'|'invalid'>('idle')
+  const [promoLoading, setPromoLoading] = useState(false)
   const ppRef = useRef(false)
 
   // Cargar PayPal SDK
@@ -123,6 +128,30 @@ export default function PaymentModal({ open, onClose, userId, username, balances
     const d = await res.json()
     if (!res.ok) { setStatus('error'); setMessage(d.error) }
     else { setStatus('success'); setMessage('Solicitud de retiro registrada. Procesamos en 24hs.') }
+  }
+
+  async function validatePromo() {
+    if (!promoCode.trim()) return
+    setPromoLoading(true)
+    setPromoStatus('idle')
+    const { data, error } = await supabase
+      .from('promo_codes')
+      .select('*')
+      .eq('code', promoCode.trim().toUpperCase())
+      .eq('is_active', true)
+      .single()
+    setPromoLoading(false)
+    if (error || !data) { setPromoStatus('invalid'); setPromoData(null); return }
+    if (data.max_uses && data.uses_count >= data.max_uses) { setPromoStatus('invalid'); setPromoData(null); return }
+    setPromoStatus('valid')
+    setPromoData(data)
+  }
+
+  function getChipsWithPromo(baseChips: number): number {
+    if (!promoData || promoStatus !== 'valid') return baseChips
+    if (promoData.type === 'free_chips') return baseChips * promoData.value
+    if (promoData.type === 'percent') return baseChips + Math.floor(baseChips * promoData.value / 100)
+    return baseChips
   }
 
   if (!open) return null
@@ -233,6 +262,28 @@ export default function PaymentModal({ open, onClose, userId, username, balances
                   </button>
                 ))}
               </div>
+              {/* PROMO CODE */}
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <input
+                  placeholder="¿Tenés un código promo?"
+                  value={promoCode}
+                  onChange={e => { setPromoCode(e.target.value.toUpperCase()); setPromoStatus('idle'); setPromoData(null) }}
+                  style={{ ...inputStyle, flex: 1, fontSize: '0.75rem', padding: '10px 12px' }}
+                />
+                <button onPointerDown={validatePromo} disabled={promoLoading}
+                  style={{ background: 'rgba(212,175,55,0.15)', border: '1px solid rgba(212,175,55,0.3)', borderRadius: 6, padding: '10px 14px', color: GOLD, fontSize: '0.6rem', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', touchAction: 'manipulation' }}>
+                  {promoLoading ? '...' : 'APLICAR'}
+                </button>
+              </div>
+              {promoStatus === 'valid' && promoData && (
+                <div style={{ background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.25)', borderRadius: 6, padding: '10px 14px', fontSize: '0.65rem', color: '#4ade80' }}>
+                  ✓ {promoData.description} — {getChipsWithPromo(selectedPkg.chips).toLocaleString('es-UY')} Chips por USD {selectedPkg.usd.toFixed(2)}
+                </div>
+              )}
+              {promoStatus === 'invalid' && (
+                <p style={{ color: '#f87171', fontSize: '0.65rem', margin: 0 }}>Código inválido o expirado.</p>
+              )}
+
               {status === 'success' ? (
                 <div style={{ padding: '14px', background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.3)', borderRadius: 6, color: '#4ade80', fontSize: '0.75rem', textAlign: 'center' }}>{message}</div>
               ) : (
