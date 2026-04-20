@@ -606,16 +606,15 @@ export default function RoulettePlayPage() {
   {/* IZQUIERDA */}
   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
     <button
-      onPointerDown={() => {}}
+      onPointerDown={() => router.push('/games')}
       style={{
         background: 'none',
         border: 'none',
-        color: 'rgba(255,255,255,0.2)',
-        cursor: 'default',
+        color: 'rgba(255,255,255,0.4)',
+        cursor: 'pointer',
         fontSize: '0.9rem',
         padding: 0,
         flexShrink: 0,
-        opacity: 0.3
       }}
     >
       ←
