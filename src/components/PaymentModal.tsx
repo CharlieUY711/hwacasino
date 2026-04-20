@@ -96,7 +96,7 @@ export default function PaymentModal({ open, onClose, userId, username, balances
   useEffect(() => { ppRef.current = false }, [selectedPkg])
   useEffect(() => { if (!open) ppRef.current = false }, [open])
 
-  async function promoHook.validate() {
+  async function validatePromo() {
     if (!promoCode.trim()) return
     setPromoLoading(true)
     setPromoStatus('idle')
@@ -246,9 +246,9 @@ export default function PaymentModal({ open, onClose, userId, username, balances
                 <input placeholder="¿Tenés un código promo?" value={promoHook.code}
                   onChange={e => { promoHook.setCode(e.target.value.toUpperCase()) }}
                   style={{ ...inputStyle, flex: 1, fontSize: '0.75rem', padding: '10px 12px' }} />
-                <button onPointerDown={validatePromo} disabled={promoHook.status === 'loading'}
+                <button onPointerDown={validatePromo} disabled={promoLoading}
                   style={{ background: 'rgba(212,175,55,0.15)', border: '1px solid rgba(212,175,55,0.3)', borderRadius: 6, padding: '10px 14px', color: GOLD, fontSize: '0.6rem', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', touchAction: 'manipulation' }}>
-                  {promoHook.status === 'loading' ? '...' : 'APLICAR'}
+                  {promoLoading ? '...' : 'APLICAR'}
                 </button>
               </div>
               {promoHook.status === 'valid' && promoHook.promo && (
