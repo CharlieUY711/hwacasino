@@ -1103,7 +1103,6 @@ export default function RoulettePlayPage() {
           </button>
       )}
       </div>
-      </div>
       <PaymentModal
         open={showPayment}
         onClose={() => setShowPayment(false)}
