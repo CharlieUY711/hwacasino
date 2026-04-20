@@ -1102,6 +1102,7 @@ export default function RoulettePlayPage() {
             {copied ? '✓ COPIADO' : '🔗 SALA: ' + room}
           </button>
       )}
+      </div>
       <PaymentModal
         open={showPayment}
         onClose={() => setShowPayment(false)}
