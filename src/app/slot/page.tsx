@@ -182,7 +182,7 @@ export default function SlotPage() {
       <div style={{background:'rgba(8,8,8,0.97)',borderBottom:'1px solid rgba(212,175,55,0.15)',
         padding:'8px 14px',display:'flex',alignItems:'center',gap:'10px',
         position:'sticky',top:0,zIndex:90}}>
-        <button onClick={()=>router.push('/lobby')} style={{background:'none',border:'none',
+        <button onClick={()=>router.push('/games')} style={{background:'none',border:'none',
           color:'rgba(255,255,255,0.35)',cursor:'pointer',fontSize:'1rem',padding:0,flexShrink:0}}>←</button>
         <span style={{fontSize:'0.75rem',color:GOLD,fontWeight:700,letterSpacing:'0.15em',flex:1}}>HWA SLOTS</span>
         <span style={{fontSize:'0.6rem',color:'rgba(255,255,255,0.45)'}}>{username}</span>
