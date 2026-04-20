@@ -1,7 +1,6 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabaseClient'
-import { usePromoCode } from '@/hooks/usePromoCode'
 import { NowPaymentsWidget } from '@/components/NowPaymentsWidget'
 
 const GOLD = '#D4AF37'
@@ -77,11 +76,11 @@ export default function PaymentModal({ open, onClose, userId, username, balances
       onApprove: async (data: { orderID: string }) => {
         setStatus('loading')
         setMessage('Procesando...')
-        const chipsToCredit = promoHook.getChipsWithBonus(selectedPkg.chips)
+        const chipsToCredit = getChipsWithPromo(selectedPkg.chips)
         const res = await fetch('/api/paypal/capture', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ order_id: data.orderID, chips: chipsToCredit, promo_code: promoHook.promo?.code }),
+          body: JSON.stringify({ order_id: data.orderID, chips: chipsToCredit, promo_code: promoData?.code }),
         })
         const d = await res.json()
         if (!res.ok) { setStatus('error'); setMessage(d.error); return }
@@ -103,7 +102,7 @@ export default function PaymentModal({ open, onClose, userId, username, balances
     const { data, error } = await supabase
       .from('promo_codes')
       .select('*')
-      .eq('code', promoHook.code.trim().toUpperCase())
+      .eq('code', promoCode.trim().toUpperCase())
       .eq('is_active', true)
       .single()
     setPromoLoading(false)
@@ -113,7 +112,7 @@ export default function PaymentModal({ open, onClose, userId, username, balances
     setPromoData(data)
   }
 
-  function promoHook.getChipsWithBonus(baseChips: number): number {
+  function getChipsWithPromo(baseChips: number): number {
     if (!promoData || promoStatus !== 'valid') return baseChips
     if (promoData.type === 'free_chips') return baseChips * promoData.value
     if (promoData.type === 'percent') return baseChips + Math.floor(baseChips * promoData.value / 100)
@@ -243,20 +242,20 @@ export default function PaymentModal({ open, onClose, userId, username, balances
 
               {/* Promo code */}
               <div style={{ display: 'flex', gap: 8 }}>
-                <input placeholder="¿Tenés un código promo?" value={promoHook.code}
-                  onChange={e => { promoHook.setCode(e.target.value.toUpperCase()) }}
+                <input placeholder="¿Tenés un código promo?" value={promoCode}
+                  onChange={e => { setPromoCode(e.target.value.toUpperCase()); setPromoStatus('idle'); setPromoData(null) }}
                   style={{ ...inputStyle, flex: 1, fontSize: '0.75rem', padding: '10px 12px' }} />
                 <button onPointerDown={validatePromo} disabled={promoLoading}
                   style={{ background: 'rgba(212,175,55,0.15)', border: '1px solid rgba(212,175,55,0.3)', borderRadius: 6, padding: '10px 14px', color: GOLD, fontSize: '0.6rem', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', touchAction: 'manipulation' }}>
                   {promoLoading ? '...' : 'APLICAR'}
                 </button>
               </div>
-              {promoHook.status === 'valid' && promoHook.promo && (
+              {promoStatus === 'valid' && promoData && (
                 <div style={{ background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.25)', borderRadius: 6, padding: '10px 14px', fontSize: '0.65rem', color: '#4ade80' }}>
-                  ✓ {promoHook.promo?.purchase_bonus_label ?? promoHook.promo?.description} — {promoHook.getChipsWithBonus(selectedPkg.chips).toLocaleString('es-UY')} Chips por USD {selectedPkg.usd.toFixed(2)}
+                  ✓ {promoData.description} — {getChipsWithPromo(selectedPkg.chips).toLocaleString('es-UY')} Chips por USD {selectedPkg.usd.toFixed(2)}
                 </div>
               )}
-              {promoHook.status === 'invalid' && (
+              {promoStatus === 'invalid' && (
                 <p style={{ color: '#f87171', fontSize: '0.65rem', margin: 0 }}>Código inválido o expirado.</p>
               )}
 
