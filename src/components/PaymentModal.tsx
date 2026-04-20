@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabaseClient'
+import { usePromoCode } from '@/hooks/usePromoCode'
 import { NowPaymentsWidget } from '@/components/NowPaymentsWidget'
 
 const GOLD = '#D4AF37'
@@ -76,11 +77,11 @@ export default function PaymentModal({ open, onClose, userId, username, balances
       onApprove: async (data: { orderID: string }) => {
         setStatus('loading')
         setMessage('Procesando...')
-        const chipsToCredit = getChipsWithPromo(selectedPkg.chips)
+        const chipsToCredit = promoHook.getChipsWithBonus(selectedPkg.chips)
         const res = await fetch('/api/paypal/capture', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ order_id: data.orderID, chips: chipsToCredit, promo_code: promoData?.code }),
+          body: JSON.stringify({ order_id: data.orderID, chips: chipsToCredit, promo_code: promoHook.promo?.code }),
         })
         const d = await res.json()
         if (!res.ok) { setStatus('error'); setMessage(d.error); return }
@@ -95,14 +96,14 @@ export default function PaymentModal({ open, onClose, userId, username, balances
   useEffect(() => { ppRef.current = false }, [selectedPkg])
   useEffect(() => { if (!open) ppRef.current = false }, [open])
 
-  async function validatePromo() {
+  async function promoHook.validate() {
     if (!promoCode.trim()) return
     setPromoLoading(true)
     setPromoStatus('idle')
     const { data, error } = await supabase
       .from('promo_codes')
       .select('*')
-      .eq('code', promoCode.trim().toUpperCase())
+      .eq('code', promoHook.code.trim().toUpperCase())
       .eq('is_active', true)
       .single()
     setPromoLoading(false)
@@ -112,7 +113,7 @@ export default function PaymentModal({ open, onClose, userId, username, balances
     setPromoData(data)
   }
 
-  function getChipsWithPromo(baseChips: number): number {
+  function promoHook.getChipsWithBonus(baseChips: number): number {
     if (!promoData || promoStatus !== 'valid') return baseChips
     if (promoData.type === 'free_chips') return baseChips * promoData.value
     if (promoData.type === 'percent') return baseChips + Math.floor(baseChips * promoData.value / 100)
@@ -242,20 +243,20 @@ export default function PaymentModal({ open, onClose, userId, username, balances
 
               {/* Promo code */}
               <div style={{ display: 'flex', gap: 8 }}>
-                <input placeholder="¿Tenés un código promo?" value={promoCode}
-                  onChange={e => { setPromoCode(e.target.value.toUpperCase()); setPromoStatus('idle'); setPromoData(null) }}
+                <input placeholder="¿Tenés un código promo?" value={promoHook.code}
+                  onChange={e => { promoHook.setCode(e.target.value.toUpperCase()) }}
                   style={{ ...inputStyle, flex: 1, fontSize: '0.75rem', padding: '10px 12px' }} />
-                <button onPointerDown={validatePromo} disabled={promoLoading}
+                <button onPointerDown={validatePromo} disabled={promoHook.status === 'loading'}
                   style={{ background: 'rgba(212,175,55,0.15)', border: '1px solid rgba(212,175,55,0.3)', borderRadius: 6, padding: '10px 14px', color: GOLD, fontSize: '0.6rem', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', touchAction: 'manipulation' }}>
-                  {promoLoading ? '...' : 'APLICAR'}
+                  {promoHook.status === 'loading' ? '...' : 'APLICAR'}
                 </button>
               </div>
-              {promoStatus === 'valid' && promoData && (
+              {promoHook.status === 'valid' && promoHook.promo && (
                 <div style={{ background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.25)', borderRadius: 6, padding: '10px 14px', fontSize: '0.65rem', color: '#4ade80' }}>
-                  ✓ {promoData.description} — {getChipsWithPromo(selectedPkg.chips).toLocaleString('es-UY')} Chips por USD {selectedPkg.usd.toFixed(2)}
+                  ✓ {promoHook.promo?.purchase_bonus_label ?? promoHook.promo?.description} — {promoHook.getChipsWithBonus(selectedPkg.chips).toLocaleString('es-UY')} Chips por USD {selectedPkg.usd.toFixed(2)}
                 </div>
               )}
-              {promoStatus === 'invalid' && (
+              {promoHook.status === 'invalid' && (
                 <p style={{ color: '#f87171', fontSize: '0.65rem', margin: 0 }}>Código inválido o expirado.</p>
               )}
 
