@@ -486,11 +486,7 @@ export default function RoulettePlayPage() {
   const isSolo = onlineCount <= 1
   const isCustomRoom = room !== 'vip-1' && room !== 'vip-2' && room !== 'vip-3'
 
-  function createRoom() {
-    const id = Math.random().toString(36).substring(2, 8).toUpperCase()
-    window.location.href = '/roulette/play?room=' + id
-  }
-
+  
   function copyRoomLink() {
     const link = window.location.origin + '/roulette/play?room=' + room
     navigator.clipboard.writeText(link)
