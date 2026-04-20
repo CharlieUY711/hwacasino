@@ -147,10 +147,6 @@ export default function RoulettePlayPage() {
   const [showPayment, setShowPayment] = useState(false)
   const [showMultiModal, setShowMultiModal] = useState(false)
   const [copied, setCopied] = useState(false)
-  const [showMultiModal, setShowMultiModal] = useState(false)
-  const [copied, setCopied] = useState(false)
-  
-
   const [showPayout, setShowPayout]     = useState(false)
   const [phase, setPhase]               = useState<'idle'|'spinning'|'result'|'payout'>('idle')
 
@@ -501,7 +497,6 @@ export default function RoulettePlayPage() {
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
-  const isCustomRoom = room !== 'vip-1' && room !== 'vip-2' && room !== 'vip-3'
 
   function createRoom() {
     const id = Math.random().toString(36).substring(2, 8).toUpperCase()
