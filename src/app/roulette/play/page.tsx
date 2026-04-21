@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabaseClient'
 import { useWallet } from '@/hooks/useWallet'
 
 import { LocaleSelector } from '@/components/LocaleSelector'
+import { GameHeader } from '@/components/GameHeader'
 import { useTranslation } from '@/hooks/useTranslation'
 
 const GOLD = '#D4AF37'
