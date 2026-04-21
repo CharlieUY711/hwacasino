@@ -28,6 +28,8 @@ export function GameHeader({ title, balance, displayBalance, username, centerCon
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
+        width: '100%',
+        boxSizing: 'border-box' as const,
       }}
     >
       {/* IZQUIERDA */}
