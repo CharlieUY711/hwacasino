@@ -134,8 +134,6 @@ export default function SlotPage() {
       `}</style>
 
 
-        }
-      />
 
       {/* ── MAIN ── */}
       <div style={{ background: '#070710', minHeight: 'calc(100dvh - 54px)', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '12px 8px 16px', gap: '10px' }}>
