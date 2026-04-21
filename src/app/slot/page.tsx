@@ -4,13 +4,14 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import { useWallet } from '@/hooks/useWallet'
 import PaymentModal from '@/components/PaymentModal'
-import { SYMBOLS, COLS, ROWS, type SymbolId, type SpinResult } from '@/lib/slot/engine'
+import { LocaleSelector } from '@/components/LocaleSelector'
+import { SYMBOLS, COLS, ROWS, type SymbolId } from '@/lib/slot/engine'
 
 const GOLD = '#D4AF37'
 const BET_OPTIONS = [10, 25, 50, 100, 250, 500]
-const SPIN_MS    = 1400
-const STOP_DELAY = 220
-const WIN_FLASH  = 900
+const SPIN_MS     = 1400
+const STOP_DELAY  = 220
+const WIN_FLASH   = 900
 const CASCADE_WAIT = 700
 
 function randomSym(): SymbolId {
@@ -27,17 +28,17 @@ type Phase = 'idle' | 'spinning' | 'revealing' | 'wins' | 'cascading' | 'done'
 export default function SlotPage() {
   const router = useRouter()
   const { balance, balances, username, loading } = useWallet('CHIPS')
-  const [userId, setUserId]         = useState<string | null>(null)
-  const [grid, setGrid]             = useState<SymbolId[][]>(initGrid)
-  const [phase, setPhase]           = useState<Phase>('idle')
-  const [winCells, setWinCells]     = useState<Set<string>>(new Set())
+  const [userId, setUserId]           = useState<string | null>(null)
+  const [grid, setGrid]               = useState<SymbolId[][]>(initGrid)
+  const [phase, setPhase]             = useState<Phase>('idle')
+  const [winCells, setWinCells]       = useState<Set<string>>(new Set())
   const [stoppedCols, setStoppedCols] = useState<Set<number>>(new Set())
-  const [multiplier, setMultiplier] = useState(1)
-  const [freeSpins, setFreeSpins]   = useState(0)
+  const [multiplier, setMultiplier]   = useState(1)
+  const [freeSpins, setFreeSpins]     = useState(0)
   const [isFreeSpinning, setIsFreeSpinning] = useState(false)
-  const [bet, setBet]               = useState(50)
-  const [showShop, setShowShop]     = useState(false)
-  const [winDisplay, setWinDisplay] = useState(0)
+  const [bet, setBet]                 = useState(50)
+  const [showShop, setShowShop]       = useState(false)
+  const [winDisplay, setWinDisplay]   = useState(0)
   const spinInterval = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
@@ -76,11 +77,7 @@ export default function SlotPage() {
       setPhase('done')
       if (result.totalWin > 0) setWinDisplay(result.totalWin)
       if (result.freeSpinsTriggered > 0) setFreeSpins((f: number) => f + result.freeSpinsTriggered)
-      setTimeout(() => {
-        setPhase('idle')
-        setWinDisplay(0)
-        setMultiplier(1)
-      }, result.totalWin > 0 ? 1200 : 400)
+      setTimeout(() => { setPhase('idle'); setWinDisplay(0); setMultiplier(1) }, result.totalWin > 0 ? 1200 : 400)
     }
   }, [])
 
@@ -94,9 +91,7 @@ export default function SlotPage() {
         stopped.add(c)
         setStoppedCols(new Set(stopped))
         setGrid(g => g.map((existing, ci) => ci === c ? finalGrid[c] : existing))
-        if (c === COLS - 1) {
-          setTimeout(() => processWins(result, 0), 300)
-        }
+        if (c === COLS - 1) setTimeout(() => processWins(result, 0), 300)
       }, c * STOP_DELAY)
     }
   }, [processWins])
@@ -108,7 +103,6 @@ export default function SlotPage() {
     setStoppedCols(new Set())
     setWinDisplay(0)
     setWinCells(new Set())
-
     const [apiRes] = await Promise.all([
       fetch('/api/slot/spin', {
         method: 'POST',
@@ -117,7 +111,6 @@ export default function SlotPage() {
       }).then(r => r.json()),
       delay(SPIN_MS),
     ])
-
     setIsFreeSpinning(false)
     if (apiRes.error) {
       setPhase('idle')
@@ -159,35 +152,37 @@ export default function SlotPage() {
           <img src="/logo-hwa.png" alt="HWA" style={{ height: '18px', width: 'auto', flexShrink: 0 }} />
           <span style={{ fontSize: '0.68rem', color: GOLD, fontWeight: 500 }}>HWA SLOTS</span>
         </div>
+
         {/* CENTRO */}
-        <div style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-          {freeSpins > 0 && (
-            <span style={{ fontSize: '0.6rem', color: '#86efac', fontWeight: 700 }}>FREE x{freeSpins}</span>
-          )}
-          {multiplier > 1 && (
-            <span style={{ fontSize: '0.6rem', color: GOLD, fontWeight: 700 }}>{multiplier}x</span>
-          )}
+        <div style={{
+          position: 'absolute', left: '50%', transform: 'translateX(-50%)',
+          display: 'flex', alignItems: 'center', gap: '6px',
+          fontSize: '0.68rem', fontWeight: 500,
+        }}>
+          <span style={{ color: GOLD }}>Chip-$:</span>
+          <span style={{ color: GOLD }}>{balance.toLocaleString('es-UY')}</span>
+          {multiplier > 1 && <span style={{ color: '#86efac', marginLeft: 4 }}>{multiplier}x</span>}
+          {freeSpins > 0 && <span style={{ color: '#86efac', marginLeft: 4 }}>FREE x{freeSpins}</span>}
         </div>
+
         {/* DERECHA */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <LocaleSelector />
           <button
-            onPointerDown={() => setShowShop(true)}
-            style={{ background: 'rgba(212,175,55,0.12)', border: '1px solid rgba(212,175,55,0.3)', borderRadius: 4, color: GOLD, fontSize: '0.55rem', fontWeight: 700, padding: '4px 8px', cursor: 'pointer', letterSpacing: '0.1em' }}>
-            + CHIPS
+            onPointerDown={() => {}}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', padding: 0 }}>
+            <svg width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.4)' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'>
+              <circle cx='12' cy='8' r='4'/><path d='M4 20c0-4 3.6-7 8-7s8 3 8 7'/>
+            </svg>
+            <span style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.6)' }}>{username}</span>
           </button>
-          <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2, alignItems: 'flex-end' }}>
-            <span style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.5)' }}>{username}</span>
-            <span style={{ fontSize: '0.65rem', color: GOLD, fontWeight: 700 }}>
-              {balance.toLocaleString('es-UY')} <span style={{ fontSize: '0.45rem', opacity: 0.7 }}>CHIPS</span>
-            </span>
-          </div>
           <button
             onPointerDown={() => supabase.auth.signOut().then(() => router.push('/'))}
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-              <polyline points="16 17 21 12 16 7"/>
-              <line x1="21" y1="12" x2="9" y2="12"/>
+            <svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.3)' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' style={{ marginTop: 0.5 }}>
+              <path d='M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4'/>
+              <polyline points='16 17 21 12 16 7'/>
+              <line x1='21' y1='12' x2='9' y2='12'/>
             </svg>
           </button>
         </div>
@@ -204,7 +199,7 @@ export default function SlotPage() {
           </div>
         )}
 
-        {/* GRID 4 x 5 */}
+        {/* GRID 4x3 */}
         <div style={{
           display: 'grid', gridTemplateColumns: `repeat(${COLS}, 1fr)`,
           gap: '4px', width: '100%', maxWidth: '320px',
@@ -221,7 +216,7 @@ export default function SlotPage() {
                 return (
                   <div key={ri} style={{
                     aspectRatio: '1', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    borderRadius: 6, fontSize: '1.5rem', userSelect: 'none',
+                    borderRadius: 6, fontSize: '1.8rem', userSelect: 'none',
                     background: def.bg,
                     border: isWinCell ? '2px solid #D4AF37' : '1px solid rgba(255,255,255,0.06)',
                     animation: isWinCell ? 'cell-win 0.5s infinite' : undefined,

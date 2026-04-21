@@ -20,7 +20,7 @@ export const SYMBOLS: Record<SymbolId, SymbolDef> = {
 }
 
 export const COLS = 4
-export const ROWS = 5
+export const ROWS = 3
 export const CASCADE_MULTS = [1, 2, 3, 5, 8, 10]
 export const SCATTER_FS: Record<number,number> = { 3:10, 4:15, 5:20 }
 
