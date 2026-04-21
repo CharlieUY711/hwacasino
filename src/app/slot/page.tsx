@@ -1,5 +1,5 @@
-import { GameHeader } from '@/components/GameHeader'
 'use client'
+import { GameHeader } from '@/components/GameHeader'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
