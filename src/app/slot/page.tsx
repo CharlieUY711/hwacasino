@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import { useWallet } from '@/hooks/useWallet'
 import PaymentModal from '@/components/PaymentModal'
-import { GameHeader } from '@/components/GameHeader'
 import { SYMBOLS, COLS, ROWS, type SymbolId } from '@/lib/slot/engine'
 
 const GOLD = '#D4AF37'
@@ -134,15 +133,7 @@ export default function SlotPage() {
         @keyframes win-pop   { 0%{transform:scale(0.8);opacity:0} 60%{transform:scale(1.1)} 100%{transform:scale(1);opacity:1} }
       `}</style>
 
-      <GameHeader
-        title="HWA SLOTS"
-        balance={balance}
-        username={username}
-        centerContent={
-          <>{multiplier > 1 && <span style={{ color: '#86efac', marginRight: 4 }}>{multiplier}x</span>}
-          <span style={{ color: '#D4AF37' }}>Chip-$:</span>
-          <span style={{ color: '#D4AF37' }}>{balance.toLocaleString('es-UY')}</span>
-          {freeSpins > 0 && <span style={{ color: '#86efac', marginLeft: 4 }}>FREE x{freeSpins}</span>}</>
+
         }
       />
 

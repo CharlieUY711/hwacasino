@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
-import { GameHeader } from '@/components/GameHeader'
 import { useWallet } from '@/hooks/useWallet'
 
 const GOLD = '#D4AF37'
@@ -54,7 +53,7 @@ export default function GamesPage() {
   return (
     <div style={{ minHeight: '100dvh', background: '#070710', fontFamily: 'Inter, sans-serif', display: 'flex', flexDirection: 'column' }}>
 
-      <GameHeader title="CASINO" balance={balance} username={username} />
+      
 
       <div style={{ flex: 1, padding: '24px 16px', maxWidth: 480, width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div style={{ fontSize: '0.5rem', color: 'rgba(255,255,255,0.2)', letterSpacing: '0.3em', marginBottom: 4 }}>SELECCIONÁ UN JUEGO</div>
