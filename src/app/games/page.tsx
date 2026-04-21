@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
+import { GameHeader } from '@/components/GameHeader'
 import { useWallet } from '@/hooks/useWallet'
 
 const GOLD = '#D4AF37'
@@ -44,7 +45,9 @@ export default function GamesPage() {
   }, [router])
 
   if (checking || loading) return (
-    <div style={{ minHeight: '100dvh', background: '#070710', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <>
+      <GameHeader title="CASINO" balance={balance} username={username} />
+      <div style={{ minHeight: '100dvh', background: '#070710', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ width: 32, height: 32, border: '2px solid rgba(212,175,55,0.2)', borderTop: '2px solid #D4AF37', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
       <style>{'@keyframes spin{to{transform:rotate(360deg)}}'}</style>
     </div>
@@ -79,5 +82,6 @@ export default function GamesPage() {
         HWA CASINO · SOLO CHIPS VIRTUALES
       </div>
     </div>
+    </>
   )
 }

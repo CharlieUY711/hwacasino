@@ -1,3 +1,4 @@
+import { GameHeader } from '@/components/GameHeader'
 'use client'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
@@ -134,6 +135,20 @@ export default function SlotPage() {
       `}</style>
 
 
+
+      <GameHeader
+        title="HWA SLOTS"
+        balance={balance}
+        username={username}
+        centerContent={
+          <>
+            {multiplier > 1 && <span style={{ color: '#86efac', marginRight: 4 }}>{multiplier}x</span>}
+            <span style={{ color: '#D4AF37' }}>Chip-$:</span>
+            <span style={{ color: '#D4AF37' }}>{balance.toLocaleString('es-UY')}</span>
+            {freeSpins > 0 && <span style={{ color: '#86efac', marginLeft: 4 }}>FREE x{freeSpins}</span>}
+          </>
+        }
+      />
 
       {/* ── MAIN ── */}
       <div style={{ background: '#070710', minHeight: 'calc(100dvh - 54px)', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '12px 8px 16px', gap: '10px' }}>
