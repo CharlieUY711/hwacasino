@@ -499,12 +499,7 @@ export default function RoulettePlayPage() {
     window.location.href = '/roulette/play?room=' + id
   }
 
-  function copyRoomLink() {
-    const link = window.location.origin + '/roulette/play?room=' + room
-    navigator.clipboard.writeText(link)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
+
 
   // Estado del boton APOSTAR
   const canBet = isSolo
