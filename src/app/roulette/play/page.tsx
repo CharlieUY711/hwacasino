@@ -1110,6 +1110,8 @@ export default function RoulettePlayPage() {
         username={username}
         balances={{}}
       />
+      </div>
+      </div>
       </main>
       
     </>
