@@ -148,7 +148,6 @@ export default function RoulettePlayPage() {
   const [showMultiModal, setShowMultiModal] = useState(false)
   const [copied, setCopied] = useState(false)
   const [showMultiModal, setShowMultiModal] = useState(false)
-  const [copied, setCopied] = useState(false)
   
 
   const [showPayout, setShowPayout]     = useState(false)
@@ -488,7 +487,6 @@ export default function RoulettePlayPage() {
 
   // Modo solo vs multijugador
   const isSolo = onlineCount <= 1
-  const isCustomRoom = room !== 'vip-1' && room !== 'vip-2' && room !== 'vip-3'
 
   function createRoom() {
     const id = Math.random().toString(36).substring(2, 8).toUpperCase()

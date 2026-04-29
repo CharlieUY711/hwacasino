@@ -77,7 +77,7 @@ export default function PaymentModal({ open, onClose, userId, username, balances
       onApprove: async (data: { orderID: string }) => {
         setStatus('loading')
         setMessage('Procesando...')
-        const chipsToCredit = promoHook.getChipsWithBonus(selectedPkg.chips)
+        const chipsToCredit = getChipsWithPromo(selectedPkg.chips)
         const res = await fetch('/api/paypal/capture', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -96,7 +96,7 @@ export default function PaymentModal({ open, onClose, userId, username, balances
   useEffect(() => { ppRef.current = false }, [selectedPkg])
   useEffect(() => { if (!open) ppRef.current = false }, [open])
 
-  async function promoHook.validate() {
+  async function validatePromo() {
     if (!promoCode.trim()) return
     setPromoLoading(true)
     setPromoStatus('idle')
@@ -113,7 +113,7 @@ export default function PaymentModal({ open, onClose, userId, username, balances
     setPromoData(data)
   }
 
-  function promoHook.getChipsWithBonus(baseChips: number): number {
+  function getChipsWithPromo(baseChips: number): number {
     if (!promoData || promoStatus !== 'valid') return baseChips
     if (promoData.type === 'free_chips') return baseChips * promoData.value
     if (promoData.type === 'percent') return baseChips + Math.floor(baseChips * promoData.value / 100)
@@ -253,7 +253,7 @@ export default function PaymentModal({ open, onClose, userId, username, balances
               </div>
               {promoHook.status === 'valid' && promoHook.promo && (
                 <div style={{ background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.25)', borderRadius: 6, padding: '10px 14px', fontSize: '0.65rem', color: '#4ade80' }}>
-                  ✓ {promoHook.promo?.purchase_bonus_label ?? promoHook.promo?.description} — {promoHook.getChipsWithBonus(selectedPkg.chips).toLocaleString('es-UY')} Chips por USD {selectedPkg.usd.toFixed(2)}
+                  ✓ {promoHook.promo?.purchase_bonus_label ?? promoHook.promo?.description} — {getChipsWithPromo(selectedPkg.chips).toLocaleString('es-UY')} Chips por USD {selectedPkg.usd.toFixed(2)}
                 </div>
               )}
               {promoHook.status === 'invalid' && (
