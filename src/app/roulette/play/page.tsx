@@ -1111,8 +1111,8 @@ export default function RoulettePlayPage() {
         balances={{}}
       />
       </div>
-      </main>
       
+      </main>
     </>
   )
 }
