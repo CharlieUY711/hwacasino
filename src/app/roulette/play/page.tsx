@@ -147,7 +147,6 @@ export default function RoulettePlayPage() {
   const [showPayment, setShowPayment] = useState(false)
   const [showMultiModal, setShowMultiModal] = useState(false)
   const [copied, setCopied] = useState(false)
-  const [showMultiModal, setShowMultiModal] = useState(false)
   
 
   const [showPayout, setShowPayout]     = useState(false)
